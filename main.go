@@ -7,6 +7,19 @@ import (
 )
 
 func main() {
+	// Create new keybase api instance
 	k := api.New()
-	fmt.Printf("Username: %v\nLogged In: %v\nVersion: %v", k.Username(), k.LoggedIn(), k.Version())
+
+	// Get username, logged in status, and client version
+	username := k.Username()
+	loggedin := k.LoggedIn()
+	version := k.Version()
+
+	// Send current client version to self if client is logged in.
+	if loggedin {
+		c, _ := k.ChatSend(username, version)
+		fmt.Println(c.Result.Message)
+	} else {
+		fmt.Println("Not logged in")
+	}
 }
