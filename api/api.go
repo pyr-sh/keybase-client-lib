@@ -10,6 +10,8 @@ type Keybase struct {
 }
 
 type keybase interface {
+	ChatSend(user, message string) chatOutResult
+	ChatSendTeam(team, channel, message string) chatOutResult
 	LoggedIn() bool
 	Username() string
 	Version() string
