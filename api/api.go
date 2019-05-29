@@ -1,3 +1,4 @@
+// keybase/api implements an interface for interacting with the Keybase Chat, Team, and Wallet APIs
 package api
 
 import (
@@ -45,7 +46,7 @@ func (k Keybase) Username() string {
 	return s.Username
 }
 
-// LoggedIn() returns true if Keybase is currently logged in, otherwise return false.
+// LoggedIn() returns true if Keybase is currently logged in, otherwise returns false.
 func (k Keybase) LoggedIn() bool {
 	cmd := exec.Command(k.path, "status", "-j")
 	cmdOut, err := cmd.Output()
