@@ -12,6 +12,7 @@ type Keybase struct {
 type keybase interface {
 	ChatSend(user, message string) (chatOutResult, error)
 	ChatSendTeam(team, channel, message string) (chatOutResult, error)
+	ChatList() (chatOutResult, error)
 	LoggedIn() bool
 	Username() string
 	Version() string

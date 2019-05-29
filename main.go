@@ -17,7 +17,16 @@ func main() {
 
 	// Send current client version to self if client is logged in.
 	if loggedin {
-		c, _ := k.ChatSend(username, version)
+		chatList, _ := k.ChatList()
+		allChats := ""
+		for _, chat := range chatList {
+			if chat.Channel.MembersType == "team" {
+				allChats += fmt.Sprintf("%s#%s\n", chat.Channel.Name, chat.Channel.TopicName)
+			} else {
+				allChats += fmt.Sprintf("%s\n", chat.Channel.Name)
+			}
+		}
+		c, _ := k.ChatSend(username, fmt.Sprintf("Version: %s\nConversations:\n```%s```\n", version, allChats))
 		fmt.Println(c.Result.Message)
 	} else {
 		fmt.Println("Not logged in")

@@ -5,10 +5,9 @@ import (
 	"os/exec"
 )
 
-
 // ---- Struct for sending to API
 type chatOut struct {
-	Method string `json:"method"`
+	Method string        `json:"method"`
 	Params chatOutParams `json:"params"`
 }
 type chatOutChannel struct {
@@ -26,6 +25,7 @@ type chatOutOptions struct {
 type chatOutParams struct {
 	Options chatOutOptions `json:"options"`
 }
+
 // ----
 
 // ---- Struct for data received after sending to API
@@ -33,22 +33,40 @@ type chatOutResult struct {
 	Result chatOutResultResult `json:"result"`
 }
 type chatOutResultRatelimits struct {
-	Tank     string `json:"tank"`
-	Capacity int    `json:"capacity"`
-	Reset    int    `json:"reset"`
-	Gas      int    `json:"gas"`
+	Tank     string `json:"tank,omitempty"`
+	Capacity int    `json:"capacity,omitempty"`
+	Reset    int    `json:"reset,omitempty"`
+	Gas      int    `json:"gas,omitempty"`
+}
+type chatOutResultChannel struct {
+	Name        string `json:"name"`
+	Public      bool   `json:"public"`
+	MembersType string `json:"members_type"`
+	TopicType   string `json:"topic_type,omitempty"`
+	TopicName   string `json:"topic_name,omitempty"`
+}
+type chatOutResultConversations struct {
+	ID           string               `json:"id"`
+	Channel      chatOutResultChannel `json:"channel"`
+	Unread       bool                 `json:"unread"`
+	ActiveAt     int                  `json:"active_at"`
+	ActiveAtMs   int64                `json:"active_at_ms"`
+	MemberStatus string               `json:"member_status"`
 }
 type chatOutResultResult struct {
-	Message    string       `json:"message"`
-	ID         int          `json:"id"`
-	Ratelimits []chatOutResultRatelimits `json:"ratelimits"`
+	Message       string                       `json:"message,omitempty"`
+	ID            int                          `json:"id,omitempty"`
+	Ratelimits    []chatOutResultRatelimits    `json:"ratelimits,omitempty"`
+	Conversations []chatOutResultConversations `json:"conversations,omitempty"`
+	Offline       bool                         `json:"offline,omitempty"`
 }
+
 // ----
 
 // chatAPIOut() sends JSON requests to the chat API and returns its response.
 func chatAPIOut(keybasePath string, c chatOut) (chatOutResult, error) {
 	jsonBytes, _ := json.Marshal(c)
-	
+
 	cmd := exec.Command(keybasePath, "chat", "api", "-m", string(jsonBytes))
 	cmdOut, err := cmd.Output()
 	if err != nil {
@@ -81,4 +99,13 @@ func (k Keybase) ChatSendTeam(team, channel, message string) (chatOutResult, err
 	m.Params.Options.Message.Body = message
 
 	return chatAPIOut(k.path, m)
+}
+
+// ChatList() returns a list of all conversations.
+func (k Keybase) ChatList() ([]chatOutResultConversations, error) {
+	m := chatOut{}
+	m.Method = "list"
+
+	r, err := chatAPIOut(k.path, m)
+	return r.Result.Conversations, err
 }
