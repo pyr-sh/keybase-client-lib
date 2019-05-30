@@ -26,8 +26,8 @@ func main() {
 				allChats += fmt.Sprintf("%s\n", chat.Channel.Name)
 			}
 		}
-		c, _ := k.ChatSend(username, fmt.Sprintf("Version: %s\nConversations:\n```%s```\n", version, allChats))
-		fmt.Println(c.Result.Message)
+		c, _ := k.ChatSendText(username, fmt.Sprintf("Version: %s\nConversations:\n```%s```\n", version, allChats))
+		fmt.Println(c.Message, "-", c.ID)
 	} else {
 		fmt.Println("Not logged in")
 	}

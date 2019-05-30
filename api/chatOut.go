@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"os/exec"
+	"strings"
 )
 
 // ---- Struct for sending to API
@@ -80,25 +81,33 @@ func chatAPIOut(keybasePath string, c chatOut) (chatOutResult, error) {
 }
 
 // ChatSend() sends a chat message to a user.
-func (k Keybase) ChatSend(user, message string) (chatOutResult, error) {
+func (k Keybase) ChatSendText(user string, message ...string) (chatOutResultResult, error) {
 	m := chatOut{}
 	m.Method = "send"
 	m.Params.Options.Channel.Name = user
-	m.Params.Options.Message.Body = message
+	m.Params.Options.Message.Body = strings.Join(message, " ")
 
-	return chatAPIOut(k.path, m)
+	r, err := chatAPIOut(k.path, m)
+	if err != nil {
+		return chatOutResultResult{}, err
+	}
+	return r.Result, nil
 }
 
 // ChatSendTeam() sends a chat message to a team.
-func (k Keybase) ChatSendTeam(team, channel, message string) (chatOutResult, error) {
+func (k Keybase) ChatSendTextTeam(team, channel string, message ...string) (chatOutResultResult, error) {
 	m := chatOut{}
 	m.Method = "send"
 	m.Params.Options.Channel.Name = team
 	m.Params.Options.Channel.MembersType = "team"
 	m.Params.Options.Channel.TopicName = channel
-	m.Params.Options.Message.Body = message
+	m.Params.Options.Message.Body = strings.Join(message, " ")
 
-	return chatAPIOut(k.path, m)
+	r, err := chatAPIOut(k.path, m)
+	if err != nil {
+		return chatOutResultResult{}, err
+	}
+	return r.Result, nil
 }
 
 // ChatList() returns a list of all conversations.
