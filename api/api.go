@@ -13,6 +13,8 @@ type Keybase struct {
 type keybase interface {
 	ChatSendText(user string, message ...string) (chatOutResultResult, error)
 	ChatSendTextTeam(team, channel, message string) (chatOutResultResult, error)
+	ChatSendReaction(user, reaction string, messageId int) (chatOutResultResult, error)
+	ChatSendReactionTeam(team, channel, reaction string, messageId int) (chatOutResultResult, error)
 	ChatList() ([]chatOutResultConversations, error)
 	LoggedIn() bool
 	Username() string

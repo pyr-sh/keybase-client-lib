@@ -20,8 +20,9 @@ type chatOutMessage struct {
 	Body string `json:"body"`
 }
 type chatOutOptions struct {
-	Channel chatOutChannel `json:"channel"`
-	Message chatOutMessage `json:"message"`
+	Channel   chatOutChannel `json:"channel"`
+	MessageID int            `json:"message_id"`
+	Message   chatOutMessage `json:"message"`
 }
 type chatOutParams struct {
 	Options chatOutOptions `json:"options"`
@@ -102,6 +103,38 @@ func (k Keybase) ChatSendTextTeam(team, channel string, message ...string) (chat
 	m.Params.Options.Channel.MembersType = "team"
 	m.Params.Options.Channel.TopicName = channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
+
+	r, err := chatAPIOut(k.path, m)
+	if err != nil {
+		return chatOutResultResult{}, err
+	}
+	return r.Result, nil
+}
+
+// ChatSendReaction() sends a reaction to a user's message.
+func (k Keybase) ChatSendReaction(user, reaction string, messageId int) (chatOutResultResult, error) {
+	m := chatOut{}
+	m.Method = "reaction"
+	m.Params.Options.Channel.Name = user
+	m.Params.Options.MessageID = messageId
+	m.Params.Options.Message.Body = reaction
+
+	r, err := chatAPIOut(k.path, m)
+	if err != nil {
+		return chatOutResultResult{}, err
+	}
+	return r.Result, nil
+}
+
+// ChatSendReactionTeam() sends a reaction to a message on a team.
+func (k Keybase) ChatSendReactionTeam(team, channel, reaction string, messageId int) (chatOutResultResult, error) {
+	m := chatOut{}
+	m.Method = "reaction"
+	m.Params.Options.Channel.Name = team
+	m.Params.Options.Channel.MembersType = "team"
+	m.Params.Options.Channel.TopicName = channel
+	m.Params.Options.MessageID = messageId
+	m.Params.Options.Message.Body = reaction
 
 	r, err := chatAPIOut(k.path, m)
 	if err != nil {
