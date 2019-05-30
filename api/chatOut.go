@@ -81,7 +81,7 @@ func chatAPIOut(keybasePath string, c chatOut) (chatOutResult, error) {
 	return r, nil
 }
 
-// ChatSend() sends a chat message to a user.
+// ChatSendText() sends a chat message to a user.
 func (k Keybase) ChatSendText(user string, message ...string) (chatOutResultResult, error) {
 	m := chatOut{}
 	m.Method = "send"
@@ -95,7 +95,7 @@ func (k Keybase) ChatSendText(user string, message ...string) (chatOutResultResu
 	return r.Result, nil
 }
 
-// ChatSendTeam() sends a chat message to a team.
+// ChatSendTextTeam() sends a chat message to a team.
 func (k Keybase) ChatSendTextTeam(team, channel string, message ...string) (chatOutResultResult, error) {
 	m := chatOut{}
 	m.Method = "send"
