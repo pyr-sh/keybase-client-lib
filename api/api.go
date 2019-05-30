@@ -15,6 +15,8 @@ type keybase interface {
 	ChatSendTextTeam(team, channel, message string) (chatOutResultResult, error)
 	ChatSendReaction(user, reaction string, messageId int) (chatOutResultResult, error)
 	ChatSendReactionTeam(team, channel, reaction string, messageId int) (chatOutResultResult, error)
+	ChatDeleteMessage(user string, messageId int) (chatOutResultResult, error)
+	ChatDeleteMessageTeam(team, channel string, messageId int) (chatOutResultResult, error)
 	ChatList() ([]chatOutResultConversations, error)
 	LoggedIn() bool
 	Username() string

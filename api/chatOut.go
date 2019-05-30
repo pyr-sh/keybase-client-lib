@@ -143,6 +143,36 @@ func (k Keybase) ChatSendReactionTeam(team, channel, reaction string, messageId 
 	return r.Result, nil
 }
 
+// ChatDeleteMessage() deletes a message from a one-on-one conversation.
+func (k Keybase) ChatDeleteMessage(user string, messageId int) (chatOutResultResult, error) {
+	m := chatOut{}
+	m.Method = "delete"
+	m.Params.Options.Channel.Name = user
+	m.Params.Options.MessageID = messageId
+
+	r, err := chatAPIOut(k.path, m)
+	if err != nil {
+		return chatOutResultResult{}, err
+	}
+	return r.Result, nil
+}
+
+// ChatDeleteMessageTeam() deletes a message from a team conversation.
+func (k Keybase) ChatDeleteMessageTeam(team, channel string, messageId int) (chatOutResultResult, error) {
+	m := chatOut{}
+	m.Method = "delete"
+	m.Params.Options.Channel.Name = team
+	m.Params.Options.Channel.MembersType = "team"
+	m.Params.Options.Channel.TopicName = channel
+	m.Params.Options.MessageID = messageId
+
+	r, err := chatAPIOut(k.path, m)
+	if err != nil {
+		return chatOutResultResult{}, err
+	}
+	return r.Result, nil
+}
+
 // ChatList() returns a list of all conversations.
 func (k Keybase) ChatList() ([]chatOutResultConversations, error) {
 	m := chatOut{}
