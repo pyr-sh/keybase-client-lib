@@ -1,5 +1,5 @@
 // keybase/api implements an interface for interacting with the Keybase Chat, Team, and Wallet APIs
-package api
+package keybase
 
 import (
 	"encoding/json"
