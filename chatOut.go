@@ -111,8 +111,8 @@ func (k Keybase) ChatSendTextTeam(team, channel string, message ...string) (Chat
 	return r.Result, nil
 }
 
-// ChatSendReaction() sends a reaction to a user's message.
-func (k Keybase) ChatSendReaction(user, reaction string, messageId int) (ChatOut, error) {
+// ChatReact() sends a reaction to a user's message.
+func (k Keybase) ChatReact(user, reaction string, messageId int) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "reaction"
 	m.Params.Options.Channel.Name = user
@@ -126,8 +126,8 @@ func (k Keybase) ChatSendReaction(user, reaction string, messageId int) (ChatOut
 	return r.Result, nil
 }
 
-// ChatSendReactionTeam() sends a reaction to a message on a team.
-func (k Keybase) ChatSendReactionTeam(team, channel, reaction string, messageId int) (ChatOut, error) {
+// ChatReactTeam() sends a reaction to a message on a team.
+func (k Keybase) ChatReactTeam(team, channel, reaction string, messageId int) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "reaction"
 	m.Params.Options.Channel.Name = team
