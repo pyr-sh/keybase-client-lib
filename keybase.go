@@ -10,12 +10,12 @@ type Keybase struct {
 }
 
 type keybase interface {
-	ChatSendText(user string, message ...string) (chatOutResultResult, error)
-	ChatSendTextTeam(team, channel, message string) (chatOutResultResult, error)
-	ChatSendReaction(user, reaction string, messageId int) (chatOutResultResult, error)
-	ChatSendReactionTeam(team, channel, reaction string, messageId int) (chatOutResultResult, error)
-	ChatDeleteMessage(user string, messageId int) (chatOutResultResult, error)
-	ChatDeleteMessageTeam(team, channel string, messageId int) (chatOutResultResult, error)
+	ChatSendText(user string, message ...string) (ChatOut, error)
+	ChatSendTextTeam(team, channel, message string) (ChatOut, error)
+	ChatSendReaction(user, reaction string, messageId int) (ChatOut, error)
+	ChatSendReactionTeam(team, channel, reaction string, messageId int) (ChatOut, error)
+	ChatDeleteMessage(user string, messageId int) (ChatOut, error)
+	ChatDeleteMessageTeam(team, channel string, messageId int) (ChatOut, error)
 	ChatList() ([]chatOutResultConversations, error)
 	LoggedIn() bool
 	Username() string
