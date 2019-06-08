@@ -13,6 +13,7 @@ type chatOut struct { // not exported
 }
 type chatOutChannel struct {
 	Name        string `json:"name"`
+	Public      bool   `json:"public"`
 	MembersType string `json:"members_type"`
 	TopicName   string `json:"topic_name"`
 }
@@ -47,7 +48,7 @@ type chatOutResultChannel struct {
 	TopicType   string `json:"topic_type,omitempty"`
 	TopicName   string `json:"topic_name,omitempty"`
 }
-type chatOutResultConversations struct {
+type conversation struct {
 	ID           string               `json:"id"`
 	Channel      chatOutResultChannel `json:"channel"`
 	Unread       bool                 `json:"unread"`
@@ -56,11 +57,11 @@ type chatOutResultConversations struct {
 	MemberStatus string               `json:"member_status"`
 }
 type ChatOut struct { // exported
-	Message       string                       `json:"message,omitempty"`
-	ID            int                          `json:"id,omitempty"`
-	Ratelimits    []chatOutResultRatelimits    `json:"ratelimits,omitempty"`
-	Conversations []chatOutResultConversations `json:"conversations,omitempty"`
-	Offline       bool                         `json:"offline,omitempty"`
+	Message       string                    `json:"message,omitempty"`
+	ID            int                       `json:"id,omitempty"`
+	Ratelimits    []chatOutResultRatelimits `json:"ratelimits,omitempty"`
+	Conversations []conversation            `json:"conversations,omitempty"`
+	Offline       bool                      `json:"offline,omitempty"`
 }
 
 // ----
@@ -81,92 +82,51 @@ func chatAPIOut(keybasePath string, c chatOut) (chatOutResult, error) {
 	return r, nil
 }
 
-// ChatSendText() sends a chat message to a user.
-func (k Keybase) ChatSendText(user string, message ...string) (ChatOut, error) {
+// Send() sends a chat message
+func (c Chat) Send(message ...string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "send"
-	m.Params.Options.Channel.Name = user
+	m.Params.Options.Channel.Name = c.Name
+	m.Params.Options.Channel.Public = c.Public
+	m.Params.Options.Channel.MembersType = c.MembersType
+	m.Params.Options.Channel.TopicName = c.TopicName
 	m.Params.Options.Message.Body = strings.Join(message, " ")
 
-	r, err := chatAPIOut(k.path, m)
+	r, err := chatAPIOut(c.keybase.Path, m)
 	if err != nil {
 		return ChatOut{}, err
 	}
 	return r.Result, nil
 }
 
-// ChatSendTextTeam() sends a chat message to a team.
-func (k Keybase) ChatSendTextTeam(team, channel string, message ...string) (ChatOut, error) {
-	m := chatOut{}
-	m.Method = "send"
-	m.Params.Options.Channel.Name = team
-	m.Params.Options.Channel.MembersType = "team"
-	m.Params.Options.Channel.TopicName = channel
-	m.Params.Options.Message.Body = strings.Join(message, " ")
-
-	r, err := chatAPIOut(k.path, m)
-	if err != nil {
-		return ChatOut{}, err
-	}
-	return r.Result, nil
-}
-
-// ChatReact() sends a reaction to a user's message.
-func (k Keybase) ChatReact(user, reaction string, messageId int) (ChatOut, error) {
+// React() sends a reaction to a message.
+func (c Chat) React(reaction string, messageId int) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "reaction"
-	m.Params.Options.Channel.Name = user
-	m.Params.Options.MessageID = messageId
+	m.Params.Options.Channel.Name = c.Name
+	m.Params.Options.Channel.MembersType = c.MembersType
+	m.Params.Options.Channel.TopicName = c.TopicName
 	m.Params.Options.Message.Body = reaction
+	m.Params.Options.MessageID = messageId
 
-	r, err := chatAPIOut(k.path, m)
+	r, err := chatAPIOut(c.keybase.Path, m)
 	if err != nil {
 		return ChatOut{}, err
 	}
 	return r.Result, nil
 }
 
-// ChatReactTeam() sends a reaction to a message on a team.
-func (k Keybase) ChatReactTeam(team, channel, reaction string, messageId int) (ChatOut, error) {
-	m := chatOut{}
-	m.Method = "reaction"
-	m.Params.Options.Channel.Name = team
-	m.Params.Options.Channel.MembersType = "team"
-	m.Params.Options.Channel.TopicName = channel
-	m.Params.Options.MessageID = messageId
-	m.Params.Options.Message.Body = reaction
-
-	r, err := chatAPIOut(k.path, m)
-	if err != nil {
-		return ChatOut{}, err
-	}
-	return r.Result, nil
-}
-
-// ChatDeleteMessage() deletes a message from a one-on-one conversation.
-func (k Keybase) ChatDeleteMessage(user string, messageId int) (ChatOut, error) {
+// Delete() deletes a chat message
+func (c Chat) Delete(messageId int) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "delete"
-	m.Params.Options.Channel.Name = user
+	m.Params.Options.Channel.Name = c.Name
+	m.Params.Options.Channel.Public = c.Public
+	m.Params.Options.Channel.MembersType = c.MembersType
+	m.Params.Options.Channel.TopicName = c.TopicName
 	m.Params.Options.MessageID = messageId
 
-	r, err := chatAPIOut(k.path, m)
-	if err != nil {
-		return ChatOut{}, err
-	}
-	return r.Result, nil
-}
-
-// ChatDeleteMessageTeam() deletes a message from a team conversation.
-func (k Keybase) ChatDeleteMessageTeam(team, channel string, messageId int) (ChatOut, error) {
-	m := chatOut{}
-	m.Method = "delete"
-	m.Params.Options.Channel.Name = team
-	m.Params.Options.Channel.MembersType = "team"
-	m.Params.Options.Channel.TopicName = channel
-	m.Params.Options.MessageID = messageId
-
-	r, err := chatAPIOut(k.path, m)
+	r, err := chatAPIOut(c.keybase.Path, m)
 	if err != nil {
 		return ChatOut{}, err
 	}
@@ -174,10 +134,10 @@ func (k Keybase) ChatDeleteMessageTeam(team, channel string, messageId int) (Cha
 }
 
 // ChatList() returns a list of all conversations.
-func (k Keybase) ChatList() ([]chatOutResultConversations, error) {
+func (k Keybase) ChatList() ([]conversation, error) {
 	m := chatOut{}
 	m.Method = "list"
 
-	r, err := chatAPIOut(k.path, m)
+	r, err := chatAPIOut(k.Path, m)
 	return r.Result.Conversations, err
 }
