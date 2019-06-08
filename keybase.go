@@ -40,6 +40,7 @@ type Chat struct {
 
 type chat interface {
 	Send(message ...string) (ChatOut, error)
+	Edit(messageId int, message ...string) (ChatOut, error)
 	React(messageId int, reaction string) (ChatOut, error)
 	Delete(messageId int) (ChatOut, error)
 }

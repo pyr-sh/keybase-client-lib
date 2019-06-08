@@ -99,8 +99,26 @@ func (c Chat) Send(message ...string) (ChatOut, error) {
 	return r.Result, nil
 }
 
+// Edit() edits a previously sent chat message
+func (c Chat) Edit(messageId int, message ...string) (ChatOut, error) {
+	m := chatOut{}
+	m.Method = "edit"
+	m.Params.Options.Channel.Name = c.Name
+	m.Params.Options.Channel.Public = c.Public
+	m.Params.Options.Channel.MembersType = c.MembersType
+	m.Params.Options.Channel.TopicName = c.TopicName
+	m.Params.Options.Message.Body = strings.Join(message, " ")
+	m.Params.Options.MessageID = messageId
+
+	r, err := chatAPIOut(c.keybase.Path, m)
+	if err != nil {
+		return ChatOut{}, err
+	}
+	return r.Result, nil
+}
+
 // React() sends a reaction to a message.
-func (c Chat) React(reaction string, messageId int) (ChatOut, error) {
+func (c Chat) React(messageId int, reaction string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "reaction"
 	m.Params.Options.Channel.Name = c.Name
