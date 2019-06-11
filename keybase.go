@@ -25,17 +25,10 @@ type Keybase struct {
 	Version  string
 }
 
-// Channel is a map of options that can be passed to NewChat()
-type Channel map[string]interface{}
-
 // Chat holds basic information about a specific conversation
 type Chat struct {
 	keybase     Keybase
-	Name        string
-	Public      bool
-	MembersType string
-	TopicName   string
-	TopicType   string
+	Channel Channel
 }
 
 type chat interface {
@@ -46,7 +39,8 @@ type chat interface {
 }
 
 type keybase interface {
-	NewChat(channel map[string]interface{}) Chat
+	NewChat(channel Channel) Chat
+	Runner(handler func(ChatIn), channelFilters ...Channel)
 	ChatList() ([]conversation, error)
 	loggedIn() bool
 	username() string
@@ -75,35 +69,11 @@ func NewKeybase(path ...string) Keybase {
 }
 
 // Return a new Chat instance
-func (k Keybase) NewChat(channel map[string]interface{}) Chat {
-	var c Chat = Chat{}
-	c.keybase = k
-	if value, ok := channel["Name"].(string); ok == true {
-		c.Name = value
+func (k Keybase) NewChat(channel Channel) Chat {
+	return Chat{
+		keybase: k,
+		Channel: channel,
 	}
-	if value, ok := channel["Public"].(bool); ok == true {
-		c.Public = value
-	} else {
-		c.Public = false
-	}
-	if value, ok := channel["MembersType"].(string); ok == true {
-		c.MembersType = value
-	} else {
-		c.MembersType = USER
-	}
-	if value, ok := channel["TopicName"].(string); ok == true {
-		c.TopicName = value
-	} else {
-		if c.MembersType == TEAM {
-			c.TopicName = "general"
-		}
-	}
-	if value, ok := channel["TopicType"].(string); ok == true {
-		c.TopicType = value
-	} else {
-		c.TopicType = CHAT
-	}
-	return c
 }
 
 // username() returns the username of the currently logged-in Keybase user.

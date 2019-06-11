@@ -1,18 +1,16 @@
 package keybase
 
-import ()
+import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"os/exec"
+)
 
-type chatIn struct {
+type ChatIn struct {
 	Type   string    `json:"type"`
 	Source string    `json:"source"`
 	Msg    chatInMsg `json:"msg"`
-}
-type chatInChannel struct {
-	Name        string `json:"name"`
-	Public      bool   `json:"public"`
-	MembersType string `json:"members_type"`
-	TopicType   string `json:"topic_type"`
-	TopicName   string `json:"topic_name"`
 }
 type chatInSender struct {
 	UID        string `json:"uid"`
@@ -84,7 +82,7 @@ type chatInContent struct {
 }
 type chatInMsg struct {
 	ID                 int           `json:"id"`
-	Channel            chatInChannel `json:"channel"`
+	Channel            Channel       `json:"channel"`
 	Sender             chatInSender  `json:"sender"`
 	SentAt             int           `json:"sent_at"`
 	SentAtMs           int64         `json:"sent_at_ms"`
@@ -95,4 +93,41 @@ type chatInMsg struct {
 	Etime              int64         `json:"etime"`
 	HasPairwiseMacs    bool          `json:"has_pairwise_macs"`
 	ChannelMention     string        `json:"channel_mention"`
+}
+
+// Creates a string of json-encoded channels to pass to keybase chat api-listen --filter-channels
+func createFilterString(channelFilters ...Channel) string {
+	if len(channelFilters) == 0 {
+		return "[]"
+	}
+
+	jsonBytes, _ := json.Marshal(channelFilters)
+	return fmt.Sprintf("%s", string(jsonBytes))
+}
+
+// Get new messages coming into keybase and send them into the channel
+func getNewMessages(k Keybase, c chan<- ChatIn, filterString string) {
+	keybaseListen := exec.Command(k.Path, "chat", "api-listen", "--filter-channels", filterString)
+	keybaseOutput, _ := keybaseListen.StdoutPipe()
+	keybaseListen.Start()
+	scanner := bufio.NewScanner(keybaseOutput)
+	var jsonData ChatIn
+
+	for scanner.Scan() {
+		json.Unmarshal([]byte(scanner.Text()), &jsonData)
+		c <- jsonData
+	}
+}
+
+// Runner() runs keybase chat api-listen, and passes incoming messages to the message handler func
+func (k Keybase) Runner(handler func(ChatIn), channelFilters ...Channel) {
+	c := make(chan ChatIn, 10)
+	defer close(c)
+	go getNewMessages(k, c, createFilterString(channelFilters...))
+	for {
+		chat, ok := <-c
+		if ok {
+			go handler(chat)
+		}
+	}
 }

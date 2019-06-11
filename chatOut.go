@@ -7,21 +7,22 @@ import (
 )
 
 // ---- Struct for sending to API
-type chatOut struct { // not exported
+type chatOut struct {
 	Method string        `json:"method"`
 	Params chatOutParams `json:"params"`
 }
-type chatOutChannel struct {
+type Channel struct {
 	Name        string `json:"name"`
-	Public      bool   `json:"public"`
-	MembersType string `json:"members_type"`
-	TopicName   string `json:"topic_name"`
+	Public      bool   `json:"public,omitempty"`
+	MembersType string `json:"members_type,omitempty"`
+	TopicType   string `json:"topic_type,omitempty"`
+	TopicName   string `json:"topic_name,omitempty"`
 }
 type chatOutMessage struct {
 	Body string `json:"body"`
 }
 type chatOutOptions struct {
-	Channel   chatOutChannel `json:"channel"`
+	Channel   Channel        `json:"channel"`
 	MessageID int            `json:"message_id"`
 	Message   chatOutMessage `json:"message"`
 }
@@ -41,22 +42,15 @@ type chatOutResultRatelimits struct {
 	Reset    int    `json:"reset,omitempty"`
 	Gas      int    `json:"gas,omitempty"`
 }
-type chatOutResultChannel struct {
-	Name        string `json:"name"`
-	Public      bool   `json:"public"`
-	MembersType string `json:"members_type"`
-	TopicType   string `json:"topic_type,omitempty"`
-	TopicName   string `json:"topic_name,omitempty"`
-}
 type conversation struct {
 	ID           string               `json:"id"`
-	Channel      chatOutResultChannel `json:"channel"`
+	Channel      Channel `json:"channel"`
 	Unread       bool                 `json:"unread"`
 	ActiveAt     int                  `json:"active_at"`
 	ActiveAtMs   int64                `json:"active_at_ms"`
 	MemberStatus string               `json:"member_status"`
 }
-type ChatOut struct { // exported
+type ChatOut struct {
 	Message       string                    `json:"message,omitempty"`
 	ID            int                       `json:"id,omitempty"`
 	Ratelimits    []chatOutResultRatelimits `json:"ratelimits,omitempty"`
@@ -86,10 +80,7 @@ func chatAPIOut(keybasePath string, c chatOut) (chatOutResult, error) {
 func (c Chat) Send(message ...string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "send"
-	m.Params.Options.Channel.Name = c.Name
-	m.Params.Options.Channel.Public = c.Public
-	m.Params.Options.Channel.MembersType = c.MembersType
-	m.Params.Options.Channel.TopicName = c.TopicName
+	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
 
 	r, err := chatAPIOut(c.keybase.Path, m)
@@ -103,10 +94,7 @@ func (c Chat) Send(message ...string) (ChatOut, error) {
 func (c Chat) Edit(messageId int, message ...string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "edit"
-	m.Params.Options.Channel.Name = c.Name
-	m.Params.Options.Channel.Public = c.Public
-	m.Params.Options.Channel.MembersType = c.MembersType
-	m.Params.Options.Channel.TopicName = c.TopicName
+	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
 	m.Params.Options.MessageID = messageId
 
@@ -121,9 +109,7 @@ func (c Chat) Edit(messageId int, message ...string) (ChatOut, error) {
 func (c Chat) React(messageId int, reaction string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "reaction"
-	m.Params.Options.Channel.Name = c.Name
-	m.Params.Options.Channel.MembersType = c.MembersType
-	m.Params.Options.Channel.TopicName = c.TopicName
+	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = reaction
 	m.Params.Options.MessageID = messageId
 
@@ -138,10 +124,7 @@ func (c Chat) React(messageId int, reaction string) (ChatOut, error) {
 func (c Chat) Delete(messageId int) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "delete"
-	m.Params.Options.Channel.Name = c.Name
-	m.Params.Options.Channel.Public = c.Public
-	m.Params.Options.Channel.MembersType = c.MembersType
-	m.Params.Options.Channel.TopicName = c.TopicName
+	m.Params.Options.Channel = c.Channel
 	m.Params.Options.MessageID = messageId
 
 	r, err := chatAPIOut(c.keybase.Path, m)
