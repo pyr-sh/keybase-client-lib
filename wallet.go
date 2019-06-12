@@ -95,15 +95,6 @@ func walletAPIOut(keybasePath string, w walletOut) (walletOutResult, error) {
 	return r, nil
 }
 
-// Balances() returns a list of all wallets on the current user's account, including their current balance.
-func (k Keybase) Balances() ([]WalletResult, error) {
-	m := walletOut{}
-	m.Method = "balances"
-
-	r, err := walletAPIOut(k.Path, m)
-	return r.Result, err
-}
-
 // TxDetail() returns details of a stellar transaction
 func (k Keybase) TxDetail(txid string) (WalletResult, error) {
 	m := walletOut{}
