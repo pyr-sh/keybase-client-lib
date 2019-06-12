@@ -7,7 +7,14 @@ import (
 
 // ---- Struct for sending to API
 type walletOut struct {
-	Method string `json:"method"`
+	Method string          `json:"method"`
+	Params walletOutParams `json:"params"`
+}
+type walletOutOptions struct {
+	Txid string `json:"txid"`
+}
+type walletOutParams struct {
+	Options walletOutOptions `json:"options"`
 }
 
 // ----
@@ -17,6 +24,15 @@ type walletOutResult struct {
 	Result []WalletResult `json:"result"`
 }
 type asset struct {
+	Type           string `json:"type"`
+	Code           string `json:"code"`
+	Issuer         string `json:"issuer"`
+	VerifiedDomain string `json:"verifiedDomain"`
+	IssuerName     string `json:"issuerName"`
+	Desc           string `json:"desc"`
+	InfoURL        string `json:"infoUrl"`
+}
+type sourceAsset struct {
 	Type           string `json:"type"`
 	Code           string `json:"code"`
 	Issuer         string `json:"issuer"`
@@ -35,12 +51,30 @@ type exchangeRate struct {
 	Rate     string `json:"rate"`
 }
 type WalletResult struct {
-	AccountID    string       `json:"accountID"`
-	IsPrimary    bool         `json:"isPrimary"`
-	Name         string       `json:"name"`
-	Balance      []balance    `json:"balance"`
-	ExchangeRate exchangeRate `json:"exchangeRate"`
-	AccountMode  int          `json:"accountMode"`
+	AccountID          string       `json:"accountID"`
+	IsPrimary          bool         `json:"isPrimary"`
+	Name               string       `json:"name"`
+	Balance            []balance    `json:"balance"`
+	ExchangeRate       exchangeRate `json:"exchangeRate"`
+	AccountMode        int          `json:"accountMode"`
+	TxID               string       `json:"txID"`
+	Time               int64        `json:"time"`
+	Status             string       `json:"status"`
+	StatusDetail       string       `json:"statusDetail"`
+	Amount             string       `json:"amount"`
+	Asset              asset        `json:"asset"`
+	DisplayAmount      string       `json:"displayAmount"`
+	DisplayCurrency    string       `json:"displayCurrency"`
+	SourceAmountMax    string       `json:"sourceAmountMax"`
+	SourceAmountActual string       `json:"sourceAmountActual"`
+	SourceAsset        sourceAsset  `json:"sourceAsset"`
+	FromStellar        string       `json:"fromStellar"`
+	ToStellar          string       `json:"toStellar"`
+	FromUsername       string       `json:"fromUsername"`
+	ToUsername         string       `json:"toUsername"`
+	Note               string       `json:"note"`
+	NoteErr            string       `json:"noteErr"`
+	Unread             bool         `json:"unread"`
 }
 
 // ----
@@ -68,4 +102,14 @@ func (k Keybase) Balances() ([]WalletResult, error) {
 
 	r, err := walletAPIOut(k.Path, m)
 	return r.Result, err
+}
+
+// TxDetail() returns details of a stellar transaction
+func (k Keybase) TxDetail(txid string) (WalletResult, error) {
+	m := walletOut{}
+	m.Method = "details"
+	m.Params.Options.Txid = txid
+
+	r, err := walletAPIOut(k.Path, m)
+	return r.Result[0], err
 }

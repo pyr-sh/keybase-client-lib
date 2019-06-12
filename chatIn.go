@@ -121,13 +121,10 @@ func getNewMessages(k Keybase, c chan<- ChatIn, filterString string) {
 
 // Runner() runs keybase chat api-listen, and passes incoming messages to the message handler func
 func (k Keybase) Runner(handler func(ChatIn), channelFilters ...Channel) {
-	c := make(chan ChatIn, 10)
+	c := make(chan ChatIn, 50)
 	defer close(c)
 	go getNewMessages(k, c, createFilterString(channelFilters...))
 	for {
-		chat, ok := <-c
-		if ok {
-			go handler(chat)
-		}
+		go handler(<-c)
 	}
 }
