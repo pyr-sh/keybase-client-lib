@@ -43,12 +43,12 @@ type chatOutResultRatelimits struct {
 	Gas      int    `json:"gas,omitempty"`
 }
 type conversation struct {
-	ID           string               `json:"id"`
+	ID           string  `json:"id"`
 	Channel      Channel `json:"channel"`
-	Unread       bool                 `json:"unread"`
-	ActiveAt     int                  `json:"active_at"`
-	ActiveAtMs   int64                `json:"active_at_ms"`
-	MemberStatus string               `json:"member_status"`
+	Unread       bool    `json:"unread"`
+	ActiveAt     int     `json:"active_at"`
+	ActiveAtMs   int64   `json:"active_at_ms"`
+	MemberStatus string  `json:"member_status"`
 }
 type ChatOut struct {
 	Message       string                    `json:"message,omitempty"`

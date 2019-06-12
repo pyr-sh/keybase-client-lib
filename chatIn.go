@@ -30,10 +30,33 @@ type chatInAddedtoteam struct {
 type chatInBulkaddtoconv struct {
 	Usernames []string `json:"usernames"`
 }
+type chatInCommits struct {
+	CommitHash  string `json:"commitHash"`
+	Message     string `json:"message"`
+	AuthorName  string `json:"authorName"`
+	AuthorEmail string `json:"authorEmail"`
+	Ctime       int    `json:"ctime"`
+}
+type chatInRefs struct {
+	RefName              string          `json:"refName"`
+	Commits              []chatInCommits `json:"commits"`
+	MoreCommitsAvailable bool            `json:"moreCommitsAvailable"`
+	IsDelete             bool            `json:"isDelete"`
+}
+type chatInGitpush struct {
+	Team             string       `json:"team"`
+	Pusher           string       `json:"pusher"`
+	RepoName         string       `json:"repoName"`
+	RepoID           string       `json:"repoID"`
+	Refs             []chatInRefs `json:"refs"`
+	PushType         int          `json:"pushType"`
+	PreviousRepoName string       `json:"previousRepoName"`
+}
 type chatInSystem struct {
 	SystemType    int                 `json:"systemType"`
 	Addedtoteam   chatInAddedtoteam   `json:"addedtoteam"`
 	Bulkaddtoconv chatInBulkaddtoconv `json:"bulkaddtoconv"`
+	Gitpush       chatInGitpush       `json:"gitpush"`
 }
 type chatInResult struct {
 	ResultTyp int    `json:"resultTyp"`

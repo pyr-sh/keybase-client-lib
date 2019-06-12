@@ -27,7 +27,7 @@ type Keybase struct {
 
 // Chat holds basic information about a specific conversation
 type Chat struct {
-	keybase     Keybase
+	keybase Keybase
 	Channel Channel
 }
 
