@@ -21,7 +21,7 @@ type walletOutParams struct {
 
 // ---- Struct for data received after sending to API
 type walletOutResult struct {
-	Result []WalletResult `json:"result"`
+	Result WalletResult `json:"result"`
 }
 type asset struct {
 	Type           string `json:"type"`
@@ -111,5 +111,5 @@ func (k Keybase) TxDetail(txid string) (WalletResult, error) {
 	m.Params.Options.Txid = txid
 
 	r, err := walletAPIOut(k.Path, m)
-	return r.Result[0], err
+	return r.Result, err
 }
