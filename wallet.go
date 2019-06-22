@@ -11,6 +11,7 @@ type walletOut struct {
 	Params walletOutParams `json:"params"`
 }
 type walletOutOptions struct {
+	Name string `json:"name"`
 	Txid string `json:"txid"`
 }
 type walletOutParams struct {
@@ -103,4 +104,14 @@ func (k Keybase) TxDetail(txid string) (WalletResult, error) {
 
 	r, err := walletAPIOut(k.Path, m)
 	return r.Result, err
+}
+
+// StellarAddress() returns the primary stellar address of a given user
+func (k Keybase) StellarAddress(user string) (string, error) {
+	m := walletOut{}
+	m.Method = "lookup"
+	m.Params.Options.Name = user
+
+	r, err := walletAPIOut(k.Path, m)
+	return r.Result.AccountID, err
 }
