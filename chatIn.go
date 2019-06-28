@@ -3,7 +3,6 @@ package keybase
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"os/exec"
 )
 
@@ -118,19 +117,41 @@ type chatInMsg struct {
 	ChannelMention     string        `json:"channel_mention"`
 }
 
-// Creates a string of json-encoded channels to pass to keybase chat api-listen --filter-channels
-func createFilterString(channelFilters ...Channel) string {
-	if len(channelFilters) == 0 {
-		return "[]"
-	}
+// RunOptions holds a set of options to be passed to Run
+type RunOptions struct {
+	Local          bool      // Subscribe to local messages
+	HideExploding  bool      // Ignore exploding messages
+	Dev            bool      // Subscribe to dev channel messages
+	Wallet         bool      // Subscribe to wallet events
+	FilterChannel  Channel   // Only subscribe to messages from specified channel
+	FilterChannels []Channel // Only subscribe to messages from specified channels
+}
 
-	jsonBytes, _ := json.Marshal(channelFilters)
-	return fmt.Sprintf("%s", string(jsonBytes))
+// Creates a string of a json-encoded channel to pass to keybase chat api-listen --filter-channel
+func createFilterString(channel Channel) string {
+	if channel.Name == "" {
+		return ""
+	}
+	jsonBytes, _ := json.Marshal(channel)
+	return string(jsonBytes)
+}
+
+// Creates a string of json-encoded channels to pass to keybase chat api-listen --filter-channels
+func createFiltersString(channels []Channel) string {
+	if len(channels) == 0 {
+		return ""
+	}
+	jsonBytes, _ := json.Marshal(channels)
+	return string(jsonBytes)
 }
 
 // Get new messages coming into keybase and send them into the channel
-func getNewMessages(k Keybase, c chan<- ChatIn, filterString string) {
-	keybaseListen := exec.Command(k.Path, "chat", "api-listen", "--filter-channels", filterString)
+func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
+	execCommand := []string{"chat", "api-listen"}
+	if len(execOptions) > 0 {
+		execCommand = append(execCommand, execOptions...)
+	}
+	keybaseListen := exec.Command(k.Path, execCommand...)
 	keybaseOutput, _ := keybaseListen.StdoutPipe()
 	keybaseListen.Start()
 	scanner := bufio.NewScanner(keybaseOutput)
@@ -142,11 +163,31 @@ func getNewMessages(k Keybase, c chan<- ChatIn, filterString string) {
 	}
 }
 
-// Runner() runs keybase chat api-listen, and passes incoming messages to the message handler func
-func (k Keybase) Runner(handler func(ChatIn), channelFilters ...Channel) {
+// Run() runs keybase chat api-listen, and passes incoming messages to the message handler func
+func (k Keybase) Run(handler func(ChatIn), options ...RunOptions) {
+	runOptions := make([]string, 0)
+	if len(options) > 0 {
+		if options[0].Local {
+			runOptions = append(runOptions, "--local")
+		}
+		if options[0].HideExploding {
+			runOptions = append(runOptions, "--hide-exploding")
+		}
+		if options[0].Dev {
+			runOptions = append(runOptions, "--dev")
+		}
+		if len(options[0].FilterChannels) > 0 {
+			runOptions = append(runOptions, "--filter-channels")
+			runOptions = append(runOptions, createFiltersString(options[0].FilterChannels))
+		}
+		if options[0].FilterChannel.Name != "" {
+			runOptions = append(runOptions, "--filter-channel")
+			runOptions = append(runOptions, createFilterString(options[0].FilterChannel))
+		}
+	}
 	c := make(chan ChatIn, 50)
 	defer close(c)
-	go getNewMessages(k, c, createFilterString(channelFilters...))
+	go getNewMessages(k, c, runOptions)
 	for {
 		go handler(<-c)
 	}

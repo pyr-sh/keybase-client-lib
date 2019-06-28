@@ -40,7 +40,7 @@ type chat interface {
 
 type keybase interface {
 	NewChat(channel Channel) Chat
-	Runner(handler func(ChatIn), channelFilters ...Channel)
+	Run(handler func(ChatIn), options ...RunOptions)
 	ChatList() ([]conversation, error)
 	loggedIn() bool
 	username() string
