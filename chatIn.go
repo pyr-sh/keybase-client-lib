@@ -211,5 +211,6 @@ func heartbeat(c chan<- ChatIn, freq time.Duration) {
 		time.Sleep(freq)
 		m.Msg.ID = count
 		c <- m
+		count++
 	}
 }
