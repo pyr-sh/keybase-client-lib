@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"os/exec"
+	"time"
 )
 
 type ChatIn struct {
@@ -119,6 +120,7 @@ type chatInMsg struct {
 
 // RunOptions holds a set of options to be passed to Run
 type RunOptions struct {
+	Heartbeat      int64     // Send a heartbeat through the channel every X minutes (0 = off)
 	Local          bool      // Subscribe to local messages
 	HideExploding  bool      // Ignore exploding messages
 	Dev            bool      // Subscribe to dev channel messages
@@ -165,8 +167,12 @@ func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
 
 // Run() runs keybase chat api-listen, and passes incoming messages to the message handler func
 func (k Keybase) Run(handler func(ChatIn), options ...RunOptions) {
+	var heartbeatFreq int64
 	runOptions := make([]string, 0)
 	if len(options) > 0 {
+		if options[0].Heartbeat > 0 {
+			heartbeatFreq = options[0].Heartbeat
+		}
 		if options[0].Local {
 			runOptions = append(runOptions, "--local")
 		}
@@ -187,8 +193,23 @@ func (k Keybase) Run(handler func(ChatIn), options ...RunOptions) {
 	}
 	c := make(chan ChatIn, 50)
 	defer close(c)
+	if heartbeatFreq > 0 {
+		go heartbeat(c, time.Duration(heartbeatFreq)*time.Minute)
+	}
 	go getNewMessages(k, c, runOptions)
 	for {
 		go handler(<-c)
+	}
+}
+
+func heartbeat(c chan<- ChatIn, freq time.Duration) {
+	m := ChatIn{
+		Type: "heartbeat",
+	}
+	count := 0
+	for {
+		time.Sleep(freq)
+		m.Msg.ID = count
+		c <- m
 	}
 }
