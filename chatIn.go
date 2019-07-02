@@ -156,14 +156,16 @@ func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
 	keybaseListen := exec.Command(k.Path, execCommand...)
 	keybaseOutput, _ := keybaseListen.StdoutPipe()
 	keybaseListen.Start()
-	keybaseListen.Wait()
 	scanner := bufio.NewScanner(keybaseOutput)
-	var jsonData ChatIn
 
-	for scanner.Scan() {
-		json.Unmarshal([]byte(scanner.Text()), &jsonData)
-		c <- jsonData
-	}
+	go func(scanner *bufio.Scanner, c chan<- ChatIn) {
+		var jsonData ChatIn
+		for scanner.Scan() {
+			json.Unmarshal([]byte(scanner.Text()), &jsonData)
+			c <- jsonData
+		}
+	}(scanner, c)
+	keybaseListen.Wait()
 }
 
 // Run() runs keybase chat api-listen, and passes incoming messages to the message handler func
