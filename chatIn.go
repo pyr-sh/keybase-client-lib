@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// ChatIn holds information about a message received by the `keybase chat api-listen` command
 type ChatIn struct {
 	Type   string    `json:"type"`
 	Source string    `json:"source"`
@@ -147,7 +148,7 @@ func createFiltersString(channels []Channel) string {
 	return string(jsonBytes)
 }
 
-// Get new messages coming into keybase and send them into the channel
+// Run `keybase chat api-listen` to get new messages coming into keybase and send them into the channel
 func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
 	execString := []string{"chat", "api-listen"}
 	if len(execOptions) > 0 {
@@ -169,7 +170,7 @@ func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
 	}
 }
 
-// Run() runs keybase chat api-listen, and passes incoming messages to the message handler func
+// Run runs `keybase chat api-listen`, and passes incoming messages to the message handler func
 func (k Keybase) Run(handler func(ChatIn), options ...RunOptions) {
 	var heartbeatFreq int64
 	runOptions := make([]string, 0)
@@ -206,6 +207,7 @@ func (k Keybase) Run(handler func(ChatIn), options ...RunOptions) {
 	}
 }
 
+// heartbeat sends a message through the channel with a message type of `heartbeat`
 func heartbeat(c chan<- ChatIn, freq time.Duration) {
 	m := ChatIn{
 		Type: "heartbeat",

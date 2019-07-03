@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// ---- Struct for sending to API
+// chatOut holds data to be sent to the Chat API
 type chatOut struct {
 	Method string        `json:"method"`
 	Params chatOutParams `json:"params"`
@@ -30,9 +30,7 @@ type chatOutParams struct {
 	Options chatOutOptions `json:"options"`
 }
 
-// ----
-
-// ---- Struct for data received after sending to API
+// chatOutResult holds data received after sending to API
 type chatOutResult struct {
 	Result ChatOut `json:"result"`
 }
@@ -58,9 +56,7 @@ type ChatOut struct {
 	Offline       bool                      `json:"offline,omitempty"`
 }
 
-// ----
-
-// chatAPIOut() sends JSON requests to the chat API and returns its response.
+// chatAPIOut sends JSON requests to the chat API and returns its response.
 func chatAPIOut(keybasePath string, c chatOut) (chatOutResult, error) {
 	jsonBytes, _ := json.Marshal(c)
 
@@ -76,7 +72,7 @@ func chatAPIOut(keybasePath string, c chatOut) (chatOutResult, error) {
 	return r, nil
 }
 
-// Send() sends a chat message
+// Send sends a chat message
 func (c Chat) Send(message ...string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "send"
@@ -90,7 +86,7 @@ func (c Chat) Send(message ...string) (ChatOut, error) {
 	return r.Result, nil
 }
 
-// Edit() edits a previously sent chat message
+// Edit edits a previously sent chat message
 func (c Chat) Edit(messageId int, message ...string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "edit"
@@ -105,7 +101,7 @@ func (c Chat) Edit(messageId int, message ...string) (ChatOut, error) {
 	return r.Result, nil
 }
 
-// React() sends a reaction to a message.
+// React sends a reaction to a message.
 func (c Chat) React(messageId int, reaction string) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "reaction"
@@ -120,7 +116,7 @@ func (c Chat) React(messageId int, reaction string) (ChatOut, error) {
 	return r.Result, nil
 }
 
-// Delete() deletes a chat message
+// Delete deletes a chat message
 func (c Chat) Delete(messageId int) (ChatOut, error) {
 	m := chatOut{}
 	m.Method = "delete"
@@ -134,7 +130,7 @@ func (c Chat) Delete(messageId int) (ChatOut, error) {
 	return r.Result, nil
 }
 
-// ChatList() returns a list of all conversations.
+// ChatList returns a list of all conversations.
 func (k Keybase) ChatList() ([]conversation, error) {
 	m := chatOut{}
 	m.Method = "list"

@@ -5,7 +5,7 @@ import (
 	"os/exec"
 )
 
-// ---- Struct for sending to API
+//walletOut holds data for sending to API
 type walletOut struct {
 	Method string          `json:"method"`
 	Params walletOutParams `json:"params"`
@@ -18,9 +18,7 @@ type walletOutParams struct {
 	Options walletOutOptions `json:"options"`
 }
 
-// ----
-
-// ---- Struct for data received after sending to API
+// walletOutResult holds data data received after sending to API
 type walletOutResult struct {
 	Result WalletResult `json:"result"`
 }
@@ -78,9 +76,7 @@ type WalletResult struct {
 	Unread             bool         `json:"unread"`
 }
 
-// ----
-
-// walletAPIOut() sends JSON requests to the wallet API and returns its response.
+// walletAPIOut sends JSON requests to the wallet API and returns its response.
 func walletAPIOut(keybasePath string, w walletOut) (walletOutResult, error) {
 	jsonBytes, _ := json.Marshal(w)
 
@@ -96,7 +92,7 @@ func walletAPIOut(keybasePath string, w walletOut) (walletOutResult, error) {
 	return r, nil
 }
 
-// TxDetail() returns details of a stellar transaction
+// TxDetail returns details of a stellar transaction
 func (k Keybase) TxDetail(txid string) (WalletResult, error) {
 	m := walletOut{}
 	m.Method = "details"
@@ -106,7 +102,7 @@ func (k Keybase) TxDetail(txid string) (WalletResult, error) {
 	return r.Result, err
 }
 
-// StellarAddress() returns the primary stellar address of a given user
+// StellarAddress returns the primary stellar address of a given user
 func (k Keybase) StellarAddress(user string) (string, error) {
 	m := walletOut{}
 	m.Method = "lookup"

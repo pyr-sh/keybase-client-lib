@@ -52,7 +52,7 @@ type status struct {
 	LoggedIn bool   `json:"LoggedIn"`
 }
 
-// New() returns a new instance of Keybase object. Optionally, you can pass a string containing the path to the Keybase executable as the first argument.
+// NewKeybase returns a new Keybase. Optionally, you can pass a string containing the path to the Keybase executable as the first argument.
 func NewKeybase(path ...string) Keybase {
 	k := Keybase{}
 	if len(path) < 1 {
@@ -68,7 +68,7 @@ func NewKeybase(path ...string) Keybase {
 	return k
 }
 
-// Return a new Chat instance
+// NewChat returns a new Chat instance
 func (k Keybase) NewChat(channel Channel) Chat {
 	return Chat{
 		keybase: k,
@@ -76,7 +76,7 @@ func (k Keybase) NewChat(channel Channel) Chat {
 	}
 }
 
-// username() returns the username of the currently logged-in Keybase user.
+// username returns the username of the currently logged-in Keybase user.
 func (k Keybase) username() string {
 	cmd := exec.Command(k.Path, "status", "-j")
 	cmdOut, err := cmd.Output()
@@ -90,7 +90,7 @@ func (k Keybase) username() string {
 	return s.Username
 }
 
-// loggedIn() returns true if Keybase is currently logged in, otherwise returns false.
+// loggedIn returns true if Keybase is currently logged in, otherwise returns false.
 func (k Keybase) loggedIn() bool {
 	cmd := exec.Command(k.Path, "status", "-j")
 	cmdOut, err := cmd.Output()
@@ -104,7 +104,7 @@ func (k Keybase) loggedIn() bool {
 	return s.LoggedIn
 }
 
-// version() returns the version string of the client.
+// version returns the version string of the client.
 func (k Keybase) version() string {
 	cmd := exec.Command(k.Path, "version", "-S", "-f", "s")
 	cmdOut, err := cmd.Output()
