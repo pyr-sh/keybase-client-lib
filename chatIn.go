@@ -149,16 +149,15 @@ func createFiltersString(channels []Channel) string {
 
 // Get new messages coming into keybase and send them into the channel
 func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
-	execCommand := []string{"chat", "api-listen"}
+	execString := []string{"chat", "api-listen"}
 	if len(execOptions) > 0 {
-		execCommand = append(execCommand, execOptions...)
+		execString = append(execString, execOptions...)
 	}
-	keybaseListen := exec.Command(k.Path, execCommand...)
-	keybaseOutput, _ := keybaseListen.StdoutPipe()
-
 	for {
-		keybaseListen.Start()
-		scanner := bufio.NewScanner(keybaseOutput)
+		execCmd := exec.Command(k.Path, execString...)
+		stdOut, _ := execCmd.StdoutPipe()
+		execCmd.Start()
+		scanner := bufio.NewScanner(stdOut)
 		go func(scanner *bufio.Scanner, c chan<- ChatIn) {
 			var jsonData ChatIn
 			for scanner.Scan() {
@@ -166,7 +165,7 @@ func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
 				c <- jsonData
 			}
 		}(scanner, c)
-		keybaseListen.Wait()
+		execCmd.Wait()
 	}
 }
 
