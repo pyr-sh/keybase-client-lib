@@ -27,7 +27,7 @@ type Keybase struct {
 
 // Chat holds basic information about a specific conversation
 type Chat struct {
-	keybase Keybase
+	keybase *Keybase
 	Channel Channel
 }
 
@@ -53,8 +53,8 @@ type status struct {
 }
 
 // NewKeybase returns a new Keybase. Optionally, you can pass a string containing the path to the Keybase executable as the first argument.
-func NewKeybase(path ...string) Keybase {
-	k := Keybase{}
+func NewKeybase(path ...string) *Keybase {
+	k := &Keybase{}
 	if len(path) < 1 {
 		k.Path = "keybase"
 	} else {
@@ -69,7 +69,7 @@ func NewKeybase(path ...string) Keybase {
 }
 
 // NewChat returns a new Chat instance
-func (k Keybase) NewChat(channel Channel) Chat {
+func (k *Keybase) NewChat(channel Channel) Chat {
 	return Chat{
 		keybase: k,
 		Channel: channel,
@@ -77,7 +77,7 @@ func (k Keybase) NewChat(channel Channel) Chat {
 }
 
 // username returns the username of the currently logged-in Keybase user.
-func (k Keybase) username() string {
+func (k *Keybase) username() string {
 	cmd := exec.Command(k.Path, "status", "-j")
 	cmdOut, err := cmd.Output()
 	if err != nil {
@@ -91,7 +91,7 @@ func (k Keybase) username() string {
 }
 
 // loggedIn returns true if Keybase is currently logged in, otherwise returns false.
-func (k Keybase) loggedIn() bool {
+func (k *Keybase) loggedIn() bool {
 	cmd := exec.Command(k.Path, "status", "-j")
 	cmdOut, err := cmd.Output()
 	if err != nil {
@@ -105,7 +105,7 @@ func (k Keybase) loggedIn() bool {
 }
 
 // version returns the version string of the client.
-func (k Keybase) version() string {
+func (k *Keybase) version() string {
 	cmd := exec.Command(k.Path, "version", "-S", "-f", "s")
 	cmdOut, err := cmd.Output()
 	if err != nil {

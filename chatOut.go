@@ -131,7 +131,7 @@ func (c Chat) Delete(messageId int) (ChatOut, error) {
 }
 
 // ChatList returns a list of all conversations.
-func (k Keybase) ChatList() ([]conversation, error) {
+func (k *Keybase) ChatList() ([]conversation, error) {
 	m := chatOut{}
 	m.Method = "list"
 

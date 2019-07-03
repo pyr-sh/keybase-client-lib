@@ -93,7 +93,7 @@ func walletAPIOut(keybasePath string, w walletOut) (walletOutResult, error) {
 }
 
 // TxDetail returns details of a stellar transaction
-func (k Keybase) TxDetail(txid string) (WalletResult, error) {
+func (k *Keybase) TxDetail(txid string) (WalletResult, error) {
 	m := walletOut{}
 	m.Method = "details"
 	m.Params.Options.Txid = txid
@@ -103,7 +103,7 @@ func (k Keybase) TxDetail(txid string) (WalletResult, error) {
 }
 
 // StellarAddress returns the primary stellar address of a given user
-func (k Keybase) StellarAddress(user string) (string, error) {
+func (k *Keybase) StellarAddress(user string) (string, error) {
 	m := walletOut{}
 	m.Method = "lookup"
 	m.Params.Options.Name = user

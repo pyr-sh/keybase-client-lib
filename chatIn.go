@@ -149,7 +149,7 @@ func createFiltersString(channels []Channel) string {
 }
 
 // Run `keybase chat api-listen` to get new messages coming into keybase and send them into the channel
-func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
+func getNewMessages(k *Keybase, c chan<- ChatIn, execOptions []string) {
 	execString := []string{"chat", "api-listen"}
 	if len(execOptions) > 0 {
 		execString = append(execString, execOptions...)
@@ -171,7 +171,7 @@ func getNewMessages(k Keybase, c chan<- ChatIn, execOptions []string) {
 }
 
 // Run runs `keybase chat api-listen`, and passes incoming messages to the message handler func
-func (k Keybase) Run(handler func(ChatIn), options ...RunOptions) {
+func (k *Keybase) Run(handler func(ChatIn), options ...RunOptions) {
 	var heartbeatFreq int64
 	runOptions := make([]string, 0)
 	if len(options) > 0 {
@@ -190,6 +190,7 @@ func (k Keybase) Run(handler func(ChatIn), options ...RunOptions) {
 		if len(options[0].FilterChannels) > 0 {
 			runOptions = append(runOptions, "--filter-channels")
 			runOptions = append(runOptions, createFiltersString(options[0].FilterChannels))
+
 		}
 		if options[0].FilterChannel.Name != "" {
 			runOptions = append(runOptions, "--filter-channel")
