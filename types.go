@@ -149,8 +149,11 @@ type pagination struct {
 	ForceFirstPage bool   `json:"forceFirstPage,omitempty"`
 }
 type result struct {
-	Messages   []messages `json:"messages,omitempty"`
-	Pagination pagination `json:"pagination"`
+	Messages   []messages   `json:"messages,omitempty"`
+	Pagination pagination   `json:"pagination"`
+	Message    string       `json:"message"`
+	ID         int          `json:"id"`
+	Ratelimits []rateLimits `json:"ratelimits"`
 }
 type messages struct {
 	Msg msg `json:"msg,omitempty"`
