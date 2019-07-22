@@ -119,6 +119,8 @@ type msg struct {
 	HasPairwiseMacs    bool     `json:"has_pairwise_macs"`
 	ChannelMention     string   `json:"channel_mention"`
 }
+
+// Channel holds information about a conversation
 type Channel struct {
 	Name        string `json:"name"`
 	Public      bool   `json:"public,omitempty"`
@@ -163,4 +165,39 @@ type conversation struct {
 	ActiveAt     int     `json:"active_at"`
 	ActiveAtMs   int64   `json:"active_at_ms"`
 	MemberStatus string  `json:"member_status"`
+}
+
+// Keybase holds basic information about the local Keybase executable
+type Keybase struct {
+	Path     string
+	Username string
+	LoggedIn bool
+	Version  string
+}
+
+// Chat holds basic information about a specific conversation
+type Chat struct {
+	keybase *Keybase
+	Channel Channel
+}
+
+type chat interface {
+	Send(message ...string) (ChatAPI, error)
+	Edit(messageID int, message ...string) (ChatAPI, error)
+	React(messageID int, reaction string) (ChatAPI, error)
+	Delete(messageID int) (ChatAPI, error)
+}
+
+type keybase interface {
+	NewChat(channel Channel) Chat
+	Run(handler func(ChatAPI), options ...RunOptions)
+	ChatList() ([]conversation, error)
+	loggedIn() bool
+	username() string
+	version() string
+}
+
+type status struct {
+	Username string `json:"Username"`
+	LoggedIn bool   `json:"LoggedIn"`
 }

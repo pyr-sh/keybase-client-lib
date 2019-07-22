@@ -17,41 +17,6 @@ const (
 	CHAT string = "chat"
 )
 
-// Keybase holds basic information about the local Keybase executable
-type Keybase struct {
-	Path     string
-	Username string
-	LoggedIn bool
-	Version  string
-}
-
-// Chat holds basic information about a specific conversation
-type Chat struct {
-	keybase *Keybase
-	Channel Channel
-}
-
-type chat interface {
-	Send(message ...string) (ChatAPI, error)
-	Edit(messageId int, message ...string) (ChatAPI, error)
-	React(messageId int, reaction string) (ChatAPI, error)
-	Delete(messageId int) (ChatAPI, error)
-}
-
-type keybase interface {
-	NewChat(channel Channel) Chat
-	Run(handler func(ChatAPI), options ...RunOptions)
-	ChatList() ([]conversation, error)
-	loggedIn() bool
-	username() string
-	version() string
-}
-
-type status struct {
-	Username string `json:"Username"`
-	LoggedIn bool   `json:"LoggedIn"`
-}
-
 // NewKeybase returns a new Keybase. Optionally, you can pass a string containing the path to the Keybase executable as the first argument.
 func NewKeybase(path ...string) *Keybase {
 	k := &Keybase{}
@@ -62,7 +27,7 @@ func NewKeybase(path ...string) *Keybase {
 	}
 	k.Version = k.version()
 	k.LoggedIn = k.loggedIn()
-	if k.LoggedIn == true {
+	if k.LoggedIn {
 		k.Username = k.username()
 	}
 	return k
