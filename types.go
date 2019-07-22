@@ -13,6 +13,7 @@ type ChatAPI struct {
 	Conversations []conversation `json:"conversations,omitempty"`
 	Offline       bool           `json:"offline,omitempty"`
 	Result        result         `json:"result,omitempty"`
+	keybase       Keybase        // Some methods will need this, so I'm passing it but keeping it unexported
 }
 type sender struct {
 	UID        string `json:"uid"`
@@ -141,9 +142,11 @@ type params struct {
 	Options options `json:"options"`
 }
 type pagination struct {
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	Num      int    `json:"num"`
+	Next           string `json:"next"`
+	Previous       string `json:"previous"`
+	Num            int    `json:"num"`
+	Last           bool   `json:"last,omitempty"`
+	ForceFirstPage bool   `json:"forceFirstPage,omitempty"`
 }
 type result struct {
 	Messages   []messages `json:"messages,omitempty"`
@@ -186,6 +189,11 @@ type chat interface {
 	Edit(messageID int, message ...string) (ChatAPI, error)
 	React(messageID int, reaction string) (ChatAPI, error)
 	Delete(messageID int) (ChatAPI, error)
+}
+
+type chatAPI interface {
+	Next(count ...int) (*ChatAPI, error)
+	Previous(count ...int) (*ChatAPI, error)
 }
 
 type keybase interface {
