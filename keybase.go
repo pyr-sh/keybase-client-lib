@@ -32,15 +32,15 @@ type Chat struct {
 }
 
 type chat interface {
-	Send(message ...string) (ChatOut, error)
-	Edit(messageId int, message ...string) (ChatOut, error)
-	React(messageId int, reaction string) (ChatOut, error)
-	Delete(messageId int) (ChatOut, error)
+	Send(message ...string) (ChatAPI, error)
+	Edit(messageId int, message ...string) (ChatAPI, error)
+	React(messageId int, reaction string) (ChatAPI, error)
+	Delete(messageId int) (ChatAPI, error)
 }
 
 type keybase interface {
 	NewChat(channel Channel) Chat
-	Run(handler func(ChatIn), options ...RunOptions)
+	Run(handler func(ChatAPI), options ...RunOptions)
 	ChatList() ([]conversation, error)
 	loggedIn() bool
 	username() string
