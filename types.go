@@ -1,5 +1,16 @@
 package keybase
 
+// RunOptions holds a set of options to be passed to Run
+type RunOptions struct {
+	Heartbeat      int64     // Send a heartbeat through the channel every X minutes (0 = off)
+	Local          bool      // Subscribe to local messages
+	HideExploding  bool      // Ignore exploding messages
+	Dev            bool      // Subscribe to dev channel messages
+	Wallet         bool      // Subscribe to wallet events
+	FilterChannel  Channel   // Only subscribe to messages from specified channel
+	FilterChannels []Channel // Only subscribe to messages from specified channels
+}
+
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
 type ChatAPI struct {
 	Type          string         `json:"type,omitempty"`

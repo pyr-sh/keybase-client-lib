@@ -7,17 +7,6 @@ import (
 	"time"
 )
 
-// RunOptions holds a set of options to be passed to Run
-type RunOptions struct {
-	Heartbeat      int64     // Send a heartbeat through the channel every X minutes (0 = off)
-	Local          bool      // Subscribe to local messages
-	HideExploding  bool      // Ignore exploding messages
-	Dev            bool      // Subscribe to dev channel messages
-	Wallet         bool      // Subscribe to wallet events
-	FilterChannel  Channel   // Only subscribe to messages from specified channel
-	FilterChannels []Channel // Only subscribe to messages from specified channels
-}
-
 // Creates a string of a json-encoded channel to pass to keybase chat api-listen --filter-channel
 func createFilterString(channel Channel) string {
 	if channel.Name == "" {
