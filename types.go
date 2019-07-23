@@ -13,18 +13,16 @@ type RunOptions struct {
 
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
 type ChatAPI struct {
-	Type          string         `json:"type,omitempty"`
-	Source        string         `json:"source,omitempty"`
-	Msg           msg            `json:"msg,omitempty"`
-	Method        string         `json:"method,omitempty"`
-	Params        params         `json:"params,omitempty"`
-	Message       string         `json:"message,omitempty"`
-	ID            int            `json:"id,omitempty"`
-	Ratelimits    []rateLimits   `json:"ratelimits,omitempty"`
-	Conversations []conversation `json:"conversations,omitempty"`
-	Offline       bool           `json:"offline,omitempty"`
-	Result        result         `json:"result,omitempty"`
-	keybase       Keybase        // Some methods will need this, so I'm passing it but keeping it unexported
+	Type       string       `json:"type,omitempty"`
+	Source     string       `json:"source,omitempty"`
+	Msg        msg          `json:"msg,omitempty"`
+	Method     string       `json:"method,omitempty"`
+	Params     params       `json:"params,omitempty"`
+	Message    string       `json:"message,omitempty"`
+	ID         int          `json:"id,omitempty"`
+	Ratelimits []rateLimits `json:"ratelimits,omitempty"`
+	Result     result       `json:"result,omitempty"`
+	keybase    Keybase      // Some methods will need this, so I'm passing it but keeping it unexported
 }
 type sender struct {
 	UID        string `json:"uid"`
@@ -160,11 +158,13 @@ type pagination struct {
 	ForceFirstPage bool   `json:"forceFirstPage,omitempty"`
 }
 type result struct {
-	Messages   []messages   `json:"messages,omitempty"`
-	Pagination pagination   `json:"pagination"`
-	Message    string       `json:"message"`
-	ID         int          `json:"id"`
-	Ratelimits []rateLimits `json:"ratelimits"`
+	Messages      []messages     `json:"messages,omitempty"`
+	Pagination    pagination     `json:"pagination"`
+	Message       string         `json:"message"`
+	ID            int            `json:"id"`
+	Ratelimits    []rateLimits   `json:"ratelimits"`
+	Conversations []conversation `json:"conversations,omitempty"`
+	Offline       bool           `json:"offline,omitempty"`
 }
 type messages struct {
 	Msg msg `json:"msg,omitempty"`
