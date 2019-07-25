@@ -103,7 +103,9 @@ func heartbeat(c chan<- ChatAPI, freq time.Duration) {
 // be fetched at a time. However, if count is passed, then that is the number of
 // messages that will be fetched.
 func (c Chat) Read(count ...int) (*ChatAPI, error) {
-	m := ChatAPI{}
+	m := ChatAPI{
+		Params: &params{},
+	}
 	m.Method = "read"
 	m.Params.Options.Channel = c.Channel
 	if len(count) == 0 {
@@ -125,7 +127,9 @@ func (c Chat) Read(count ...int) (*ChatAPI, error) {
 // fetched with Read. However, if count is passed, then that is the number of
 // messages that will be fetched.
 func (c *ChatAPI) Next(count ...int) (*ChatAPI, error) {
-	m := ChatAPI{}
+	m := ChatAPI{
+		Params: &params{},
+	}
 	m.Method = "read"
 	m.Params.Options.Channel = c.Result.Messages[0].Msg.Channel
 	if len(count) == 0 {
@@ -150,7 +154,9 @@ func (c *ChatAPI) Next(count ...int) (*ChatAPI, error) {
 // originally fetched with Read. However, if count is passed, then that is the
 // number of messages that will be fetched.
 func (c *ChatAPI) Previous(count ...int) (*ChatAPI, error) {
-	m := ChatAPI{}
+	m := ChatAPI{
+		Params: &params{},
+	}
 	m.Method = "read"
 	m.Params.Options.Channel = c.Result.Messages[0].Msg.Channel
 	if len(count) == 0 {

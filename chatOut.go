@@ -26,7 +26,9 @@ func chatAPIOut(keybasePath string, c ChatAPI) (ChatAPI, error) {
 
 // Send sends a chat message
 func (c Chat) Send(message ...string) (ChatAPI, error) {
-	m := ChatAPI{}
+	m := ChatAPI{
+		Params: &params{},
+	}
 	m.Method = "send"
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
@@ -40,7 +42,9 @@ func (c Chat) Send(message ...string) (ChatAPI, error) {
 
 // Edit edits a previously sent chat message
 func (c Chat) Edit(messageId int, message ...string) (ChatAPI, error) {
-	m := ChatAPI{}
+	m := ChatAPI{
+		Params: &params{},
+	}
 	m.Method = "edit"
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
@@ -55,7 +59,9 @@ func (c Chat) Edit(messageId int, message ...string) (ChatAPI, error) {
 
 // React sends a reaction to a message.
 func (c Chat) React(messageId int, reaction string) (ChatAPI, error) {
-	m := ChatAPI{}
+	m := ChatAPI{
+		Params: &params{},
+	}
 	m.Method = "reaction"
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = reaction
@@ -70,7 +76,9 @@ func (c Chat) React(messageId int, reaction string) (ChatAPI, error) {
 
 // Delete deletes a chat message
 func (c Chat) Delete(messageId int) (ChatAPI, error) {
-	m := ChatAPI{}
+	m := ChatAPI{
+		Params: &params{},
+	}
 	m.Method = "delete"
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.MessageID = messageId
