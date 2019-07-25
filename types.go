@@ -15,13 +15,13 @@ type RunOptions struct {
 type ChatAPI struct {
 	Type       string       `json:"type,omitempty"`
 	Source     string       `json:"source,omitempty"`
-	Msg        msg          `json:"msg,omitempty"`
+	Msg        *msg         `json:"msg,omitempty"`
 	Method     string       `json:"method,omitempty"`
-	Params     params       `json:"params,omitempty"`
+	Params     *params      `json:"params,omitempty"`
 	Message    string       `json:"message,omitempty"`
 	ID         int          `json:"id,omitempty"`
 	Ratelimits []rateLimits `json:"ratelimits,omitempty"`
-	Result     result       `json:"result,omitempty"`
+	Result     *result      `json:"result,omitempty"`
 	keybase    Keybase      // Some methods will need this, so I'm passing it but keeping it unexported
 }
 type sender struct {
