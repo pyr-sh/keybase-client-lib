@@ -17,7 +17,9 @@ func chatAPIOut(keybasePath string, c ChatAPI) (ChatAPI, error) {
 	}
 
 	var r ChatAPI
-	json.Unmarshal(cmdOut, &r)
+	if err := json.Unmarshal(cmdOut, &r); err != nil {
+		return ChatAPI{}, err
+	}
 
 	return r, nil
 }
