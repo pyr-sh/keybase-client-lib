@@ -135,14 +135,14 @@ func (c Chat) Send(message ...string) (ChatAPI, error) {
 }
 
 // Edit edits a previously sent chat message
-func (c Chat) Edit(messageId int, message ...string) (ChatAPI, error) {
+func (c Chat) Edit(messageID int, message ...string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
 	m.Method = "edit"
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
-	m.Params.Options.MessageID = messageId
+	m.Params.Options.MessageID = messageID
 
 	r, err := chatAPIOut(c.keybase.Path, m)
 	if err != nil {
@@ -152,14 +152,14 @@ func (c Chat) Edit(messageId int, message ...string) (ChatAPI, error) {
 }
 
 // React sends a reaction to a message.
-func (c Chat) React(messageId int, reaction string) (ChatAPI, error) {
+func (c Chat) React(messageID int, reaction string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
 	m.Method = "reaction"
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = reaction
-	m.Params.Options.MessageID = messageId
+	m.Params.Options.MessageID = messageID
 
 	r, err := chatAPIOut(c.keybase.Path, m)
 	if err != nil {
@@ -169,13 +169,13 @@ func (c Chat) React(messageId int, reaction string) (ChatAPI, error) {
 }
 
 // Delete deletes a chat message
-func (c Chat) Delete(messageId int) (ChatAPI, error) {
+func (c Chat) Delete(messageID int) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
 	m.Method = "delete"
 	m.Params.Options.Channel = c.Channel
-	m.Params.Options.MessageID = messageId
+	m.Params.Options.MessageID = messageID
 
 	r, err := chatAPIOut(c.keybase.Path, m)
 	if err != nil {
