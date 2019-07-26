@@ -198,6 +198,73 @@ type Chat struct {
 	Channel Channel
 }
 
+// WalletAPI holds data for sending to API
+type WalletAPI struct {
+	Method string  `json:"method"`
+	Params wParams `json:"params"`
+	Result wResult `json:"result"`
+}
+type wOptions struct {
+	Name string `json:"name"`
+	Txid string `json:"txid"`
+}
+type wParams struct {
+	Options wOptions `json:"options"`
+}
+type asset struct {
+	Type           string `json:"type"`
+	Code           string `json:"code"`
+	Issuer         string `json:"issuer"`
+	VerifiedDomain string `json:"verifiedDomain"`
+	IssuerName     string `json:"issuerName"`
+	Desc           string `json:"desc"`
+	InfoURL        string `json:"infoUrl"`
+}
+type sourceAsset struct {
+	Type           string `json:"type"`
+	Code           string `json:"code"`
+	Issuer         string `json:"issuer"`
+	VerifiedDomain string `json:"verifiedDomain"`
+	IssuerName     string `json:"issuerName"`
+	Desc           string `json:"desc"`
+	InfoURL        string `json:"infoUrl"`
+}
+type balance struct {
+	Asset  asset  `json:"asset"`
+	Amount string `json:"amount"`
+	Limit  string `json:"limit"`
+}
+type exchangeRate struct {
+	Currency string `json:"currency"`
+	Rate     string `json:"rate"`
+}
+type wResult struct {
+	AccountID          string       `json:"accountID"`
+	IsPrimary          bool         `json:"isPrimary"`
+	Name               string       `json:"name"`
+	Balance            []balance    `json:"balance"`
+	ExchangeRate       exchangeRate `json:"exchangeRate"`
+	AccountMode        int          `json:"accountMode"`
+	TxID               string       `json:"txID"`
+	Time               int64        `json:"time"`
+	Status             string       `json:"status"`
+	StatusDetail       string       `json:"statusDetail"`
+	Amount             string       `json:"amount"`
+	Asset              asset        `json:"asset"`
+	DisplayAmount      string       `json:"displayAmount"`
+	DisplayCurrency    string       `json:"displayCurrency"`
+	SourceAmountMax    string       `json:"sourceAmountMax"`
+	SourceAmountActual string       `json:"sourceAmountActual"`
+	SourceAsset        sourceAsset  `json:"sourceAsset"`
+	FromStellar        string       `json:"fromStellar"`
+	ToStellar          string       `json:"toStellar"`
+	FromUsername       string       `json:"fromUsername"`
+	ToUsername         string       `json:"toUsername"`
+	Note               string       `json:"note"`
+	NoteErr            string       `json:"noteErr"`
+	Unread             bool         `json:"unread"`
+}
+
 type chat interface {
 	Send(message ...string) (ChatAPI, error)
 	Edit(messageID int, message ...string) (ChatAPI, error)
