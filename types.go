@@ -13,16 +13,18 @@ type RunOptions struct {
 
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
 type ChatAPI struct {
-	Type       string       `json:"type,omitempty"`
-	Source     string       `json:"source,omitempty"`
-	Msg        *msg         `json:"msg,omitempty"`
-	Method     string       `json:"method,omitempty"`
-	Params     *params      `json:"params,omitempty"`
-	Message    string       `json:"message,omitempty"`
-	ID         int          `json:"id,omitempty"`
-	Ratelimits []rateLimits `json:"ratelimits,omitempty"`
-	Result     *result      `json:"result,omitempty"`
-	keybase    Keybase      // Some methods will need this, so I'm passing it but keeping it unexported
+	Type         string        `json:"type,omitempty"`
+	Source       string        `json:"source,omitempty"`
+	Msg          *msg          `json:"msg,omitempty"`
+	Method       string        `json:"method,omitempty"`
+	Params       *params       `json:"params,omitempty"`
+	Message      string        `json:"message,omitempty"`
+	ID           int           `json:"id,omitempty"`
+	Ratelimits   []rateLimits  `json:"ratelimits,omitempty"`
+	Notification *notification `json:"notification"`
+	Result       *result       `json:"result,omitempty"`
+	Pagination   *pagination   `json:"pagination"`
+	keybase      Keybase       // Some methods will need this, so I'm passing it but keeping it unexported
 }
 type sender struct {
 	UID        string `json:"uid"`
@@ -108,15 +110,17 @@ type text struct {
 	TeamMentions []teamMentions `json:"teamMentions"`
 }
 type content struct {
-	Type     string   `json:"type"`
-	Delete   delete   `json:"delete"`
-	Edit     edit     `json:"edit"`
-	Reaction reaction `json:"reaction"`
-	System   system   `json:"system"`
-	Text     text     `json:"text"`
+	Type        string      `json:"type"`
+	Delete      delete      `json:"delete"`
+	Edit        edit        `json:"edit"`
+	Reaction    reaction    `json:"reaction"`
+	System      system      `json:"system"`
+	Text        text        `json:"text"`
+	SendPayment SendPayment `json:"send_payment"`
 }
 type msg struct {
 	ID                 int      `json:"id"`
+	ConversationID     string   `json:"conversation_id"`
 	Channel            Channel  `json:"channel"`
 	Sender             sender   `json:"sender"`
 	SentAt             int      `json:"sent_at"`
@@ -128,6 +132,55 @@ type msg struct {
 	Etime              int64    `json:"etime"`
 	HasPairwiseMacs    bool     `json:"has_pairwise_macs"`
 	ChannelMention     string   `json:"channel_mention"`
+}
+type summary struct {
+	ID                  string      `json:"id"`
+	TxID                string      `json:"txID"`
+	Time                int64       `json:"time"`
+	StatusSimplified    int         `json:"statusSimplified"`
+	StatusDescription   string      `json:"statusDescription"`
+	StatusDetail        string      `json:"statusDetail"`
+	ShowCancel          bool        `json:"showCancel"`
+	AmountDescription   string      `json:"amountDescription"`
+	Delta               int         `json:"delta"`
+	Worth               string      `json:"worth"`
+	WorthAtSendTime     string      `json:"worthAtSendTime"`
+	IssuerDescription   string      `json:"issuerDescription"`
+	FromType            int         `json:"fromType"`
+	ToType              int         `json:"toType"`
+	AssetCode           string      `json:"assetCode"`
+	FromAccountID       string      `json:"fromAccountID"`
+	FromAccountName     string      `json:"fromAccountName"`
+	FromUsername        string      `json:"fromUsername"`
+	ToAccountID         string      `json:"toAccountID"`
+	ToAccountName       string      `json:"toAccountName"`
+	ToUsername          string      `json:"toUsername"`
+	ToAssertion         string      `json:"toAssertion"`
+	OriginalToAssertion string      `json:"originalToAssertion"`
+	Note                string      `json:"note"`
+	NoteErr             string      `json:"noteErr"`
+	SourceAmountMax     string      `json:"sourceAmountMax"`
+	SourceAmountActual  string      `json:"sourceAmountActual"`
+	SourceAsset         sourceAsset `json:"sourceAsset"`
+	SourceConvRate      string      `json:"sourceConvRate"`
+	IsAdvanced          bool        `json:"isAdvanced"`
+	SummaryAdvanced     string      `json:"summaryAdvanced"`
+	Operations          interface{} `json:"operations"`
+	Unread              bool        `json:"unread"`
+	BatchID             string      `json:"batchID"`
+	FromAirdrop         bool        `json:"fromAirdrop"`
+	IsInflation         bool        `json:"isInflation"`
+}
+type details struct {
+	PublicNote            string      `json:"publicNote"`
+	PublicNoteType        string      `json:"publicNoteType"`
+	ExternalTxURL         string      `json:"externalTxURL"`
+	FeeChargedDescription string      `json:"feeChargedDescription"`
+	PathIntermediate      interface{} `json:"pathIntermediate"`
+}
+type notification struct {
+	Summary summary `json:"summary"`
+	Details details `json:"details"`
 }
 
 // Channel holds information about a conversation
@@ -183,6 +236,9 @@ type conversation struct {
 	ActiveAtMs   int64   `json:"active_at_ms"`
 	MemberStatus string  `json:"member_status"`
 }
+type SendPayment struct {
+	PaymentID string `json:"paymentID"`
+}
 
 // Keybase holds basic information about the local Keybase executable
 type Keybase struct {
@@ -228,6 +284,7 @@ type sourceAsset struct {
 	IssuerName     string `json:"issuerName"`
 	Desc           string `json:"desc"`
 	InfoURL        string `json:"infoUrl"`
+	InfoURLText    string `json:"infoUrlText"`
 }
 type balance struct {
 	Asset  asset  `json:"asset"`
