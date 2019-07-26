@@ -256,9 +256,9 @@ type Chat struct {
 
 // WalletAPI holds data for sending to API
 type WalletAPI struct {
-	Method string  `json:"method"`
-	Params wParams `json:"params"`
-	Result wResult `json:"result"`
+	Method string   `json:"method,omitempty"`
+	Params *wParams `json:"params,omitempty"`
+	Result *wResult `json:"result,omitempty"`
 }
 type wOptions struct {
 	Name string `json:"name"`
