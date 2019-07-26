@@ -240,20 +240,6 @@ type SendPayment struct {
 	PaymentID string `json:"paymentID"`
 }
 
-// Keybase holds basic information about the local Keybase executable
-type Keybase struct {
-	Path     string
-	Username string
-	LoggedIn bool
-	Version  string
-}
-
-// Chat holds basic information about a specific conversation
-type Chat struct {
-	keybase *Keybase
-	Channel Channel
-}
-
 // WalletAPI holds data for sending to API
 type WalletAPI struct {
 	Method string   `json:"method,omitempty"`
@@ -322,6 +308,37 @@ type wResult struct {
 	Unread             bool         `json:"unread"`
 }
 
+// TeamAPI holds information sent and received to/from the team api
+type TeamAPI struct {
+	Method string   `json:"method"`
+	Params *tParams `json:"params"`
+	Result *tResult `json:"result"`
+}
+type tOptions struct {
+	Team string `json:"team"`
+}
+type tParams struct {
+	Options tOptions `json:"options"`
+}
+type tResult struct {
+	ChatSent     bool `json:"chatSent"`
+	CreatorAdded bool `json:"creatorAdded"`
+}
+
+// Keybase holds basic information about the local Keybase executable
+type Keybase struct {
+	Path     string
+	Username string
+	LoggedIn bool
+	Version  string
+}
+
+// Chat holds basic information about a specific conversation
+type Chat struct {
+	keybase *Keybase
+	Channel Channel
+}
+
 type chat interface {
 	Send(message ...string) (ChatAPI, error)
 	Edit(messageID int, message ...string) (ChatAPI, error)
@@ -334,7 +351,18 @@ type chatAPI interface {
 	Previous(count ...int) (*ChatAPI, error)
 }
 
+// Team holds basic information about a team
+type Team struct {
+	keybase *Keybase
+	Name    string
+}
+
+type team interface {
+	CreateSubteam(name string) (TeamAPI, error)
+}
+
 type keybase interface {
+	NewTeam(name string) Team
 	NewChat(channel Channel) Chat
 	Run(handler func(ChatAPI), options ...RunOptions)
 	ChatList() ([]conversation, error)

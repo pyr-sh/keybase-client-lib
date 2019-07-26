@@ -41,6 +41,14 @@ func (k *Keybase) NewChat(channel Channel) Chat {
 	}
 }
 
+// NewTeam returns a new Team instance
+func (k *Keybase) NewTeam(name string) Team {
+	return Team{
+		keybase: k,
+		Name:    name,
+	}
+}
+
 // username returns the username of the currently logged-in Keybase user.
 func (k *Keybase) username() string {
 	cmd := exec.Command(k.Path, "status", "-j")
