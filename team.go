@@ -33,3 +33,15 @@ func (t Team) CreateSubteam(name string) (TeamAPI, error) {
 	r, err := teamAPIOut(t.keybase.Path, m)
 	return r, err
 }
+
+// CreateTeam creates a new team
+func (k *Keybase) CreateTeam(name string) (TeamAPI, error) {
+	m := TeamAPI{
+		Params: &tParams{},
+	}
+	m.Method = "create-team"
+	m.Params.Options.Team = name
+
+	r, err := teamAPIOut(k.Path, m)
+	return r, err
+}

@@ -314,8 +314,18 @@ type TeamAPI struct {
 	Params *tParams `json:"params"`
 	Result *tResult `json:"result"`
 }
+type emails struct {
+	Email string `json:"email"`
+	Role  string `json:"role"`
+}
+type usernames struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+}
 type tOptions struct {
-	Team string `json:"team"`
+	Team      string      `json:"team"`
+	Emails    []emails    `json:"emails"`
+	Usernames []usernames `json:"usernames"`
 }
 type tParams struct {
 	Options tOptions `json:"options"`
@@ -340,10 +350,10 @@ type Chat struct {
 }
 
 type chat interface {
-	Send(message ...string) (ChatAPI, error)
+	Delete(messageID int) (ChatAPI, error)
 	Edit(messageID int, message ...string) (ChatAPI, error)
 	React(messageID int, reaction string) (ChatAPI, error)
-	Delete(messageID int) (ChatAPI, error)
+	Send(message ...string) (ChatAPI, error)
 }
 
 type chatAPI interface {
@@ -362,10 +372,11 @@ type team interface {
 }
 
 type keybase interface {
-	NewTeam(name string) Team
-	NewChat(channel Channel) Chat
-	Run(handler func(ChatAPI), options ...RunOptions)
 	ChatList() ([]conversation, error)
+	CreateTeam(name string) (TeamAPI, error)
+	NewChat(channel Channel) Chat
+	NewTeam(name string) Team
+	Run(handler func(ChatAPI), options ...RunOptions)
 	loggedIn() bool
 	username() string
 	version() string
