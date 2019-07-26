@@ -22,6 +22,24 @@ func teamAPIOut(keybasePath string, w TeamAPI) (TeamAPI, error) {
 	return r, nil
 }
 
+// AddUser adds members to a team by username
+func (t Team) AddUser(user, role string) (TeamAPI, error) {
+	m := TeamAPI{
+		Params: &tParams{},
+	}
+	m.Method = "add-members"
+	m.Params.Options.Team = t.Name
+	m.Params.Options.Usernames = []usernames{
+		{
+			Username: user,
+			Role:     role,
+		},
+	}
+
+	r, err := teamAPIOut(t.keybase.Path, m)
+	return r, err
+}
+
 // CreateSubteam creates a subteam
 func (t Team) CreateSubteam(name string) (TeamAPI, error) {
 	m := TeamAPI{

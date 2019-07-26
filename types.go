@@ -310,9 +310,10 @@ type wResult struct {
 
 // TeamAPI holds information sent and received to/from the team api
 type TeamAPI struct {
-	Method string   `json:"method"`
-	Params *tParams `json:"params"`
-	Result *tResult `json:"result"`
+	Method      string    `json:"method,omitempty"`
+	Params      *tParams  `json:"params,omitempty"`
+	Result      *tResult  `json:"result,omitempty"`
+	OtherResult []tResult `json:"result,omitempty"`
 }
 type emails struct {
 	Email string `json:"email"`
@@ -321,6 +322,10 @@ type emails struct {
 type usernames struct {
 	Username string `json:"username"`
 	Role     string `json:"role"`
+}
+type user struct {
+	UID      string `json:"uid"`
+	Username string `json:"username"`
 }
 type tOptions struct {
 	Team      string      `json:"team"`
@@ -333,6 +338,10 @@ type tParams struct {
 type tResult struct {
 	ChatSent     bool `json:"chatSent"`
 	CreatorAdded bool `json:"creatorAdded"`
+	Invited      bool `json:"invited"`
+	User         user `json:"user"`
+	EmailSent    bool `json:"emailSent"`
+	ChatSending  bool `json:"chatSending"`
 }
 
 // Keybase holds basic information about the local Keybase executable
