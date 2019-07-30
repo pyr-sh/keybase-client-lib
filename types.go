@@ -429,7 +429,11 @@ type Team struct {
 }
 
 type team interface {
+	AddAdmins(users ...string) (TeamAPI, error)
+	AddOwners(users ...string) (TeamAPI, error)
+	AddReaders(users ...string) (TeamAPI, error)
 	AddUser(user, role string) (TeamAPI, error)
+	AddWriters(users ...string) (TeamAPI, error)
 	CreateSubteam(name string) (TeamAPI, error)
 	MemberList() (TeamAPI, error)
 }
