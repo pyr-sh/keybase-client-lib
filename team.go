@@ -37,6 +37,21 @@ func (t Team) AddUser(user, role string) (TeamAPI, error) {
 	}
 
 	r, err := teamAPIOut(t.keybase.Path, m)
+	if err == nil {
+		r, err = t.MemberList()
+	}
+	return r, err
+}
+
+// MemberList returns a list of a team's members
+func (t Team) MemberList() (TeamAPI, error) {
+	m := TeamAPI{
+		Params: &tParams{},
+	}
+	m.Method = "list-team-memberships"
+	m.Params.Options.Team = t.Name
+
+	r, err := teamAPIOut(t.keybase.Path, m)
 	return r, err
 }
 

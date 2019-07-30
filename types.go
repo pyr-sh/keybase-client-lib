@@ -310,10 +310,9 @@ type wResult struct {
 
 // TeamAPI holds information sent and received to/from the team api
 type TeamAPI struct {
-	Method      string    `json:"method,omitempty"`
-	Params      *tParams  `json:"params,omitempty"`
-	Result      *tResult  `json:"result,omitempty"`
-	OtherResult []tResult `json:"result,omitempty"`
+	Method string   `json:"method,omitempty"`
+	Params *tParams `json:"params,omitempty"`
+	Result *tResult `json:"result,omitempty"`
 }
 type emails struct {
 	Email string `json:"email"`
@@ -327,6 +326,47 @@ type user struct {
 	UID      string `json:"uid"`
 	Username string `json:"username"`
 }
+type uv struct {
+	UID         string `json:"uid"`
+	EldestSeqno int    `json:"eldestSeqno"`
+}
+type owners struct {
+	Uv       uv     `json:"uv"`
+	Username string `json:"username"`
+	FullName string `json:"fullName"`
+	NeedsPUK bool   `json:"needsPUK"`
+	Status   int    `json:"status"`
+}
+type admins struct {
+	Uv       uv     `json:"uv"`
+	Username string `json:"username"`
+	FullName string `json:"fullName"`
+	NeedsPUK bool   `json:"needsPUK"`
+	Status   int    `json:"status"`
+}
+type readers struct {
+	Uv       uv     `json:"uv"`
+	Username string `json:"username"`
+	FullName string `json:"fullName"`
+	NeedsPUK bool   `json:"needsPUK"`
+	Status   int    `json:"status"`
+}
+type members struct {
+	Owners  []owners      `json:"owners"`
+	Admins  []admins      `json:"admins"`
+	Writers []interface{} `json:"writers"`
+	Readers []readers     `json:"readers"`
+}
+type annotatedActiveInvites struct {
+}
+type settings struct {
+	Open   bool `json:"open"`
+	JoinAs int  `json:"joinAs"`
+}
+type showcase struct {
+	IsShowcased       bool `json:"is_showcased"`
+	AnyMemberShowcase bool `json:"any_member_showcase"`
+}
 type tOptions struct {
 	Team      string      `json:"team"`
 	Emails    []emails    `json:"emails"`
@@ -336,12 +376,17 @@ type tParams struct {
 	Options tOptions `json:"options"`
 }
 type tResult struct {
-	ChatSent     bool `json:"chatSent"`
-	CreatorAdded bool `json:"creatorAdded"`
-	Invited      bool `json:"invited"`
-	User         user `json:"user"`
-	EmailSent    bool `json:"emailSent"`
-	ChatSending  bool `json:"chatSending"`
+	ChatSent               bool                   `json:"chatSent"`
+	CreatorAdded           bool                   `json:"creatorAdded"`
+	Invited                bool                   `json:"invited"`
+	User                   user                   `json:"user"`
+	EmailSent              bool                   `json:"emailSent"`
+	ChatSending            bool                   `json:"chatSending"`
+	Members                members                `json:"members"`
+	KeyGeneration          int                    `json:"keyGeneration"`
+	AnnotatedActiveInvites annotatedActiveInvites `json:"annotatedActiveInvites"`
+	Settings               settings               `json:"settings"`
+	Showcase               showcase               `json:"showcase"`
 }
 
 // Keybase holds basic information about the local Keybase executable
@@ -377,7 +422,9 @@ type Team struct {
 }
 
 type team interface {
+	AddUser(user, role string) (TeamAPI, error)
 	CreateSubteam(name string) (TeamAPI, error)
+	MemberList() (TeamAPI, error)
 }
 
 type keybase interface {
