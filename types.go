@@ -24,6 +24,7 @@ type ChatAPI struct {
 	Notification *notification `json:"notification"`
 	Result       *result       `json:"result,omitempty"`
 	Pagination   *pagination   `json:"pagination"`
+	Error        *Error        `json:"error"`
 	keybase      Keybase       // Some methods will need this, so I'm passing it but keeping it unexported
 }
 type sender struct {
@@ -245,6 +246,7 @@ type WalletAPI struct {
 	Method string   `json:"method,omitempty"`
 	Params *wParams `json:"params,omitempty"`
 	Result *wResult `json:"result,omitempty"`
+	Error  *Error   `json:"error"`
 }
 type wOptions struct {
 	Name string `json:"name"`
@@ -313,6 +315,7 @@ type TeamAPI struct {
 	Method string   `json:"method,omitempty"`
 	Params *tParams `json:"params,omitempty"`
 	Result *tResult `json:"result,omitempty"`
+	Error  *Error   `json:"error"`
 }
 type emails struct {
 	Email string `json:"email"`
@@ -374,6 +377,10 @@ type tOptions struct {
 }
 type tParams struct {
 	Options tOptions `json:"options"`
+}
+type Error struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
 }
 type tResult struct {
 	ChatSent               bool                   `json:"chatSent"`
