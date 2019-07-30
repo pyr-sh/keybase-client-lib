@@ -381,7 +381,7 @@ type team interface {
 }
 
 type keybase interface {
-	ChatList() ([]conversation, error)
+	ChatList() (ChatAPI, error)
 	CreateTeam(name string) (TeamAPI, error)
 	NewChat(channel Channel) Chat
 	NewTeam(name string) Team
