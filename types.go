@@ -374,6 +374,7 @@ type tOptions struct {
 	Team      string      `json:"team"`
 	Emails    []emails    `json:"emails"`
 	Usernames []usernames `json:"usernames"`
+	Username  string      `json:"username"`
 }
 type tParams struct {
 	Options tOptions `json:"options"`

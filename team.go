@@ -43,6 +43,19 @@ func (t Team) AddUser(user, role string) (TeamAPI, error) {
 	return r, err
 }
 
+// RemoveUser removes a member from a team
+func (t Team) RemoveUser(user string) (TeamAPI, error) {
+	m := TeamAPI{
+		Params: &tParams{},
+	}
+	m.Method = "remove-member"
+	m.Params.Options.Team = t.Name
+	m.Params.Options.Username = user
+
+	r, err := teamAPIOut(t.keybase.Path, m)
+	return r, err
+}
+
 // AddReaders adds members to a team by username, and sets their roles to Reader
 func (t Team) AddReaders(users ...string) (TeamAPI, error) {
 	m := TeamAPI{
