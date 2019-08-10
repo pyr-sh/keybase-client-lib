@@ -2,6 +2,7 @@ package keybase
 
 import (
 	"encoding/json"
+	"errors"
 	"os/exec"
 )
 
@@ -17,7 +18,9 @@ func walletAPIOut(keybasePath string, w WalletAPI) (WalletAPI, error) {
 
 	var r WalletAPI
 	json.Unmarshal(cmdOut, &r)
-
+	if r.Error != nil {
+		return WalletAPI{}, errors.New(r.Error.Message)
+	}
 	return r, nil
 }
 
@@ -42,5 +45,8 @@ func (k *Keybase) StellarAddress(user string) (string, error) {
 	m.Params.Options.Name = user
 
 	r, err := walletAPIOut(k.Path, m)
+	if err != nil {
+		return "", err
+	}
 	return r.Result.AccountID, err
 }
