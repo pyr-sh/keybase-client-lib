@@ -2,6 +2,7 @@ package keybase
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 )
@@ -17,7 +18,12 @@ func teamAPIOut(keybasePath string, w TeamAPI) (TeamAPI, error) {
 	}
 
 	var r TeamAPI
-	json.Unmarshal(cmdOut, &r)
+	if err := json.Unmarshal(cmdOut, &r); err != nil {
+		return TeamAPI{}, err
+	}
+	if r.Error != nil {
+		return TeamAPI{}, errors.New(r.Error.Message)
+	}
 
 	return r, nil
 }

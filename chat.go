@@ -3,6 +3,7 @@ package keybase
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"os/exec"
 	"strings"
 	"time"
@@ -113,6 +114,9 @@ func chatAPIOut(keybasePath string, c ChatAPI) (ChatAPI, error) {
 	var r ChatAPI
 	if err := json.Unmarshal(cmdOut, &r); err != nil {
 		return ChatAPI{}, err
+	}
+	if r.Error != nil {
+		return ChatAPI{}, errors.New(r.Error.Message)
 	}
 
 	return r, nil
