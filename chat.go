@@ -273,3 +273,35 @@ func (c *ChatAPI) Previous(count ...int) (*ChatAPI, error) {
 	c.keybase = k
 	return c, nil
 }
+
+func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Method = "attach"
+	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Filename = filepath
+	m.Params.Options.Title = title
+
+	r, err := chatAPIOut(c.keybase.Path, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}
+
+func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Method = "download"
+	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Output = filepath
+	m.Params.Options.MessageID = messageID
+
+	r, err := chatAPIOut(c.keybase.Path, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}

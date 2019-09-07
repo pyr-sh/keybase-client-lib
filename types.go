@@ -200,6 +200,9 @@ type options struct {
 	MessageID  int        `json:"message_id"`
 	Message    message    `json:"message"`
 	Pagination pagination `json:"pagination"`
+	Filename   string     `json:"filename,omitempty"`
+	Title      string     `json:"title,omitempty"`
+	Output     string     `json:"output,omitempty"`
 }
 type params struct {
 	Options options `json:"options"`
@@ -416,6 +419,8 @@ type chat interface {
 	Edit(messageID int, message ...string) (ChatAPI, error)
 	React(messageID int, reaction string) (ChatAPI, error)
 	Send(message ...string) (ChatAPI, error)
+	Upload(title string, filepath string) (ChatAPI, error)
+	Download(messageID int, filepath string) (ChatAPI, error)
 }
 
 type chatAPI interface {
