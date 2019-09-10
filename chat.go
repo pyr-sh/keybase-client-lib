@@ -305,3 +305,21 @@ func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
 	}
 	return r, nil
 }
+
+func (c Chat) LoadFlip(messageID int, conversationID string, flipConversationID string, gameID string) (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Method = "loadflip"
+	m.Params.Options.Channel = c.Channel
+	m.Params.Options.MsgID = messageID
+	m.Params.Options.ConversationID = conversationID
+	m.Params.Options.FlipConversationID = flipConversationID
+	m.Params.Options.GameID = gameID
+
+	r, err := chatAPIOut(c.keybase.Path, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}

@@ -110,6 +110,13 @@ type text struct {
 	UserMentions []userMentions `json:"userMentions"`
 	TeamMentions []teamMentions `json:"teamMentions"`
 }
+type flip struct {
+	Text         string      `json:"text"`
+	GameID       string      `json:"game_id"`
+	FlipConvID   string      `json:"flip_conv_id"`
+	UserMentions interface{} `json:"user_mentions"`
+	TeamMentions interface{} `json:"team_mentions"`
+}
 type content struct {
 	Type        string      `json:"type"`
 	Delete      delete      `json:"delete"`
@@ -118,6 +125,7 @@ type content struct {
 	System      system      `json:"system"`
 	Text        text        `json:"text"`
 	SendPayment SendPayment `json:"send_payment"`
+	Flip        flip        `json:"flip"`
 }
 type msg struct {
 	ID                 int      `json:"id"`
@@ -196,13 +204,17 @@ type message struct {
 	Body string `json:"body"`
 }
 type options struct {
-	Channel    Channel    `json:"channel"`
-	MessageID  int        `json:"message_id"`
-	Message    message    `json:"message"`
-	Pagination pagination `json:"pagination"`
-	Filename   string     `json:"filename,omitempty"`
-	Title      string     `json:"title,omitempty"`
-	Output     string     `json:"output,omitempty"`
+	Channel            Channel    `json:"channel"`
+	MessageID          int        `json:"message_id"`
+	Message            message    `json:"message"`
+	Pagination         pagination `json:"pagination"`
+	Filename           string     `json:"filename,omitempty"`
+	Title              string     `json:"title,omitempty"`
+	Output             string     `json:"output,omitempty"`
+	ConversationID     string     `json:"conversation_id"`
+	FlipConversationID string     `json:"flip_conversation_id"`
+	MsgID              int        `json:"msg_id"`
+	GameID             string     `json:"game_id"`
 }
 type params struct {
 	Options options `json:"options"`
@@ -214,14 +226,47 @@ type pagination struct {
 	Last           bool   `json:"last,omitempty"`
 	ForceFirstPage bool   `json:"forceFirstPage,omitempty"`
 }
+type participants struct {
+	UID        string `json:"uid"`
+	DeviceID   string `json:"deviceID"`
+	Username   string `json:"username"`
+	DeviceName string `json:"deviceName"`
+	Commitment string `json:"commitment"`
+	Reveal     string `json:"reveal"`
+}
+type dupreg struct {
+	User   string `json:"user"`
+	Device string `json:"device"`
+}
+type errorInfo struct {
+	Typ    int    `json:"typ"`
+	Dupreg dupreg `json:"dupreg"`
+}
+type resultInfo struct {
+	Typ  int  `json:"typ"`
+	Coin bool `json:"coin"`
+}
+type flipStatus struct {
+	GameID                  string         `json:"gameID"`
+	Phase                   int            `json:"phase"`
+	ProgressText            string         `json:"progressText"`
+	ResultText              string         `json:"resultText"`
+	CommitmentVisualization string         `json:"commitmentVisualization"`
+	RevealVisualization     string         `json:"revealVisualization"`
+	Participants            []participants `json:"participants"`
+	ResultInfo              resultInfo     `json:"resultInfo"`
+	ErrorInfo               errorInfo      `json:"errorInfo"`
+}
 type result struct {
-	Messages      []messages     `json:"messages,omitempty"`
-	Pagination    pagination     `json:"pagination"`
-	Message       string         `json:"message"`
-	ID            int            `json:"id"`
-	Ratelimits    []rateLimits   `json:"ratelimits"`
-	Conversations []conversation `json:"conversations,omitempty"`
-	Offline       bool           `json:"offline,omitempty"`
+	Messages         []messages     `json:"messages,omitempty"`
+	Pagination       pagination     `json:"pagination"`
+	Message          string         `json:"message"`
+	ID               int            `json:"id"`
+	Ratelimits       []rateLimits   `json:"ratelimits"`
+	Conversations    []conversation `json:"conversations,omitempty"`
+	Offline          bool           `json:"offline,omitempty"`
+	Status           flipStatus     `json:"status,omitempty"`
+	IdentifyFailures interface{}    `json:"identifyFailures,omitempty"`
 }
 type messages struct {
 	Msg msg `json:"msg,omitempty"`
@@ -421,6 +466,7 @@ type chat interface {
 	Send(message ...string) (ChatAPI, error)
 	Upload(title string, filepath string) (ChatAPI, error)
 	Download(messageID int, filepath string) (ChatAPI, error)
+	LoadFlip(messageID int, conversationID string, flipConversationID string, gameID string) (ChatAPI, error)
 }
 
 type chatAPI interface {
