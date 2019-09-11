@@ -254,8 +254,8 @@ type flipStatus struct {
 	CommitmentVisualization string         `json:"commitmentVisualization"`
 	RevealVisualization     string         `json:"revealVisualization"`
 	Participants            []participants `json:"participants"`
-	ResultInfo              resultInfo     `json:"resultInfo"`
-	ErrorInfo               errorInfo      `json:"errorInfo"`
+	ResultInfo              *resultInfo    `json:"resultInfo"`
+	ErrorInfo               *errorInfo     `json:"errorInfo"`
 }
 type result struct {
 	Messages         []messages     `json:"messages,omitempty"`
