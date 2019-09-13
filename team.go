@@ -4,15 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os/exec"
 )
 
 // teamAPIOut sends JSON requests to the team API and returns its response.
-func teamAPIOut(keybasePath string, w TeamAPI) (TeamAPI, error) {
-	jsonBytes, _ := json.Marshal(w)
+func teamAPIOut(k *Keybase, t TeamAPI) (TeamAPI, error) {
+	jsonBytes, _ := json.Marshal(t)
 
-	cmd := exec.Command(keybasePath, "team", "api", "-m", string(jsonBytes))
-	cmdOut, err := cmd.Output()
+	cmdOut, err := k.Exec("team", "api", "-m", string(jsonBytes))
 	if err != nil {
 		return TeamAPI{}, err
 	}
@@ -42,7 +40,7 @@ func (t Team) AddUser(user, role string) (TeamAPI, error) {
 		},
 	}
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	if err == nil && r.Error == nil {
 		r, err = t.MemberList()
 	}
@@ -58,7 +56,7 @@ func (t Team) RemoveUser(user string) (TeamAPI, error) {
 	m.Params.Options.Team = t.Name
 	m.Params.Options.Username = user
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	return r, err
 }
 
@@ -75,7 +73,7 @@ func (t Team) AddReaders(users ...string) (TeamAPI, error) {
 	}
 	m.Params.Options.Usernames = addUsers
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	if err == nil && r.Error == nil {
 		r, err = t.MemberList()
 	}
@@ -95,7 +93,7 @@ func (t Team) AddWriters(users ...string) (TeamAPI, error) {
 	}
 	m.Params.Options.Usernames = addUsers
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	if err == nil && r.Error == nil {
 		r, err = t.MemberList()
 	}
@@ -115,7 +113,7 @@ func (t Team) AddAdmins(users ...string) (TeamAPI, error) {
 	}
 	m.Params.Options.Usernames = addUsers
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	if err == nil && r.Error == nil {
 		r, err = t.MemberList()
 	}
@@ -135,7 +133,7 @@ func (t Team) AddOwners(users ...string) (TeamAPI, error) {
 	}
 	m.Params.Options.Usernames = addUsers
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	if err == nil && r.Error == nil {
 		r, err = t.MemberList()
 	}
@@ -150,7 +148,7 @@ func (t Team) MemberList() (TeamAPI, error) {
 	m.Method = "list-team-memberships"
 	m.Params.Options.Team = t.Name
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	return r, err
 }
 
@@ -162,7 +160,7 @@ func (t Team) CreateSubteam(name string) (TeamAPI, error) {
 	m.Method = "create-team"
 	m.Params.Options.Team = fmt.Sprintf("%s.%s", t.Name, name)
 
-	r, err := teamAPIOut(t.keybase.Path, m)
+	r, err := teamAPIOut(t.keybase, m)
 	return r, err
 }
 
@@ -174,6 +172,6 @@ func (k *Keybase) CreateTeam(name string) (TeamAPI, error) {
 	m.Method = "create-team"
 	m.Params.Options.Team = name
 
-	r, err := teamAPIOut(k.Path, m)
+	r, err := teamAPIOut(k, m)
 	return r, err
 }
