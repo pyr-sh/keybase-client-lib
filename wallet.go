@@ -3,15 +3,13 @@ package keybase
 import (
 	"encoding/json"
 	"errors"
-	"os/exec"
 )
 
 // walletAPIOut sends JSON requests to the wallet API and returns its response.
-func walletAPIOut(keybasePath string, w WalletAPI) (WalletAPI, error) {
+func walletAPIOut(k *Keybase, w WalletAPI) (WalletAPI, error) {
 	jsonBytes, _ := json.Marshal(w)
 
-	cmd := exec.Command(keybasePath, "wallet", "api", "-m", string(jsonBytes))
-	cmdOut, err := cmd.Output()
+	cmdOut, err := k.Exec("wallet", "api", "-m", string(jsonBytes))
 	if err != nil {
 		return WalletAPI{}, err
 	}
@@ -32,7 +30,7 @@ func (k *Keybase) TxDetail(txid string) (WalletAPI, error) {
 	m.Method = "details"
 	m.Params.Options.Txid = txid
 
-	r, err := walletAPIOut(k.Path, m)
+	r, err := walletAPIOut(k, m)
 	return r, err
 }
 
