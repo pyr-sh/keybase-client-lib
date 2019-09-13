@@ -3,6 +3,7 @@ package keybase
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 // walletAPIOut sends JSON requests to the wallet API and returns its response.
@@ -42,9 +43,19 @@ func (k *Keybase) StellarAddress(user string) (string, error) {
 	m.Method = "lookup"
 	m.Params.Options.Name = user
 
-	r, err := walletAPIOut(k.Path, m)
+	r, err := walletAPIOut(k, m)
 	if err != nil {
 		return "", err
 	}
 	return r.Result.AccountID, err
+}
+
+// RequestPayment sends a request for payment to a user
+func (k *Keybase) RequestPayment(user string, amount float64, memo ...string) error {
+	if len(memo) > 0 {
+		_, err := k.Exec("wallet", "request", user, fmt.Sprintf("%f", amount), "-m", memo[0])
+		return err
+	}
+	_, err := k.Exec("wallet", "request", user, fmt.Sprintf("%f", amount))
+	return err
 }

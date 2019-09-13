@@ -499,6 +499,7 @@ type keybase interface {
 	loggedIn() bool
 	username() string
 	version() string
+	RequestPayment(user string, amount float64, memo ...string)
 }
 
 type status struct {
