@@ -33,6 +33,15 @@ func NewKeybase(path ...string) *Keybase {
 	return k
 }
 
+// Exec executes the given Keybase command
+func (k *Keybase) Exec(command ...string) ([]byte, error) {
+	out, err := exec.Command(k.Path, command...).Output()
+	if err != nil {
+		return []byte{}, err
+	}
+	return out, nil
+}
+
 // NewChat returns a new Chat instance
 func (k *Keybase) NewChat(channel Channel) Chat {
 	return Chat{
