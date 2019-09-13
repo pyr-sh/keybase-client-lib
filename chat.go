@@ -102,11 +102,10 @@ func heartbeat(c chan<- ChatAPI, freq time.Duration) {
 }
 
 // chatAPIOut sends JSON requests to the chat API and returns its response.
-func chatAPIOut(keybasePath string, c ChatAPI) (ChatAPI, error) {
+func chatAPIOut(k *Keybase, c ChatAPI) (ChatAPI, error) {
 	jsonBytes, _ := json.Marshal(c)
 
-	cmd := exec.Command(keybasePath, "chat", "api", "-m", string(jsonBytes))
-	cmdOut, err := cmd.Output()
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
 	if err != nil {
 		return ChatAPI{}, err
 	}
@@ -131,7 +130,7 @@ func (c Chat) Send(message ...string) (ChatAPI, error) {
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return ChatAPI{}, err
 	}
@@ -148,7 +147,7 @@ func (c Chat) Edit(messageID int, message ...string) (ChatAPI, error) {
 	m.Params.Options.Message.Body = strings.Join(message, " ")
 	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return ChatAPI{}, err
 	}
@@ -165,7 +164,7 @@ func (c Chat) React(messageID int, reaction string) (ChatAPI, error) {
 	m.Params.Options.Message.Body = reaction
 	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return ChatAPI{}, err
 	}
@@ -181,7 +180,7 @@ func (c Chat) Delete(messageID int) (ChatAPI, error) {
 	m.Params.Options.Channel = c.Channel
 	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return ChatAPI{}, err
 	}
@@ -193,7 +192,7 @@ func (k *Keybase) ChatList() (ChatAPI, error) {
 	m := ChatAPI{}
 	m.Method = "list"
 
-	r, err := chatAPIOut(k.Path, m)
+	r, err := chatAPIOut(k, m)
 	return r, err
 }
 
@@ -212,7 +211,7 @@ func (c Chat) Read(count ...int) (*ChatAPI, error) {
 		m.Params.Options.Pagination.Num = count[0]
 	}
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return &ChatAPI{}, err
 	}
@@ -237,7 +236,7 @@ func (c *ChatAPI) Next(count ...int) (*ChatAPI, error) {
 	}
 	m.Params.Options.Pagination.Next = c.Result.Pagination.Next
 
-	result, err := chatAPIOut(c.keybase.Path, m)
+	result, err := chatAPIOut(&c.keybase, m)
 	if err != nil {
 		return &ChatAPI{}, err
 	}
@@ -264,7 +263,7 @@ func (c *ChatAPI) Previous(count ...int) (*ChatAPI, error) {
 	}
 	m.Params.Options.Pagination.Previous = c.Result.Pagination.Previous
 
-	result, err := chatAPIOut(c.keybase.Path, m)
+	result, err := chatAPIOut(&c.keybase, m)
 	if err != nil {
 		return &ChatAPI{}, err
 	}
@@ -283,7 +282,7 @@ func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
 	m.Params.Options.Filename = filepath
 	m.Params.Options.Title = title
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return ChatAPI{}, err
 	}
@@ -299,7 +298,7 @@ func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
 	m.Params.Options.Output = filepath
 	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return ChatAPI{}, err
 	}
@@ -317,7 +316,7 @@ func (c Chat) LoadFlip(messageID int, conversationID string, flipConversationID 
 	m.Params.Options.FlipConversationID = flipConversationID
 	m.Params.Options.GameID = gameID
 
-	r, err := chatAPIOut(c.keybase.Path, m)
+	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
 		return ChatAPI{}, err
 	}
