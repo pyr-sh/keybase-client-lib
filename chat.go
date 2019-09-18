@@ -278,6 +278,8 @@ func (c *ChatAPI) Previous(count ...int) (*ChatAPI, error) {
 	return c, nil
 }
 
+// Upload attaches a file to a conversation
+// The filepath must be an absolute path
 func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
@@ -294,6 +296,7 @@ func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
 	return r, nil
 }
 
+// Download downloads a file from a conversation
 func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
@@ -310,6 +313,8 @@ func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
 	return r, nil
 }
 
+// LoadFlip returns the results of a flip
+// If the flip is still in progress, this can be expected to change if called again
 func (c Chat) LoadFlip(messageID int, conversationID string, flipConversationID string, gameID string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
