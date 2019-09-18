@@ -86,8 +86,7 @@ func (k *Keybase) loggedIn() bool {
 
 // version returns the version string of the client.
 func (k *Keybase) version() string {
-	cmd := exec.Command(k.Path, "version", "-S", "-f", "s")
-	cmdOut, err := cmd.Output()
+	cmdOut, err := k.Exec("version", "-S", "-f", "s")
 	if err != nil {
 		return ""
 	}
