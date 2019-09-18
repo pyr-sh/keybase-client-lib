@@ -73,8 +73,7 @@ func (k *Keybase) username() string {
 
 // loggedIn returns true if Keybase is currently logged in, otherwise returns false.
 func (k *Keybase) loggedIn() bool {
-	cmd := exec.Command(k.Path, "status", "-j")
-	cmdOut, err := cmd.Output()
+	cmdOut, err := k.Exec("status", "-j")
 	if err != nil {
 		return false
 	}
