@@ -2,6 +2,7 @@ package keybase
 
 // RunOptions holds a set of options to be passed to Run
 type RunOptions struct {
+	Capacity       int       // Channel capacity for the buffered channel that holds messages. Defaults to 100 if not set
 	Heartbeat      int64     // Send a heartbeat through the channel every X minutes (0 = off)
 	Local          bool      // Subscribe to local messages
 	HideExploding  bool      // Ignore exploding messages

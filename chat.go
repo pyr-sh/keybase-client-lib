@@ -52,8 +52,13 @@ func getNewMessages(k *Keybase, c chan<- ChatAPI, execOptions []string) {
 // Run runs `keybase chat api-listen`, and passes incoming messages to the message handler func
 func (k *Keybase) Run(handler func(ChatAPI), options ...RunOptions) {
 	var heartbeatFreq int64
+	var channelCapacity = 100
+
 	runOptions := make([]string, 0)
 	if len(options) > 0 {
+		if options[0].Capacity > 0 {
+			channelCapacity = options[0].Capacity
+		}
 		if options[0].Heartbeat > 0 {
 			heartbeatFreq = options[0].Heartbeat
 		}
@@ -76,7 +81,7 @@ func (k *Keybase) Run(handler func(ChatAPI), options ...RunOptions) {
 			runOptions = append(runOptions, createFilterString(options[0].FilterChannel))
 		}
 	}
-	c := make(chan ChatAPI, 50)
+	c := make(chan ChatAPI, channelCapacity)
 	defer close(c)
 	if heartbeatFreq > 0 {
 		go heartbeat(c, time.Duration(heartbeatFreq)*time.Minute)
