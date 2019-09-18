@@ -60,8 +60,7 @@ func (k *Keybase) NewTeam(name string) Team {
 
 // username returns the username of the currently logged-in Keybase user.
 func (k *Keybase) username() string {
-	cmd := exec.Command(k.Path, "status", "-j")
-	cmdOut, err := cmd.Output()
+	cmdOut, err := k.Exec("status", "-j")
 	if err != nil {
 		return ""
 	}
