@@ -468,6 +468,8 @@ type chat interface {
 	Upload(title string, filepath string) (ChatAPI, error)
 	Download(messageID int, filepath string) (ChatAPI, error)
 	LoadFlip(messageID int, conversationID string, flipConversationID string, gameID string) (ChatAPI, error)
+	Pin(messageID int) (ChatAPI, error)
+	Unpin() (ChatAPI, error)
 }
 
 type chatAPI interface {

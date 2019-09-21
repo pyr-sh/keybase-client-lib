@@ -332,3 +332,34 @@ func (c Chat) LoadFlip(messageID int, conversationID string, flipConversationID 
 	}
 	return r, nil
 }
+
+// Pin pins a message to a channel
+func (c Chat) Pin(messageID int) (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Method = "pin"
+	m.Params.Options.Channel = c.Channel
+	m.Params.Options.MessageID = messageID
+
+	r, err := chatAPIOut(c.keybase, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}
+
+// Unpin clears any pinned messages from a channel
+func (c Chat) Unpin() (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Method = "unpin"
+	m.Params.Options.Channel = c.Channel
+
+	r, err := chatAPIOut(c.keybase, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}
