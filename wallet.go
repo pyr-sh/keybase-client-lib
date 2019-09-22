@@ -59,3 +59,9 @@ func (k *Keybase) RequestPayment(user string, amount float64, memo ...string) er
 	_, err := k.Exec("wallet", "request", user, fmt.Sprintf("%f", amount))
 	return err
 }
+
+// CancelRequest cancels a request for payment previously sent to a user
+func (k *Keybase) CancelRequest(requestID string) error {
+	_, err := k.Exec("wallet", "cancel-request", requestID)
+	return err
+}

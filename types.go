@@ -504,6 +504,7 @@ type keybase interface {
 	username() string
 	version() string
 	RequestPayment(user string, amount float64, memo ...string)
+	CancelRequest(requestID string) error
 }
 
 type status struct {
