@@ -363,3 +363,19 @@ func (c Chat) Unpin() (ChatAPI, error) {
 	}
 	return r, nil
 }
+
+// Mark marks a conversation as read up to a specified message
+func (c Chat) Mark(messageID int) (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Method = "mark"
+	m.Params.Options.Channel = c.Channel
+	m.Params.Options.MessageID = messageID
+
+	r, err := chatAPIOut(c.keybase, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}

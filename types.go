@@ -470,6 +470,7 @@ type chat interface {
 	LoadFlip(messageID int, conversationID string, flipConversationID string, gameID string) (ChatAPI, error)
 	Pin(messageID int) (ChatAPI, error)
 	Unpin() (ChatAPI, error)
+	Mark(messageID int) (ChatAPI, error)
 }
 
 type chatAPI interface {
