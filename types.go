@@ -339,8 +339,12 @@ type WalletAPI struct {
 }
 
 type wOptions struct {
-	Name string `json:"name"`
-	Txid string `json:"txid"`
+	Name      string `json:"name"`
+	Txid      string `json:"txid"`
+	Recipient string `json:"recipient"`
+	Amount    string `json:"amount"`
+	Currency  string `json:"currency"`
+	Message   string `json:"message"`
 }
 
 type wParams struct {
@@ -562,6 +566,8 @@ type Wallet struct {
 }
 
 type wallet interface {
+	Send(recipient string, amount string, currency string, message ...string) (WalletAPI, error)
+	SendXLM(recipient string, amount string, message ...string) (WalletAPI, error)
 }
 
 type keybase interface {

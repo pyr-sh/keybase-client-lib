@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // walletAPIOut sends JSON requests to the wallet API and returns its response.
@@ -64,4 +65,30 @@ func (k *Keybase) RequestPayment(user string, amount float64, memo ...string) er
 func (k *Keybase) CancelRequest(requestID string) error {
 	_, err := k.Exec("wallet", "cancel-request", requestID)
 	return err
+}
+
+// Send sends the specified amount of the specified currency to a user
+func (w Wallet) Send(recipient string, amount string, currency string, message ...string) (WalletAPI, error) {
+	m := WalletAPI{
+		Params: &wParams{},
+	}
+	m.Method = "send"
+	m.Params.Options.Recipient = recipient
+	m.Params.Options.Amount = amount
+	m.Params.Options.Currency = currency
+	if len(message) > 0 {
+		m.Params.Options.Message = strings.Join(message, " ")
+	}
+
+	r, err := walletAPIOut(w.keybase, m)
+	if err != nil {
+		return WalletAPI{}, err
+	}
+	return r, err
+}
+
+// SendXLM sends the specified amount of XLM to a user
+func (w Wallet) SendXLM(recipient string, amount string, message ...string) (WalletAPI, error) {
+	result, err := w.Send(recipient, amount, "XLM", message...)
+	return result, err
 }
