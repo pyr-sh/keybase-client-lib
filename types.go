@@ -566,8 +566,12 @@ type Wallet struct {
 }
 
 type wallet interface {
+	CancelRequest(requestID string) error
+	RequestPayment(user string, amount float64, memo ...string)
 	Send(recipient string, amount string, currency string, message ...string) (WalletAPI, error)
 	SendXLM(recipient string, amount string, message ...string) (WalletAPI, error)
+	StellarAddress(user string) (string, error)
+	TxDetail(txid string) (WalletAPI, error)
 }
 
 type keybase interface {
@@ -580,8 +584,6 @@ type keybase interface {
 	loggedIn() bool
 	username() string
 	version() string
-	RequestPayment(user string, amount float64, memo ...string)
-	CancelRequest(requestID string) error
 }
 
 type status struct {
