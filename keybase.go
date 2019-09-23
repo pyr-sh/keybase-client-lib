@@ -58,6 +58,13 @@ func (k *Keybase) NewTeam(name string) Team {
 	}
 }
 
+// NewWallet returns a new Wallet instance
+func (k *Keybase) NewWallet() Wallet {
+	return Wallet{
+		keybase: k,
+	}
+}
+
 // username returns the username of the currently logged-in Keybase user.
 func (k *Keybase) username() string {
 	cmdOut, err := k.Exec("status", "-j")
