@@ -575,6 +575,7 @@ type keybase interface {
 	CreateTeam(name string) (TeamAPI, error)
 	NewChat(channel Channel) Chat
 	NewTeam(name string) Team
+	NewWallet() Wallet
 	Run(handler func(ChatAPI), options ...RunOptions)
 	loggedIn() bool
 	username() string
