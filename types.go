@@ -556,6 +556,14 @@ type team interface {
 	MemberList() (TeamAPI, error)
 }
 
+// Wallet holds basic information about a wallet
+type Wallet struct {
+	keybase *Keybase
+}
+
+type wallet interface {
+}
+
 type keybase interface {
 	ChatList() (ChatAPI, error)
 	CreateTeam(name string) (TeamAPI, error)
