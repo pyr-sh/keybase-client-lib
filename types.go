@@ -582,10 +582,8 @@ type keybase interface {
 	NewTeam(name string) Team
 	NewWallet() Wallet
 	Run(handler func(ChatAPI), options ...RunOptions)
-	loggedIn() bool
-	username() string
 	version() string
-	device() string
+	status() status
 }
 
 type status struct {

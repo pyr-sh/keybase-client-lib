@@ -1,3 +1,3 @@
 module samhofi.us/x/keybase
 
-go 1.12
+go 1.13

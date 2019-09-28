@@ -25,11 +25,13 @@ func NewKeybase(path ...string) *Keybase {
 	} else {
 		k.Path = path[0]
 	}
+
+	s := k.status()
 	k.Version = k.version()
-	k.LoggedIn = k.loggedIn()
+	k.LoggedIn = s.LoggedIn
 	if k.LoggedIn {
-		k.Username = k.username()
-		k.Device = k.device()
+		k.Username = s.Username
+		k.Device = s.Device.Name
 	}
 	return k
 }
@@ -66,43 +68,18 @@ func (k *Keybase) NewWallet() Wallet {
 	}
 }
 
-// username returns the username of the currently logged-in Keybase user.
-func (k *Keybase) username() string {
+// status returns the results of the `keybase status` command, which includes
+// information about the client, and the currently logged-in Keybase user.
+func (k *Keybase) status() status {
 	cmdOut, err := k.Exec("status", "-j")
 	if err != nil {
-		return ""
+		return status{}
 	}
 
 	var s status
 	json.Unmarshal(cmdOut, &s)
 
-	return s.Username
-}
-
-// device returns the device name of the currently provisioned device.
-func (k *Keybase) device() string {
-	cmdOut, err := k.Exec("status", "-j")
-	if err != nil {
-		return ""
-	}
-
-	var s status
-	json.Unmarshal(cmdOut, &s)
-
-	return s.Device.Name
-}
-
-// loggedIn returns true if Keybase is currently logged in, otherwise returns false.
-func (k *Keybase) loggedIn() bool {
-	cmdOut, err := k.Exec("status", "-j")
-	if err != nil {
-		return false
-	}
-
-	var s status
-	json.Unmarshal(cmdOut, &s)
-
-	return s.LoggedIn
+	return s
 }
 
 // version returns the version string of the client.
