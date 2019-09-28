@@ -29,6 +29,7 @@ func NewKeybase(path ...string) *Keybase {
 	k.LoggedIn = k.loggedIn()
 	if k.LoggedIn {
 		k.Username = k.username()
+		k.Device = k.device()
 	}
 	return k
 }
@@ -76,6 +77,19 @@ func (k *Keybase) username() string {
 	json.Unmarshal(cmdOut, &s)
 
 	return s.Username
+}
+
+// device returns the device name of the currently provisioned device.
+func (k *Keybase) device() string {
+	cmdOut, err := k.Exec("status", "-j")
+	if err != nil {
+		return ""
+	}
+
+	var s status
+	json.Unmarshal(cmdOut, &s)
+
+	return s.Device.Name
 }
 
 // loggedIn returns true if Keybase is currently logged in, otherwise returns false.

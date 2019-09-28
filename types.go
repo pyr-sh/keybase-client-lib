@@ -518,6 +518,7 @@ type Keybase struct {
 	Username string
 	LoggedIn bool
 	Version  string
+	Device   string
 }
 
 // Chat holds basic information about a specific conversation
@@ -584,9 +585,15 @@ type keybase interface {
 	loggedIn() bool
 	username() string
 	version() string
+	device() string
 }
 
 type status struct {
 	Username string `json:"Username"`
 	LoggedIn bool   `json:"LoggedIn"`
+	Device   device `json:"Device"`
+}
+
+type device struct {
+	Name string `json:"name"`
 }
