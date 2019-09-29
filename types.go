@@ -224,22 +224,23 @@ type Channel struct {
 	TopicName   string `json:"topic_name,omitempty"`
 }
 
-type message struct {
+type mesg struct {
 	Body string `json:"body"`
 }
 
 type options struct {
-	Channel            Channel    `json:"channel"`
-	MessageID          int        `json:"message_id"`
-	Message            message    `json:"message"`
-	Pagination         pagination `json:"pagination"`
-	Filename           string     `json:"filename,omitempty"`
-	Title              string     `json:"title,omitempty"`
-	Output             string     `json:"output,omitempty"`
-	ConversationID     string     `json:"conversation_id"`
-	FlipConversationID string     `json:"flip_conversation_id"`
-	MsgID              int        `json:"msg_id"`
-	GameID             string     `json:"game_id"`
+	Channel            *Channel    `json:"channel,omitempty"`
+	MessageID          int         `json:"message_id,omitempty"`
+	Message            *mesg       `json:"message,omitempty"`
+	Pagination         *pagination `json:"pagination,omitempty"`
+	Filename           string      `json:"filename,omitempty,omitempty"`
+	Title              string      `json:"title,omitempty,omitempty"`
+	Output             string      `json:"output,omitempty,omitempty"`
+	ConversationID     string      `json:"conversation_id,omitempty"`
+	FlipConversationID string      `json:"flip_conversation_id,omitempty"`
+	MsgID              int         `json:"msg_id,omitempty"`
+	GameID             string      `json:"game_id,omitempty"`
+	TopicType          string      `json:"topic_type,omitempty"`
 }
 type params struct {
 	Options options `json:"options"`

@@ -131,8 +131,12 @@ func (c Chat) Send(message ...string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
+	m.Params.Options = options{
+		Message: &mesg{},
+	}
+
 	m.Method = "send"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
 
 	r, err := chatAPIOut(c.keybase, m)
@@ -147,8 +151,11 @@ func (c Chat) Edit(messageID int, message ...string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
+	m.Params.Options = options{
+		Message: &mesg{},
+	}
 	m.Method = "edit"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.Message.Body = strings.Join(message, " ")
 	m.Params.Options.MessageID = messageID
 
@@ -164,8 +171,11 @@ func (c Chat) React(messageID int, reaction string) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
+	m.Params.Options = options{
+		Message: &mesg{},
+	}
 	m.Method = "reaction"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.Message.Body = reaction
 	m.Params.Options.MessageID = messageID
 
@@ -182,7 +192,7 @@ func (c Chat) Delete(messageID int) (ChatAPI, error) {
 		Params: &params{},
 	}
 	m.Method = "delete"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.MessageID = messageID
 
 	r, err := chatAPIOut(c.keybase, m)
@@ -193,8 +203,14 @@ func (c Chat) Delete(messageID int) (ChatAPI, error) {
 }
 
 // ChatList returns a list of all conversations.
-func (k *Keybase) ChatList() (ChatAPI, error) {
-	m := ChatAPI{}
+func (k *Keybase) ChatList(topicType ...string) (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+
+	if len(topicType) > 0 {
+		m.Params.Options.TopicType = topicType[0]
+	}
 	m.Method = "list"
 
 	r, err := chatAPIOut(k, m)
@@ -208,8 +224,12 @@ func (c Chat) Read(count ...int) (*ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
+	m.Params.Options = options{
+		Pagination: &pagination{},
+	}
+
 	m.Method = "read"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	if len(count) == 0 {
 		m.Params.Options.Pagination.Num = 10
 	} else {
@@ -232,8 +252,12 @@ func (c *ChatAPI) Next(count ...int) (*ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
+	m.Params.Options = options{
+		Pagination: &pagination{},
+	}
+
 	m.Method = "read"
-	m.Params.Options.Channel = c.Result.Messages[0].Msg.Channel
+	m.Params.Options.Channel = &c.Result.Messages[0].Msg.Channel
 	if len(count) == 0 {
 		m.Params.Options.Pagination.Num = c.Result.Pagination.Num
 	} else {
@@ -259,8 +283,12 @@ func (c *ChatAPI) Previous(count ...int) (*ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
+	m.Params.Options = options{
+		Pagination: &pagination{},
+	}
+
 	m.Method = "read"
-	m.Params.Options.Channel = c.Result.Messages[0].Msg.Channel
+	m.Params.Options.Channel = &c.Result.Messages[0].Msg.Channel
 	if len(count) == 0 {
 		m.Params.Options.Pagination.Num = c.Result.Pagination.Num
 	} else {
@@ -285,7 +313,7 @@ func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
 		Params: &params{},
 	}
 	m.Method = "attach"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.Filename = filepath
 	m.Params.Options.Title = title
 
@@ -302,7 +330,7 @@ func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
 		Params: &params{},
 	}
 	m.Method = "download"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.Output = filepath
 	m.Params.Options.MessageID = messageID
 
@@ -320,7 +348,7 @@ func (c Chat) LoadFlip(messageID int, conversationID string, flipConversationID 
 		Params: &params{},
 	}
 	m.Method = "loadflip"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.MsgID = messageID
 	m.Params.Options.ConversationID = conversationID
 	m.Params.Options.FlipConversationID = flipConversationID
@@ -339,7 +367,7 @@ func (c Chat) Pin(messageID int) (ChatAPI, error) {
 		Params: &params{},
 	}
 	m.Method = "pin"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.MessageID = messageID
 
 	r, err := chatAPIOut(c.keybase, m)
@@ -355,7 +383,7 @@ func (c Chat) Unpin() (ChatAPI, error) {
 		Params: &params{},
 	}
 	m.Method = "unpin"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
@@ -370,7 +398,7 @@ func (c Chat) Mark(messageID int) (ChatAPI, error) {
 		Params: &params{},
 	}
 	m.Method = "mark"
-	m.Params.Options.Channel = c.Channel
+	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.MessageID = messageID
 
 	r, err := chatAPIOut(c.keybase, m)
