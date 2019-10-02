@@ -240,7 +240,12 @@ type options struct {
 	FlipConversationID string      `json:"flip_conversation_id,omitempty"`
 	MsgID              int         `json:"msg_id,omitempty"`
 	GameID             string      `json:"game_id,omitempty"`
-	TopicType          string      `json:"topic_type,omitempty"`
+
+	Name        string `json:"name"`
+	Public      bool   `json:"public,omitempty"`
+	MembersType string `json:"members_type,omitempty"`
+	TopicType   string `json:"topic_type,omitempty"`
+	TopicName   string `json:"topic_name,omitempty"`
 }
 type params struct {
 	Options options `json:"options"`

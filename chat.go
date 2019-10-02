@@ -203,13 +203,19 @@ func (c Chat) Delete(messageID int) (ChatAPI, error) {
 }
 
 // ChatList returns a list of all conversations.
-func (k *Keybase) ChatList(topicType ...string) (ChatAPI, error) {
+// You can pass a Channel to use as a filter here, but you'll probably want to
+// leave the TopicName empty.
+func (k *Keybase) ChatList(opts ...Channel) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
 
-	if len(topicType) > 0 {
-		m.Params.Options.TopicType = topicType[0]
+	if len(opts) > 0 {
+		m.Params.Options.Name = opts[0].Name
+		m.Params.Options.Public = opts[0].Public
+		m.Params.Options.MembersType = opts[0].MembersType
+		m.Params.Options.TopicType = opts[0].TopicType
+		m.Params.Options.TopicName = opts[0].TopicName
 	}
 	m.Method = "list"
 
