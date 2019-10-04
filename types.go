@@ -22,10 +22,10 @@ type ChatAPI struct {
 	Message      string        `json:"message,omitempty"`
 	ID           int           `json:"id,omitempty"`
 	Ratelimits   []rateLimits  `json:"ratelimits,omitempty"`
-	Notification *notification `json:"notification"`
+	Notification *notification `json:"notification,omitempty"`
 	Result       *result       `json:"result,omitempty"`
-	Pagination   *pagination   `json:"pagination"`
-	Error        *Error        `json:"error"`
+	Pagination   *pagination   `json:"pagination,omitempty"`
+	Error        *Error        `json:"error,omitempty"`
 	keybase      Keybase       // Some methods will need this, so I'm passing it but keeping it unexported
 }
 
@@ -217,7 +217,7 @@ type notification struct {
 
 // Channel holds information about a conversation
 type Channel struct {
-	Name        string `json:"name"`
+	Name        string `json:"name,omitempty"`
 	Public      bool   `json:"public,omitempty"`
 	MembersType string `json:"members_type,omitempty"`
 	TopicType   string `json:"topic_type,omitempty"`
@@ -241,7 +241,7 @@ type options struct {
 	MsgID              int         `json:"msg_id,omitempty"`
 	GameID             string      `json:"game_id,omitempty"`
 
-	Name        string `json:"name"`
+	Name        string `json:"name,omitempty"`
 	Public      bool   `json:"public,omitempty"`
 	MembersType string `json:"members_type,omitempty"`
 	TopicType   string `json:"topic_type,omitempty"`

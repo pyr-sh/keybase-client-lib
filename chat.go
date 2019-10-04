@@ -2,12 +2,44 @@ package keybase
 
 import (
 	"bufio"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"os/exec"
 	"strings"
 	"time"
 )
+
+// Returns a string representation of a message id suitable for use in a
+// pagination struct
+func getID(id int) string {
+	var b []byte
+	switch {
+	case id < 128:
+		// 7-bit int
+		b = make([]byte, 1)
+		b = []byte{byte(id)}
+
+	case id <= 255:
+		// uint8
+		b = make([]byte, 2)
+		b = []byte{204, byte(id)}
+
+	case id > 255 && id <= 65535:
+		// uint16
+		b = make([]byte, 2)
+		binary.BigEndian.PutUint16(b, uint16(id))
+		b = append([]byte{205}, b...)
+
+	case id > 65535 && id <= 4294967295:
+		// uint32
+		b = make([]byte, 4)
+		binary.BigEndian.PutUint32(b, uint32(id))
+		b = append([]byte{206}, b...)
+	}
+	return base64.StdEncoding.EncodeToString(b)
+}
 
 // Creates a string of a json-encoded channel to pass to keybase chat api-listen --filter-channel
 func createFilterString(channel Channel) string {
@@ -221,6 +253,29 @@ func (k *Keybase) ChatList(opts ...Channel) (ChatAPI, error) {
 
 	r, err := chatAPIOut(k, m)
 	return r, err
+}
+
+// ReadMessage fetches the chat message with the specified message id from a conversation.
+func (c Chat) ReadMessage(messageID int) (*ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Params.Options = options{
+		Pagination: &pagination{},
+	}
+
+	m.Method = "read"
+	m.Params.Options.Channel = &c.Channel
+	m.Params.Options.Pagination.Num = 1
+
+	m.Params.Options.Pagination.Previous = getID(messageID - 1)
+
+	r, err := chatAPIOut(c.keybase, m)
+	if err != nil {
+		return &ChatAPI{}, err
+	}
+	r.keybase = *c.keybase
+	return &r, nil
 }
 
 // Read fetches chat messages from a conversation. By default, 10 messages will
