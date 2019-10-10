@@ -239,6 +239,7 @@ type options struct {
 	ConversationID     string      `json:"conversation_id,omitempty"`
 	FlipConversationID string      `json:"flip_conversation_id,omitempty"`
 	MsgID              int         `json:"msg_id,omitempty"`
+	ReplyTo            int         `json:"reply_to,omitempty"`
 	GameID             string      `json:"game_id,omitempty"`
 
 	Name        string `json:"name,omitempty"`
@@ -538,6 +539,7 @@ type chat interface {
 	Edit(messageID int, message ...string) (ChatAPI, error)
 	React(messageID int, reaction string) (ChatAPI, error)
 	Send(message ...string) (ChatAPI, error)
+	Reply(replyTo int, message ...string) (ChatAPI, error)
 	Upload(title string, filepath string) (ChatAPI, error)
 	Download(messageID int, filepath string) (ChatAPI, error)
 	LoadFlip(messageID int, conversationID string, flipConversationID string, gameID string) (ChatAPI, error)
