@@ -445,23 +445,7 @@ type uv struct {
 	EldestSeqno int    `json:"eldestSeqno"`
 }
 
-type owners struct {
-	Uv       uv     `json:"uv"`
-	Username string `json:"username"`
-	FullName string `json:"fullName"`
-	NeedsPUK bool   `json:"needsPUK"`
-	Status   int    `json:"status"`
-}
-
-type admins struct {
-	Uv       uv     `json:"uv"`
-	Username string `json:"username"`
-	FullName string `json:"fullName"`
-	NeedsPUK bool   `json:"needsPUK"`
-	Status   int    `json:"status"`
-}
-
-type readers struct {
+type member struct {
 	Uv       uv     `json:"uv"`
 	Username string `json:"username"`
 	FullName string `json:"fullName"`
@@ -470,10 +454,10 @@ type readers struct {
 }
 
 type members struct {
-	Owners  []owners      `json:"owners"`
-	Admins  []admins      `json:"admins"`
-	Writers []interface{} `json:"writers"`
-	Readers []readers     `json:"readers"`
+	Owners  []member `json:"owners"`
+	Admins  []member `json:"admins"`
+	Writers []member `json:"writers"`
+	Readers []member `json:"readers"`
 }
 
 type annotatedActiveInvites struct {
