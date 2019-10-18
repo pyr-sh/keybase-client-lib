@@ -13,7 +13,7 @@ import (
 
 // Returns a string representation of a message id suitable for use in a
 // pagination struct
-func getID(id int) string {
+func getID(id uint) string {
 	var b []byte
 	switch {
 	case id < 128:
@@ -289,7 +289,7 @@ func (c Chat) ReadMessage(messageID int) (*ChatAPI, error) {
 	m.Params.Options.Channel = &c.Channel
 	m.Params.Options.Pagination.Num = 1
 
-	m.Params.Options.Pagination.Previous = getID(messageID - 1)
+	m.Params.Options.Pagination.Previous = getID(uint(messageID - 1))
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
