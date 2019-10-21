@@ -135,8 +135,78 @@ type flip struct {
 	TeamMentions interface{} `json:"team_mentions"`
 }
 
+type image struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type metadata struct {
+	AssetType int   `json:"assetType"`
+	Image     image `json:"image"`
+}
+
+type preview struct {
+	Filename  string   `json:"filename"`
+	Region    string   `json:"region"`
+	Endpoint  string   `json:"endpoint"`
+	Bucket    string   `json:"bucket"`
+	Path      string   `json:"path"`
+	Size      int      `json:"size"`
+	MimeType  string   `json:"mimeType"`
+	EncHash   string   `json:"encHash"`
+	Key       string   `json:"key"`
+	VerifyKey string   `json:"verifyKey"`
+	Title     string   `json:"title"`
+	Nonce     string   `json:"nonce"`
+	Metadata  metadata `json:"metadata"`
+	Tag       int      `json:"tag"`
+}
+
+type previews struct {
+	Filename  string   `json:"filename"`
+	Region    string   `json:"region"`
+	Endpoint  string   `json:"endpoint"`
+	Bucket    string   `json:"bucket"`
+	Path      string   `json:"path"`
+	Size      int      `json:"size"`
+	MimeType  string   `json:"mimeType"`
+	EncHash   string   `json:"encHash"`
+	Key       string   `json:"key"`
+	VerifyKey string   `json:"verifyKey"`
+	Title     string   `json:"title"`
+	Nonce     string   `json:"nonce"`
+	Metadata  metadata `json:"metadata"`
+	Tag       int      `json:"tag"`
+}
+
+type object struct {
+	Filename  string   `json:"filename"`
+	Region    string   `json:"region"`
+	Endpoint  string   `json:"endpoint"`
+	Bucket    string   `json:"bucket"`
+	Path      string   `json:"path"`
+	Size      int      `json:"size"`
+	MimeType  string   `json:"mimeType"`
+	EncHash   string   `json:"encHash"`
+	Key       string   `json:"key"`
+	VerifyKey string   `json:"verifyKey"`
+	Title     string   `json:"title"`
+	Nonce     string   `json:"nonce"`
+	Metadata  metadata `json:"metadata"`
+	Tag       int      `json:"tag"`
+}
+
+type attachment struct {
+	Object   object     `json:"object"`
+	Preview  preview    `json:"preview"`
+	Previews []previews `json:"previews"`
+	Metadata metadata   `json:"metadata"`
+	Uploaded bool       `json:"uploaded"`
+}
+
 type content struct {
 	Type           string         `json:"type"`
+	Attachment     attachment     `json:"attachment"`
 	Delete         delete         `json:"delete"`
 	Edit           edit           `json:"edit"`
 	Reaction       reaction       `json:"reaction"`
@@ -248,6 +318,7 @@ type options struct {
 	TopicType   string `json:"topic_type,omitempty"`
 	TopicName   string `json:"topic_name,omitempty"`
 }
+
 type params struct {
 	Options options `json:"options"`
 }
