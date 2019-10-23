@@ -71,8 +71,8 @@ func getNewMessages(k *Keybase, c chan<- ChatAPI, execOptions []string) {
 		execCmd.Start()
 		scanner := bufio.NewScanner(stdOut)
 		go func(scanner *bufio.Scanner, c chan<- ChatAPI) {
-			var jsonData ChatAPI
 			for scanner.Scan() {
+				var jsonData ChatAPI
 				json.Unmarshal([]byte(scanner.Text()), &jsonData)
 				c <- jsonData
 			}
