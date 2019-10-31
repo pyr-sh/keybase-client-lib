@@ -123,6 +123,8 @@ type edit struct {
 type text struct {
 	Body         string         `json:"body"`
 	Payments     []payments     `json:"payments"`
+	ReplyTo      int            `json:"replyTo"`
+	ReplyToUID   string         `json:"replyToUID"`
 	UserMentions []userMentions `json:"userMentions"`
 	TeamMentions []teamMentions `json:"teamMentions"`
 }
