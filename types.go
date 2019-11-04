@@ -656,7 +656,7 @@ type wallet interface {
 type keybase interface {
 	AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error)
 	AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error)
-	ChatList() (ChatAPI, error)
+	ChatList(opts ...Channel) (ChatAPI, error)
 	ClearCommands() (ChatAPI, error)
 	CreateTeam(name string) (TeamAPI, error)
 	NewChat(channel Channel) Chat
