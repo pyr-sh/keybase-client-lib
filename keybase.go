@@ -36,6 +36,14 @@ func NewKeybase(path ...string) *Keybase {
 	return k
 }
 
+// NewBotCommand returns a new BotCommand instance
+func NewBotCommand(name string, description string) BotCommand {
+	return BotCommand{
+		Name:        name,
+		Description: description,
+	}
+}
+
 // Exec executes the given Keybase command
 func (k *Keybase) Exec(command ...string) ([]byte, error) {
 	out, err := exec.Command(k.Path, command...).Output()

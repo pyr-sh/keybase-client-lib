@@ -489,3 +489,41 @@ func (c Chat) Mark(messageID int) (ChatAPI, error) {
 	}
 	return r, nil
 }
+
+// ClearCommands clears bot advertisements
+func (k *Keybase) ClearCommands() (ChatAPI, error) {
+	m := ChatAPI{}
+	m.Method = "clearcommands"
+
+	r, err := chatAPIOut(k, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}
+
+// AdvertiseCommands sets up bot command advertisements
+// This method allows you to set up multiple different types of advertisements at once.
+// Use this method if you have commands whose visibility differs from each other.
+func (k *Keybase) AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error) {
+	m := ChatAPI{
+		Params: &params{},
+	}
+	m.Method = "advertisecommands"
+	m.Params.Options.BotAdvertisements = advertisements
+
+	r, err := chatAPIOut(k, m)
+	if err != nil {
+		return ChatAPI{}, err
+	}
+	return r, nil
+}
+
+// AdvertiseCommand sets up bot command advertisements
+// This method allows you to set up one type of advertisement.
+// Use this method if you have commands whose visibility should all be the same.
+func (k *Keybase) AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error) {
+	return k.AdvertiseCommands([]BotAdvertisement{
+		advertisement,
+	})
+}

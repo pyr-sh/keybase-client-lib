@@ -296,23 +296,36 @@ type Channel struct {
 	TopicName   string `json:"topic_name,omitempty"`
 }
 
+type BotCommand struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+type BotAdvertisement struct {
+	Type        string       `json:"type"`                // "public", "teamconvs", "teammembers"
+	TeamName    string       `json:"team_name,omitempty"` // required if Type is not "public"
+	BotCommands []BotCommand `json:"commands"`
+}
+
 type mesg struct {
 	Body string `json:"body"`
 }
 
 type options struct {
-	Channel            *Channel    `json:"channel,omitempty"`
-	MessageID          int         `json:"message_id,omitempty"`
-	Message            *mesg       `json:"message,omitempty"`
-	Pagination         *pagination `json:"pagination,omitempty"`
-	Filename           string      `json:"filename,omitempty,omitempty"`
-	Title              string      `json:"title,omitempty,omitempty"`
-	Output             string      `json:"output,omitempty,omitempty"`
-	ConversationID     string      `json:"conversation_id,omitempty"`
-	FlipConversationID string      `json:"flip_conversation_id,omitempty"`
-	MsgID              int         `json:"msg_id,omitempty"`
-	ReplyTo            int         `json:"reply_to,omitempty"`
-	GameID             string      `json:"game_id,omitempty"`
+	Channel            *Channel           `json:"channel,omitempty"`
+	MessageID          int                `json:"message_id,omitempty"`
+	Message            *mesg              `json:"message,omitempty"`
+	Pagination         *pagination        `json:"pagination,omitempty"`
+	Filename           string             `json:"filename,omitempty,omitempty"`
+	Title              string             `json:"title,omitempty,omitempty"`
+	Output             string             `json:"output,omitempty,omitempty"`
+	ConversationID     string             `json:"conversation_id,omitempty"`
+	FlipConversationID string             `json:"flip_conversation_id,omitempty"`
+	MsgID              int                `json:"msg_id,omitempty"`
+	ReplyTo            int                `json:"reply_to,omitempty"`
+	GameID             string             `json:"game_id,omitempty"`
+	Alias              string             `json:"alias,omitempty"`
+	BotAdvertisements  []BotAdvertisement `json:"advertisements,omitempty"`
 
 	Name        string `json:"name,omitempty"`
 	Public      bool   `json:"public,omitempty"`
@@ -641,14 +654,17 @@ type wallet interface {
 }
 
 type keybase interface {
+	AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error)
+	AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error)
 	ChatList() (ChatAPI, error)
+	ClearCommands() (ChatAPI, error)
 	CreateTeam(name string) (TeamAPI, error)
 	NewChat(channel Channel) Chat
 	NewTeam(name string) Team
 	NewWallet() Wallet
 	Run(handler func(ChatAPI), options ...RunOptions)
-	version() string
 	status() status
+	version() string
 }
 
 type status struct {
