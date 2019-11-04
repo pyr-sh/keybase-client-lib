@@ -37,10 +37,26 @@ func NewKeybase(path ...string) *Keybase {
 }
 
 // NewBotCommand returns a new BotCommand instance
-func NewBotCommand(name string, description string) BotCommand {
-	return BotCommand{
+func NewBotCommand(name, description, usage string, extendedDescription ...BotCommandExtendedDescription) BotCommand {
+	result := BotCommand{
 		Name:        name,
 		Description: description,
+		Usage:       usage,
+	}
+
+	if len(extendedDescription) > 0 {
+		result.ExtendedDescription = &extendedDescription[0]
+	}
+
+	return result
+}
+
+// NewBotCommandExtendedDescription
+func NewBotCommandExtendedDescription(title, desktopBody, mobileBody string) BotCommandExtendedDescription {
+	return BotCommandExtendedDescription{
+		Title:       title,
+		DesktopBody: desktopBody,
+		MobileBody:  mobileBody,
 	}
 }
 

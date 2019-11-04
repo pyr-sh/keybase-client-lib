@@ -297,8 +297,16 @@ type Channel struct {
 }
 
 type BotCommand struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name                string                         `json:"name"`
+	Description         string                         `json:"description"`
+	Usage               string                         `json:"usage"`
+	ExtendedDescription *BotCommandExtendedDescription `json:"extended_description,omitempty"`
+}
+
+type BotCommandExtendedDescription struct {
+	Title       string `json:"title"`
+	DesktopBody string `json:"desktop_body"`
+	MobileBody  string `json:"mobile_body"`
 }
 
 type BotAdvertisement struct {

@@ -10,8 +10,8 @@ func ExampleKeybase_AdvertiseCommand() {
 	c := BotAdvertisement{
 		Type: "public",
 		BotCommands: []BotCommand{
-			NewBotCommand("help", "Get help using this bot"),
-			NewBotCommand("hello", "Say hello"),
+			NewBotCommand("help", "Get help using this bot", "!help <command>"),
+			NewBotCommand("hello", "Say hello", "!hello"),
 		},
 	}
 
