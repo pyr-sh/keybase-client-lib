@@ -119,8 +119,7 @@ func (k *Keybase) version() string {
 }
 
 // UserLookup pulls information about users.
-// The following fields are currently returned: basics, profile, proofs_summary, devices
-// See https://keybase.io/docs/api/1.0/call/user/lookup for more info
+// The following fields are currently returned: basics, profile, proofs_summary, devices -- See https://keybase.io/docs/api/1.0/call/user/lookup for more info.
 func (k *Keybase) UserLookup(users ...string) (UserAPI, error) {
 	var fields = []string{"basics", "profile", "proofs_summary", "devices"}
 
