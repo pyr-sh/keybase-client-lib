@@ -2,7 +2,9 @@ package keybase
 
 import (
 	"encoding/json"
+	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // Possible MemberTypes
@@ -114,4 +116,23 @@ func (k *Keybase) version() string {
 	}
 
 	return string(cmdOut)
+}
+
+// UserLookup pulls information about users.
+// The following fields are currently returned: basics, profile, proofs_summary
+// See https://keybase.io/docs/api/1.0/call/user/lookup for more info
+func (k *Keybase) UserLookup(users ...string) (UserAPI, error) {
+	var fields = []string{"basics", "profile", "proofs_summary"}
+
+	cmdOut, err := k.Exec("apicall", "--arg", fmt.Sprintf("usernames=%s", strings.Join(users, ",")), "--arg", fmt.Sprintf("fields=%s", strings.Join(fields, ",")), "user/lookup")
+	if err != nil {
+		return UserAPI{}, err
+	}
+
+	var r UserAPI
+	if err := json.Unmarshal(cmdOut, &r); err != nil {
+		return UserAPI{}, err
+	}
+
+	return r, nil
 }

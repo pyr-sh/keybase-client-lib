@@ -597,6 +597,64 @@ type tResult struct {
 	Showcase               showcase               `json:"showcase"`
 }
 
+// UserAPI holds information received to the userlookup api
+type UserAPI struct {
+	Status uStatus `json:"status"`
+	Them   []them  `json:"them"`
+}
+
+type uStatus struct {
+	Code int    `json:"code"`
+	Name string `json:"name"`
+}
+
+type basics struct {
+	Ctime                int    `json:"ctime"`
+	EldestSeqno          int    `json:"eldest_seqno"`
+	IDVersion            int    `json:"id_version"`
+	LastIDChange         int    `json:"last_id_change"`
+	Mtime                int    `json:"mtime"`
+	PassphraseGeneration int    `json:"passphrase_generation"`
+	RandomPw             bool   `json:"random_pw"`
+	Salt                 string `json:"salt"`
+	Status               int    `json:"status"`
+	TrackVersion         int    `json:"track_version"`
+	Username             string `json:"username"`
+	UsernameCased        string `json:"username_cased"`
+}
+
+type profile struct {
+	Bio      string `json:"bio"`
+	FullName string `json:"full_name"`
+	Location string `json:"location"`
+	Mtime    int    `json:"mtime"`
+}
+
+type proof struct {
+	HumanURL          string `json:"human_url"`
+	Nametag           string `json:"nametag"`
+	PresentationGroup string `json:"presentation_group"`
+	PresentationTag   string `json:"presentation_tag"`
+	ProofID           string `json:"proof_id"`
+	ProofType         string `json:"proof_type"`
+	ProofURL          string `json:"proof_url"`
+	ServiceURL        string `json:"service_url"`
+	SigID             string `json:"sig_id"`
+	State             int    `json:"state"`
+}
+
+type proofsSummary struct {
+	All    []proof `json:"all"`
+	HasWeb bool    `json:"has_web"`
+}
+
+type them struct {
+	Basics        basics        `json:"basics,omitempty"`
+	ID            string        `json:"id"`
+	Profile       profile       `json:"profile,omitempty"`
+	ProofsSummary proofsSummary `json:"proofs_summary"`
+}
+
 // Keybase holds basic information about the local Keybase executable
 type Keybase struct {
 	Path     string
@@ -673,6 +731,7 @@ type keybase interface {
 	Run(handler func(ChatAPI), options ...RunOptions)
 	status() status
 	version() string
+	UserLookup(users ...string) (UserAPI, error)
 }
 
 type status struct {
