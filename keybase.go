@@ -119,10 +119,10 @@ func (k *Keybase) version() string {
 }
 
 // UserLookup pulls information about users.
-// The following fields are currently returned: basics, profile, proofs_summary
+// The following fields are currently returned: basics, profile, proofs_summary, devices
 // See https://keybase.io/docs/api/1.0/call/user/lookup for more info
 func (k *Keybase) UserLookup(users ...string) (UserAPI, error) {
-	var fields = []string{"basics", "profile", "proofs_summary"}
+	var fields = []string{"basics", "profile", "proofs_summary", "devices"}
 
 	cmdOut, err := k.Exec("apicall", "--arg", fmt.Sprintf("usernames=%s", strings.Join(users, ",")), "--arg", fmt.Sprintf("fields=%s", strings.Join(fields, ",")), "user/lookup")
 	if err != nil {

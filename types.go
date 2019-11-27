@@ -648,11 +648,27 @@ type proofsSummary struct {
 	HasWeb bool    `json:"has_web"`
 }
 
+type key struct {
+	KeyRole int    `json:"key_role"`
+	Kid     string `json:"kid"`
+	SigID   string `json:"sig_id"`
+}
+
+type uDevice struct {
+	Ctime  int    `json:"ctime"`
+	Keys   []key  `json:"keys"`
+	Mtime  int    `json:"mtime"`
+	Name   string `json:"name"`
+	Status int    `json:"status"`
+	Type   string `json:"type"`
+}
+
 type them struct {
-	Basics        basics        `json:"basics,omitempty"`
-	ID            string        `json:"id"`
-	Profile       profile       `json:"profile,omitempty"`
-	ProofsSummary proofsSummary `json:"proofs_summary"`
+	Basics        basics             `json:"basics,omitempty"`
+	ID            string             `json:"id"`
+	Profile       profile            `json:"profile,omitempty"`
+	ProofsSummary proofsSummary      `json:"proofs_summary"`
+	Devices       map[string]uDevice `json:"devices,omitempty"`
 }
 
 // Keybase holds basic information about the local Keybase executable
