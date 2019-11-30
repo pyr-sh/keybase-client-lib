@@ -175,3 +175,15 @@ func (k *Keybase) CreateTeam(name string) (TeamAPI, error) {
 	r, err := teamAPIOut(k, m)
 	return r, err
 }
+
+// ListUserMemberships returns information about a given user's team memberships
+func (k *Keybase) ListUserMemberships(user string) (TeamAPI, error) {
+	m := TeamAPI{
+		Params: &tParams{},
+	}
+	m.Method = "list-user-memberships"
+	m.Params.Options.Username = user
+
+	r, err := teamAPIOut(k, m)
+	return r, err
+}

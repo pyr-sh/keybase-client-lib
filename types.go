@@ -595,6 +595,31 @@ type tResult struct {
 	AnnotatedActiveInvites annotatedActiveInvites `json:"annotatedActiveInvites"`
 	Settings               settings               `json:"settings"`
 	Showcase               showcase               `json:"showcase"`
+	Teams                  []teamInfo             `json:"teams"`
+}
+
+type implicit struct {
+	Role     int    `json:"role"`
+	Ancestor string `json:"ancestor"`
+}
+
+type teamInfo struct {
+	UID                     string   `json:"uid"`
+	TeamID                  string   `json:"team_id"`
+	Username                string   `json:"username"`
+	FullName                string   `json:"full_name"`
+	FqName                  string   `json:"fq_name"`
+	IsImplicitTeam          bool     `json:"is_implicit_team"`
+	ImplicitTeamDisplayName string   `json:"implicit_team_display_name"`
+	IsOpenTeam              bool     `json:"is_open_team"`
+	Role                    int      `json:"role"`
+	NeedsPUK                bool     `json:"needsPUK"`
+	MemberCount             int      `json:"member_count"`
+	MemberEldestSeqno       int      `json:"member_eldest_seqno"`
+	AllowProfilePromote     bool     `json:"allow_profile_promote"`
+	IsMemberShowcased       bool     `json:"is_member_showcased"`
+	Status                  int      `json:"status"`
+	Implicit                implicit `json:"implicit,omitempty"`
 }
 
 // UserAPI holds information received to the userlookup api
@@ -748,6 +773,7 @@ type keybase interface {
 	status() status
 	version() string
 	UserLookup(users ...string) (UserAPI, error)
+	ListUserMemberships(user string) (TeamAPI, error)
 }
 
 type status struct {
