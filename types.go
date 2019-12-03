@@ -1,5 +1,7 @@
 package keybase
 
+import "time"
+
 // RunOptions holds a set of options to be passed to Run
 type RunOptions struct {
 	Capacity       int       // Channel capacity for the buffered channel that holds messages. Defaults to 100 if not set
@@ -622,7 +624,7 @@ type teamInfo struct {
 	Implicit                implicit `json:"implicit,omitempty"`
 }
 
-// UserAPI holds information received to the userlookup api
+// UserAPI holds information received from the user/lookup api
 type UserAPI struct {
 	Status uStatus `json:"status"`
 	Them   []them  `json:"them"`
@@ -694,6 +696,70 @@ type them struct {
 	Profile       profile            `json:"profile,omitempty"`
 	ProofsSummary proofsSummary      `json:"proofs_summary"`
 	Devices       map[string]uDevice `json:"devices,omitempty"`
+}
+
+// UserCardAPI holds information received from the user/card api
+type UserCardAPI struct {
+	AirdropRegistered bool           `json:"airdrop_registered"`
+	Blocked           bool           `json:"blocked"`
+	FollowSummary     followSummary  `json:"follow_summary"`
+	Profile           cardProfile    `json:"profile"`
+	Status            uStatus        `json:"status"`
+	TeamShowcase      []teamShowcase `json:"team_showcase"`
+	TheyFollowYou     bool           `json:"they_follow_you"`
+	UserBlocks        userBlocks     `json:"user_blocks"`
+	YouFollowThem     bool           `json:"you_follow_them"`
+}
+
+type followSummary struct {
+	Followers int `json:"followers"`
+	Following int `json:"following"`
+}
+
+type cardProfile struct {
+	Bio                    string    `json:"bio"`
+	Comment                string    `json:"comment"`
+	CrimeAll               int       `json:"crime_all"`
+	CrimeChat              int       `json:"crime_chat"`
+	CrimeFollow            int       `json:"crime_follow"`
+	CrimeIllegal           int       `json:"crime_illegal"`
+	CrimeLegacyAll         int       `json:"crime_legacy_all"`
+	CrimeLegacyPorn        int       `json:"crime_legacy_porn"`
+	CrimeLegacyStellar     int       `json:"crime_legacy_stellar"`
+	CrimePorn              int       `json:"crime_porn"`
+	CrimeSmurfing          int       `json:"crime_smurfing"`
+	CrimeSpacedrop         int       `json:"crime_spacedrop"`
+	CrimeStellarDust       int       `json:"crime_stellar_dust"`
+	CrimeStellarPaymentReq int       `json:"crime_stellar_payment_req"`
+	CrimeTeam              int       `json:"crime_team"`
+	Ctime                  time.Time `json:"ctime"`
+	FullName               string    `json:"full_name"`
+	IsAdmin                int       `json:"is_admin"`
+	Location               string    `json:"location"`
+	Mtime                  time.Time `json:"mtime"`
+	Reporter               string    `json:"reporter"`
+	Status                 int       `json:"status"`
+	Twitter                string    `json:"twitter"`
+	UID                    string    `json:"uid"`
+	Website                string    `json:"website"`
+}
+
+type teamShowcase struct {
+	Description     string   `json:"description"`
+	FqName          string   `json:"fq_name"`
+	NumMembers      int      `json:"num_members"`
+	Open            bool     `json:"open"`
+	PublicAdmins    []string `json:"public_admins"`
+	Role            int      `json:"role"`
+	TeamID          string   `json:"team_id"`
+	TeamIsShowcased bool     `json:"team_is_showcased"`
+}
+
+type userBlocks struct {
+	Chat   bool      `json:"chat"`
+	Ctime  time.Time `json:"ctime"`
+	Follow bool      `json:"follow"`
+	Mtime  time.Time `json:"mtime"`
 }
 
 // Keybase holds basic information about the local Keybase executable
@@ -774,6 +840,7 @@ type keybase interface {
 	version() string
 	UserLookup(users ...string) (UserAPI, error)
 	ListUserMemberships(user string) (TeamAPI, error)
+	UserCard(user string) (UserCardAPI, error)
 }
 
 type status struct {

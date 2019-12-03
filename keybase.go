@@ -135,3 +135,18 @@ func (k *Keybase) UserLookup(users ...string) (UserAPI, error) {
 
 	return r, nil
 }
+
+// UserCard pulls the information that is typically displayed when you open a user's profile.
+func (k *Keybase) UserCard(user string) (UserCardAPI, error) {
+	cmdOut, err := k.Exec("apicall", "--arg", "username="+user, "user/card")
+	if err != nil {
+		return UserCardAPI{}, err
+	}
+
+	var r UserCardAPI
+	if err := json.Unmarshal(cmdOut, &r); err != nil {
+		return UserCardAPI{}, err
+	}
+
+	return r, nil
+}
