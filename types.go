@@ -28,6 +28,7 @@ type ChatAPI struct {
 	Result       *result       `json:"result,omitempty"`
 	Pagination   *pagination   `json:"pagination,omitempty"`
 	Error        *Error        `json:"error,omitempty"`
+	ErrorListen  *string       `json:"error,omitempty"` // Keybase's api-listen command has error messages in this format instead of their normal error output
 	keybase      Keybase       // Some methods will need this, so I'm passing it but keeping it unexported
 }
 
