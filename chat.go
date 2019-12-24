@@ -74,8 +74,8 @@ func getNewMessages(k *Keybase, c chan<- ChatAPI, execOptions []string) {
 			for scanner.Scan() {
 				var jsonData ChatAPI
 				json.Unmarshal([]byte(scanner.Text()), &jsonData)
-				if len([]byte(jsonData.ErrorRaw)) > 0 {
-					var errorListen = string(jsonData.ErrorRaw)
+				if jsonData.ErrorRaw != nil {
+					var errorListen = string(*jsonData.ErrorRaw)
 					jsonData.ErrorListen = &errorListen
 				}
 				c <- jsonData
@@ -155,9 +155,9 @@ func chatAPIOut(k *Keybase, c ChatAPI) (ChatAPI, error) {
 	if err := json.Unmarshal(cmdOut, &r); err != nil {
 		return ChatAPI{}, err
 	}
-	if len([]byte(r.ErrorRaw)) > 0 {
+	if r.ErrorRaw != nil {
 		var errorRead Error
-		json.Unmarshal([]byte(r.ErrorRaw), &errorRead)
+		json.Unmarshal([]byte(*r.ErrorRaw), &errorRead)
 		r.ErrorRead = &errorRead
 		return r, errors.New(r.ErrorRead.Message)
 	}

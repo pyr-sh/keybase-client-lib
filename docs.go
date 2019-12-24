@@ -48,6 +48,11 @@ in @mkbot#test1:
     }
 
     func handler(m keybase.ChatAPI) {
+	if m.ErrorListen != nil {
+		fmt.Printf("Error: %s\n", *m.ErrorListen)
+		return
+	}
+
     	msgType := m.Msg.Content.Type
     	msgID := m.Msg.ID
     	deviceName := m.Msg.Sender.DeviceName
