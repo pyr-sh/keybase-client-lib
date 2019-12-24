@@ -74,6 +74,10 @@ func getNewMessages(k *Keybase, c chan<- ChatAPI, execOptions []string) {
 			for scanner.Scan() {
 				var jsonData ChatAPI
 				json.Unmarshal([]byte(scanner.Text()), &jsonData)
+				if len([]byte(jsonData.ErrorRaw)) > 0 {
+					var errorListen = string(jsonData.ErrorRaw)
+					jsonData.ErrorListen = &errorListen
+				}
 				c <- jsonData
 			}
 		}(scanner, c)
@@ -151,8 +155,11 @@ func chatAPIOut(k *Keybase, c ChatAPI) (ChatAPI, error) {
 	if err := json.Unmarshal(cmdOut, &r); err != nil {
 		return ChatAPI{}, err
 	}
-	if r.Error != nil {
-		return ChatAPI{}, errors.New(r.Error.Message)
+	if len([]byte(r.ErrorRaw)) > 0 {
+		var errorRead Error
+		json.Unmarshal([]byte(r.ErrorRaw), &errorRead)
+		r.ErrorRead = &errorRead
+		return r, errors.New(r.ErrorRead.Message)
 	}
 
 	return r, nil
@@ -173,7 +180,7 @@ func (c Chat) Send(message ...string) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -194,7 +201,7 @@ func (c Chat) Reply(replyTo int, message ...string) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -214,7 +221,7 @@ func (c Chat) Edit(messageID int, message ...string) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -234,7 +241,7 @@ func (c Chat) React(messageID int, reaction string) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -250,7 +257,7 @@ func (c Chat) Delete(messageID int) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -293,7 +300,7 @@ func (c Chat) ReadMessage(messageID int) (*ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return &ChatAPI{}, err
+		return &r, err
 	}
 	r.keybase = *c.keybase
 	return &r, nil
@@ -320,7 +327,7 @@ func (c Chat) Read(count ...int) (*ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return &ChatAPI{}, err
+		return &r, err
 	}
 	r.keybase = *c.keybase
 	return &r, nil
@@ -349,7 +356,7 @@ func (c *ChatAPI) Next(count ...int) (*ChatAPI, error) {
 
 	result, err := chatAPIOut(&c.keybase, m)
 	if err != nil {
-		return &ChatAPI{}, err
+		return &result, err
 	}
 	k := c.keybase
 	*c = result
@@ -380,7 +387,7 @@ func (c *ChatAPI) Previous(count ...int) (*ChatAPI, error) {
 
 	result, err := chatAPIOut(&c.keybase, m)
 	if err != nil {
-		return &ChatAPI{}, err
+		return &result, err
 	}
 	k := c.keybase
 	*c = result
@@ -401,7 +408,7 @@ func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -418,7 +425,7 @@ func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -438,7 +445,7 @@ func (c Chat) LoadFlip(messageID int, conversationID string, flipConversationID 
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -454,7 +461,7 @@ func (c Chat) Pin(messageID int) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -469,7 +476,7 @@ func (c Chat) Unpin() (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -485,7 +492,7 @@ func (c Chat) Mark(messageID int) (ChatAPI, error) {
 
 	r, err := chatAPIOut(c.keybase, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -497,7 +504,7 @@ func (k *Keybase) ClearCommands() (ChatAPI, error) {
 
 	r, err := chatAPIOut(k, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }
@@ -514,7 +521,7 @@ func (k *Keybase) AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI,
 
 	r, err := chatAPIOut(k, m)
 	if err != nil {
-		return ChatAPI{}, err
+		return r, err
 	}
 	return r, nil
 }

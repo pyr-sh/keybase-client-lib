@@ -1,6 +1,9 @@
 package keybase
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // RunOptions holds a set of options to be passed to Run
 type RunOptions struct {
@@ -16,20 +19,21 @@ type RunOptions struct {
 
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
 type ChatAPI struct {
-	Type         string        `json:"type,omitempty"`
-	Source       string        `json:"source,omitempty"`
-	Msg          *msg          `json:"msg,omitempty"`
-	Method       string        `json:"method,omitempty"`
-	Params       *params       `json:"params,omitempty"`
-	Message      string        `json:"message,omitempty"`
-	ID           int           `json:"id,omitempty"`
-	Ratelimits   []rateLimits  `json:"ratelimits,omitempty"`
-	Notification *notification `json:"notification,omitempty"`
-	Result       *result       `json:"result,omitempty"`
-	Pagination   *pagination   `json:"pagination,omitempty"`
-	Error        *Error        `json:"error,omitempty"`
-	ErrorListen  *string       `json:"error,omitempty"` // Keybase's api-listen command has error messages in this format instead of their normal error output
-	keybase      Keybase       // Some methods will need this, so I'm passing it but keeping it unexported
+	Type         string          `json:"type,omitempty"`
+	Source       string          `json:"source,omitempty"`
+	Msg          *msg            `json:"msg,omitempty"`
+	Method       string          `json:"method,omitempty"`
+	Params       *params         `json:"params,omitempty"`
+	Message      string          `json:"message,omitempty"`
+	ID           int             `json:"id,omitempty"`
+	Ratelimits   []rateLimits    `json:"ratelimits,omitempty"`
+	Notification *notification   `json:"notification,omitempty"`
+	Result       *result         `json:"result,omitempty"`
+	Pagination   *pagination     `json:"pagination,omitempty"`
+	ErrorRaw     json.RawMessage `json:"error,omitempty"` // Raw JSON string containit any errors returned
+	ErrorRead    *Error          `json:"-"`               // Errors returned by any outgoing chat functions such as Read(), Edit(), etc
+	ErrorListen  *string         `json:"-"`               // Errors returned by the api-listen command (used in the Run() function)
+	keybase      Keybase         // Some methods will need this, so I'm passing it but keeping it unexported
 }
 
 type sender struct {
