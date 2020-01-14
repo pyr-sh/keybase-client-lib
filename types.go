@@ -532,6 +532,7 @@ type wResult struct {
 	Note               string       `json:"note"`
 	NoteErr            string       `json:"noteErr"`
 	Unread             bool         `json:"unread"`
+	Username           string       `json:"username"`
 }
 
 // TeamAPI holds information sent and received to/from the team api
