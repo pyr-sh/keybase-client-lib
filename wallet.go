@@ -51,6 +51,21 @@ func (w Wallet) StellarAddress(user string) (string, error) {
 	return r.Result.AccountID, err
 }
 
+// StellarUser returns the keybase username of a given wallet address
+func (w Wallet) StellarUser(wallet string) (string, error) {
+	m := WalletAPI{
+		Params: &wParams{},
+	}
+	m.Method = "lookup"
+	m.Params.Options.Name = wallet
+
+	r, err := walletAPIOut(w.keybase, m)
+	if err != nil {
+		return "", err
+	}
+	return r.Result.Username, err
+}
+
 // RequestPayment sends a request for payment to a user
 func (w Wallet) RequestPayment(user string, amount float64, memo ...string) error {
 	k := w.keybase
