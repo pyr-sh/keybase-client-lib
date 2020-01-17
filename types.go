@@ -646,6 +646,32 @@ type teamInfo struct {
 	Implicit                implicit `json:"implicit,omitempty"`
 }
 
+// KVAPI holds information sent and received to/from the kvstore api
+type KVAPI struct {
+	Method  string    `json:"method,omitempty"`
+	Params  *kvParams `json:"params,omitempty"`
+	Result  *kvResult `json:"result,omitempty"`
+	Error   *Error    `json:"error"`
+	keybase Keybase
+}
+
+type kvOptions struct {
+	Team       string `json:"team,omitempty"`
+	Namespace  string `json:"namespace,omitempty"`
+	EntryKey   string `json:"entryKey,omitempty"`
+	Revision   int    `json:"revision,omitempty"`
+	EntryValue string `json:"entryValue,omitempty"`
+}
+
+type kvParams struct {
+	Options kvOptions `json:"options,omitempty"`
+}
+
+type kvResult struct {
+	TeamName   string   `json:"teamName"`
+	Namespaces []string `json:"namespaces"`
+}
+
 // UserAPI holds information received from the user/lookup api
 type UserAPI struct {
 	Status uStatus `json:"status"`
@@ -848,6 +874,16 @@ type wallet interface {
 	TxDetail(txid string) (WalletAPI, error)
 }
 
+// KV holds basic information about a KVStore
+type KV struct {
+	keybase *Keybase
+	Team    string
+}
+
+type kvInterface interface {
+	Namespaces() (KVAPI, error)
+}
+
 type keybase interface {
 	AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error)
 	AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error)
@@ -856,6 +892,7 @@ type keybase interface {
 	CreateTeam(name string) (TeamAPI, error)
 	NewChat(channel Channel) Chat
 	NewTeam(name string) Team
+	NewKV(team string) KV
 	NewWallet() Wallet
 	Run(handler func(ChatAPI), options ...RunOptions)
 	status() status

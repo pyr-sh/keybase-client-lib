@@ -87,6 +87,14 @@ func (k *Keybase) NewTeam(name string) Team {
 	}
 }
 
+// NewKV returns a new KV instance
+func (k *Keybase) NewKV(team string) KV {
+	return KV{
+		keybase: k,
+		Team:    team,
+	}
+}
+
 // NewWallet returns a new Wallet instance
 func (k *Keybase) NewWallet() Wallet {
 	return Wallet{
