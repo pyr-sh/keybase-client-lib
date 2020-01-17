@@ -62,3 +62,23 @@ func (kv KV) Keys(namespace string) (KVAPI, error) {
 	}
 	return r, nil
 }
+
+// Get returns an entry
+func (kv KV) Get(namespace string, key string) (KVAPI, error) {
+	m := KVAPI{
+		Params: &kvParams{},
+	}
+	m.Params.Options = kvOptions{
+		Team:      kv.Team,
+		Namespace: namespace,
+		EntryKey:  key,
+	}
+
+	m.Method = "get"
+
+	r, err := kvAPIOut(kv.keybase, m)
+	if err != nil {
+		return r, err
+	}
+	return r, nil
+}

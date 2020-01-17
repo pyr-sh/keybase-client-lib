@@ -676,6 +676,9 @@ type kvResult struct {
 	TeamName   string     `json:"teamName"`
 	Namespaces []string   `json:"namespaces"`
 	EntryKeys  []entryKey `json:"entryKeys"`
+	EntryKey   string     `json:"entryKey"`
+	EntryValue string     `json:"entryValue"`
+	Revision   int        `json:"revision"`
 }
 
 // UserAPI holds information received from the user/lookup api
@@ -889,6 +892,7 @@ type KV struct {
 type kvInterface interface {
 	Namespaces() (KVAPI, error)
 	Keys(namespace string) (KVAPI, error)
+	Get(namespace string, key string) (KVAPI, error)
 }
 
 type keybase interface {
