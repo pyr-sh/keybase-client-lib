@@ -43,3 +43,22 @@ func (kv KV) Namespaces() (KVAPI, error) {
 	}
 	return r, nil
 }
+
+// Keys returns all non-deleted keys for a namespace
+func (kv KV) Keys(namespace string) (KVAPI, error) {
+	m := KVAPI{
+		Params: &kvParams{},
+	}
+	m.Params.Options = kvOptions{
+		Team:      kv.Team,
+		Namespace: namespace,
+	}
+
+	m.Method = "list"
+
+	r, err := kvAPIOut(kv.keybase, m)
+	if err != nil {
+		return r, err
+	}
+	return r, nil
+}

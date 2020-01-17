@@ -667,9 +667,15 @@ type kvParams struct {
 	Options kvOptions `json:"options,omitempty"`
 }
 
+type entryKey struct {
+	EntryKey string `json:"entryKey"`
+	Revision int    `json:"revision"`
+}
+
 type kvResult struct {
-	TeamName   string   `json:"teamName"`
-	Namespaces []string `json:"namespaces"`
+	TeamName   string     `json:"teamName"`
+	Namespaces []string   `json:"namespaces"`
+	EntryKeys  []entryKey `json:"entryKeys"`
 }
 
 // UserAPI holds information received from the user/lookup api
@@ -882,6 +888,7 @@ type KV struct {
 
 type kvInterface interface {
 	Namespaces() (KVAPI, error)
+	Keys(namespace string) (KVAPI, error)
 }
 
 type keybase interface {
