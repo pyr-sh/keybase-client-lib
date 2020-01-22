@@ -103,3 +103,23 @@ func (kv KV) Put(namespace string, key string, value string) (KVAPI, error) {
 	}
 	return r, nil
 }
+
+// Delete removes an entry
+func (kv KV) Delete(namespace string, key string) (KVAPI, error) {
+	m := KVAPI{
+		Params: &kvParams{},
+	}
+	m.Params.Options = kvOptions{
+		Team:      kv.Team,
+		Namespace: namespace,
+		EntryKey:  key,
+	}
+
+	m.Method = "del"
+
+	r, err := kvAPIOut(kv.keybase, m)
+	if err != nil {
+		return r, err
+	}
+	return r, nil
+}

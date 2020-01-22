@@ -894,6 +894,7 @@ type kvInterface interface {
 	Keys(namespace string) (KVAPI, error)
 	Get(namespace string, key string) (KVAPI, error)
 	Put(namespace string, key string, value string) (KVAPI, error)
+	Delete(namespace string, key string) (KVAPI, error)
 }
 
 type keybase interface {
