@@ -64,7 +64,7 @@ func (kv KV) Keys(namespace string) (KVAPI, error) {
 }
 
 // Get returns an entry
-func (kv KV) Get(namespace string, key string) (KVAPI, error) {
+func (kv KV) Get(namespace string, key string, revision ...uint) (KVAPI, error) {
 	m := KVAPI{
 		Params: &kvParams{},
 	}
@@ -72,6 +72,10 @@ func (kv KV) Get(namespace string, key string) (KVAPI, error) {
 		Team:      kv.Team,
 		Namespace: namespace,
 		EntryKey:  key,
+	}
+
+	if len(revision) > 0 {
+		m.Params.Options.Revision = revision[0]
 	}
 
 	m.Method = "get"
@@ -84,7 +88,7 @@ func (kv KV) Get(namespace string, key string) (KVAPI, error) {
 }
 
 // Put adds an entry
-func (kv KV) Put(namespace string, key string, value string) (KVAPI, error) {
+func (kv KV) Put(namespace string, key string, value string, revision ...uint) (KVAPI, error) {
 	m := KVAPI{
 		Params: &kvParams{},
 	}
@@ -93,6 +97,10 @@ func (kv KV) Put(namespace string, key string, value string) (KVAPI, error) {
 		Namespace:  namespace,
 		EntryKey:   key,
 		EntryValue: value,
+	}
+
+	if len(revision) > 0 {
+		m.Params.Options.Revision = revision[0]
 	}
 
 	m.Method = "put"
@@ -105,7 +113,7 @@ func (kv KV) Put(namespace string, key string, value string) (KVAPI, error) {
 }
 
 // Delete removes an entry
-func (kv KV) Delete(namespace string, key string) (KVAPI, error) {
+func (kv KV) Delete(namespace string, key string, revision ...uint) (KVAPI, error) {
 	m := KVAPI{
 		Params: &kvParams{},
 	}
@@ -113,6 +121,10 @@ func (kv KV) Delete(namespace string, key string) (KVAPI, error) {
 		Team:      kv.Team,
 		Namespace: namespace,
 		EntryKey:  key,
+	}
+
+	if len(revision) > 0 {
+		m.Params.Options.Revision = revision[0]
 	}
 
 	m.Method = "del"

@@ -659,7 +659,7 @@ type kvOptions struct {
 	Team       string `json:"team,omitempty"`
 	Namespace  string `json:"namespace,omitempty"`
 	EntryKey   string `json:"entryKey,omitempty"`
-	Revision   int    `json:"revision,omitempty"`
+	Revision   uint   `json:"revision,omitempty"`
 	EntryValue string `json:"entryValue,omitempty"`
 }
 
@@ -669,7 +669,7 @@ type kvParams struct {
 
 type entryKey struct {
 	EntryKey string `json:"entryKey"`
-	Revision int    `json:"revision"`
+	Revision uint   `json:"revision"`
 }
 
 type kvResult struct {
@@ -678,7 +678,7 @@ type kvResult struct {
 	EntryKeys  []entryKey `json:"entryKeys"`
 	EntryKey   string     `json:"entryKey"`
 	EntryValue string     `json:"entryValue"`
-	Revision   int        `json:"revision"`
+	Revision   uint       `json:"revision"`
 }
 
 // UserAPI holds information received from the user/lookup api
