@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"samhofi.us/x/keybase/types/chat1"
 )
 
 // Possible MemberTypes
@@ -72,7 +74,7 @@ func (k *Keybase) Exec(command ...string) ([]byte, error) {
 }
 
 // NewChat returns a new Chat instance
-func (k *Keybase) NewChat(channel Channel) Chat {
+func (k *Keybase) NewChat(channel chat1.ChatChannel) Chat {
 	return Chat{
 		keybase: k,
 		Channel: channel,

@@ -5,18 +5,20 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"samhofi.us/x/keybase/types/chat1"
 )
 
 // RunOptions holds a set of options to be passed to Run
 type RunOptions struct {
-	Capacity       int       // Channel capacity for the buffered channel that holds messages. Defaults to 100 if not set
-	Heartbeat      int64     // Send a heartbeat through the channel every X minutes (0 = off)
-	Local          bool      // Subscribe to local messages
-	HideExploding  bool      // Ignore exploding messages
-	Dev            bool      // Subscribe to dev channel messages
-	Wallet         bool      // Subscribe to wallet events
-	FilterChannel  Channel   // Only subscribe to messages from specified channel
-	FilterChannels []Channel // Only subscribe to messages from specified channels
+	Capacity       int                 // Channel capacity for the buffered channel that holds messages. Defaults to 100 if not set
+	Heartbeat      int64               // Send a heartbeat through the channel every X minutes (0 = off)
+	Local          bool                // Subscribe to local messages
+	HideExploding  bool                // Ignore exploding messages
+	Dev            bool                // Subscribe to dev channel messages
+	Wallet         bool                // Subscribe to wallet events
+	FilterChannel  chat1.ChatChannel   // Only subscribe to messages from specified channel
+	FilterChannels []chat1.ChatChannel // Only subscribe to messages from specified channels
 }
 
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
@@ -229,19 +231,19 @@ type content struct {
 }
 
 type msg struct {
-	ID                 int      `json:"id"`
-	ConversationID     string   `json:"conversation_id"`
-	Channel            Channel  `json:"channel"`
-	Sender             sender   `json:"sender"`
-	SentAt             int      `json:"sent_at"`
-	SentAtMs           int64    `json:"sent_at_ms"`
-	Content            content  `json:"content"`
-	Unread             bool     `json:"unread"`
-	AtMentionUsernames []string `json:"at_mention_usernames"`
-	IsEphemeral        bool     `json:"is_ephemeral"`
-	Etime              int64    `json:"etime"`
-	HasPairwiseMacs    bool     `json:"has_pairwise_macs"`
-	ChannelMention     string   `json:"channel_mention"`
+	ID                 int               `json:"id"`
+	ConversationID     string            `json:"conversation_id"`
+	Channel            chat1.ChatChannel `json:"channel"`
+	Sender             sender            `json:"sender"`
+	SentAt             int               `json:"sent_at"`
+	SentAtMs           int64             `json:"sent_at_ms"`
+	Content            content           `json:"content"`
+	Unread             bool              `json:"unread"`
+	AtMentionUsernames []string          `json:"at_mention_usernames"`
+	IsEphemeral        bool              `json:"is_ephemeral"`
+	Etime              int64             `json:"etime"`
+	HasPairwiseMacs    bool              `json:"has_pairwise_macs"`
+	ChannelMention     string            `json:"channel_mention"`
 }
 
 type summary struct {
@@ -296,15 +298,6 @@ type notification struct {
 	Details details `json:"details"`
 }
 
-// Channel holds information about a conversation
-type Channel struct {
-	Name        string `json:"name,omitempty"`
-	Public      bool   `json:"public,omitempty"`
-	MembersType string `json:"members_type,omitempty"`
-	TopicType   string `json:"topic_type,omitempty"`
-	TopicName   string `json:"topic_name,omitempty"`
-}
-
 type BotCommand struct {
 	Name                string                         `json:"name"`
 	Description         string                         `json:"description"`
@@ -342,7 +335,7 @@ func (d *duration) MarshalJSON() (b []byte, err error) {
 }
 
 type options struct {
-	Channel            *Channel           `json:"channel,omitempty"`
+	Channel            *chat1.ChatChannel `json:"channel,omitempty"`
 	MessageID          int                `json:"message_id,omitempty"`
 	Message            *mesg              `json:"message,omitempty"`
 	Pagination         *pagination        `json:"pagination,omitempty"`
@@ -437,12 +430,12 @@ type rateLimits struct {
 }
 
 type conversation struct {
-	ID           string  `json:"id"`
-	Channel      Channel `json:"channel"`
-	Unread       bool    `json:"unread"`
-	ActiveAt     int     `json:"active_at"`
-	ActiveAtMs   int64   `json:"active_at_ms"`
-	MemberStatus string  `json:"member_status"`
+	ID           string            `json:"id"`
+	Channel      chat1.ChatChannel `json:"channel"`
+	Unread       bool              `json:"unread"`
+	ActiveAt     int               `json:"active_at"`
+	ActiveAtMs   int64             `json:"active_at_ms"`
+	MemberStatus string            `json:"member_status"`
 }
 
 type SendPayment struct {
@@ -831,7 +824,7 @@ type Keybase struct {
 // Chat holds basic information about a specific conversation
 type Chat struct {
 	keybase *Keybase
-	Channel Channel
+	Channel chat1.ChatChannel
 }
 
 type chat interface {
@@ -900,10 +893,10 @@ type kvInterface interface {
 type keybase interface {
 	AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error)
 	AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error)
-	ChatList(opts ...Channel) (ChatAPI, error)
+	ChatList(opts ...chat1.ChatChannel) (ChatAPI, error)
 	ClearCommands() (ChatAPI, error)
 	CreateTeam(name string) (TeamAPI, error)
-	NewChat(channel Channel) Chat
+	NewChat(channel chat1.ChatChannel) Chat
 	NewTeam(name string) Team
 	NewKV(team string) KV
 	NewWallet() Wallet

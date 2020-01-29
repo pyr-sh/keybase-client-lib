@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"samhofi.us/x/keybase/types/chat1"
 )
 
 // Returns a string representation of a message id suitable for use in a
@@ -42,7 +44,7 @@ func getID(id uint) string {
 }
 
 // Creates a string of a json-encoded channel to pass to keybase chat api-listen --filter-channel
-func createFilterString(channel Channel) string {
+func createFilterString(channel chat1.ChatChannel) string {
 	if channel.Name == "" {
 		return ""
 	}
@@ -51,7 +53,7 @@ func createFilterString(channel Channel) string {
 }
 
 // Creates a string of json-encoded channels to pass to keybase chat api-listen --filter-channels
-func createFiltersString(channels []Channel) string {
+func createFiltersString(channels []chat1.ChatChannel) string {
 	if len(channels) == 0 {
 		return ""
 	}
@@ -285,7 +287,7 @@ func (c Chat) Delete(messageID int) (ChatAPI, error) {
 // ChatList returns a list of all conversations.
 // You can pass a Channel to use as a filter here, but you'll probably want to
 // leave the TopicName empty.
-func (k *Keybase) ChatList(opts ...Channel) (ChatAPI, error) {
+func (k *Keybase) ChatList(opts ...chat1.ChatChannel) (ChatAPI, error) {
 	m := ChatAPI{
 		Params: &params{},
 	}
