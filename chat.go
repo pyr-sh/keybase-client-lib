@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
-	"strings"
 	"time"
 
 	"samhofi.us/x/keybase/types/chat1"
@@ -345,26 +344,6 @@ func (k *Keybase) EditToConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, me
 		return r, err
 	}
 
-	return r, nil
-}
-
-// Edit edits a previously sent chat message
-func (c Chat) Edit(messageID int, message ...string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Message: &mesg{},
-	}
-	m.Method = "edit"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = strings.Join(message, " ")
-	m.Params.Options.MessageID = messageID
-
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
 	return r, nil
 }
 
