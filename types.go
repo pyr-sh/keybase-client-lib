@@ -27,20 +27,34 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+type duration struct {
+	time.Duration
+}
+
+func (d *duration) UnmarshalJSON(b []byte) (err error) {
+	d.Duration, err = time.ParseDuration(strings.Trim(string(b), `"`))
+	return
+}
+
+func (d *duration) MarshalJSON() (b []byte, err error) {
+	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
+}
+
 type SendMessageBody struct {
 	Body string
 }
 
 // SendMessageOptions holds a set of options to be passed to SendMessage
 type SendMessageOptions struct {
-	Channel          chat1.ChatChannel `json:"channel,omitempty"`
-	ConversationID   chat1.ConvIDStr   `json:"conversation_id,omitempty"`
-	Message          SendMessageBody   `json:",omitempty"`
-	Filename         string            `json:"filename,omitempty"`
-	Title            string            `json:"title,omitempty"`
-	MessageID        chat1.MessageID   `json:"message_id,omitempty"`
-	ConfirmLumenSend bool              `json:"confirm_lumen_send"`
-	ReplyTo          *chat1.MessageID  `json:"reply_to,omitempty"`
+	Channel           chat1.ChatChannel `json:"channel,omitempty"`
+	ConversationID    chat1.ConvIDStr   `json:"conversation_id,omitempty"`
+	Message           SendMessageBody   `json:",omitempty"`
+	Filename          string            `json:"filename,omitempty"`
+	Title             string            `json:"title,omitempty"`
+	MessageID         chat1.MessageID   `json:"message_id,omitempty"`
+	ConfirmLumenSend  bool              `json:"confirm_lumen_send"`
+	ReplyTo           *chat1.MessageID  `json:"reply_to,omitempty"`
+	ExplodingLifetime duration          `json:"exploding_lifetime,omitempty"`
 }
 
 type sendMessageParams struct {
@@ -365,19 +379,6 @@ type BotAdvertisement struct {
 
 type mesg struct {
 	Body string `json:"body"`
-}
-
-type duration struct {
-	time.Duration
-}
-
-func (d *duration) UnmarshalJSON(b []byte) (err error) {
-	d.Duration, err = time.ParseDuration(strings.Trim(string(b), `"`))
-	return
-}
-
-func (d *duration) MarshalJSON() (b []byte, err error) {
-	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
 }
 
 type options struct {

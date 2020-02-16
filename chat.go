@@ -226,6 +226,48 @@ func (k *Keybase) SendMessageToConvID(convID chat1.ConvIDStr, message string, a 
 	return r, nil
 }
 
+// SendEphemeralToChannel sends a chat message to a channel
+func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+	}
+
+	opts.ExplodingLifetime.Duration = duration
+
+	r, err := k.SendMessage(opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
+// SendEphemeralToConvID sends a chat message to a conversation id
+func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+	}
+
+	opts.ExplodingLifetime.Duration = duration
+
+	r, err := k.SendMessage(opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
 // Send sends a chat message
 func (c Chat) Send(message ...string) (ChatAPI, error) {
 	m := ChatAPI{
