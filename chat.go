@@ -235,7 +235,7 @@ func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration tim
 		Message: SendMessageBody{
 			Body: fmt.Sprintf(message, a...),
 		},
-		ExplodingLifetime: explodingLifetime{duration},
+		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
 
 	r, err := k.SendMessage(opts)
@@ -255,7 +255,7 @@ func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Du
 		Message: SendMessageBody{
 			Body: fmt.Sprintf(message, a...),
 		},
-		ExplodingLifetime: explodingLifetime{duration},
+		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
 
 	r, err := k.SendMessage(opts)
@@ -267,7 +267,7 @@ func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Du
 }
 
 // ReplyToChannel sends a chat message to a channel
-func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo *chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -275,7 +275,7 @@ func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo *chat1.Messa
 		Message: SendMessageBody{
 			Body: fmt.Sprintf(message, a...),
 		},
-		ReplyTo: replyTo,
+		ReplyTo: &replyTo,
 	}
 
 	r, err := k.SendMessage(opts)
@@ -287,7 +287,7 @@ func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo *chat1.Messa
 }
 
 // ReplyToConvID sends a chat message to a conversation id
-func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo *chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -295,7 +295,7 @@ func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo *chat1.MessageID
 		Message: SendMessageBody{
 			Body: fmt.Sprintf(message, a...),
 		},
-		ReplyTo: replyTo,
+		ReplyTo: &replyTo,
 	}
 
 	r, err := k.SendMessage(opts)
