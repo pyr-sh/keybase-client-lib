@@ -228,7 +228,7 @@ func (k *Keybase) SendMessageToConvID(convID chat1.ConvIDStr, message string, a 
 	return r, nil
 }
 
-// SendEphemeralToChannel sends a chat message to a channel
+// SendEphemeralToChannel sends an exploding chat message to a channel
 func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
@@ -248,7 +248,7 @@ func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration tim
 	return r, nil
 }
 
-// SendEphemeralToConvID sends a chat message to a conversation id
+// SendEphemeralToConvID sends an exploding chat message to a conversation id
 func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
@@ -268,7 +268,7 @@ func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Du
 	return r, nil
 }
 
-// ReplyToChannel sends a chat message to a channel
+// ReplyToChannel sends a reply message to a channel
 func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
@@ -288,7 +288,7 @@ func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo chat1.Messag
 	return r, nil
 }
 
-// ReplyToConvID sends a chat message to a conversation id
+// ReplyToConvID sends a reply message to a conversation id
 func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
@@ -308,7 +308,7 @@ func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID,
 	return r, nil
 }
 
-// EditToChannel sends a chat message to a channel
+// EditToChannel sends an edit message to a channel
 func (k *Keybase) EditToChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
@@ -328,7 +328,7 @@ func (k *Keybase) EditToChannel(channel chat1.ChatChannel, msgID chat1.MessageID
 	return r, nil
 }
 
-// EditToConvID sends a chat message to a conversation id
+// EditToConvID sends an edit message to a conversation id
 func (k *Keybase) EditToConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
