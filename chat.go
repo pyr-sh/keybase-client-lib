@@ -207,6 +207,25 @@ func (k *Keybase) SendMessageToChannel(channel chat1.ChatChannel, message string
 	return r, nil
 }
 
+// SendMessageToConvID sends a chat message to a conversation id
+func (k *Keybase) SendMessageToConvID(convID chat1.ConvIDStr, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+	}
+
+	r, err := k.SendMessage(opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
 // Send sends a chat message
 func (c Chat) Send(message ...string) (ChatAPI, error) {
 	m := ChatAPI{
