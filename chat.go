@@ -308,6 +308,46 @@ func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID,
 	return r, nil
 }
 
+// EditToChannel sends a chat message to a channel
+func (k *Keybase) EditToChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
+	}
+
+	r, err := k.SendMessage("edit", opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
+// EditToConvID sends a chat message to a conversation id
+func (k *Keybase) EditToConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
+	}
+
+	r, err := k.SendMessage("edit", opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
 // Edit edits a previously sent chat message
 func (c Chat) Edit(messageID int, message ...string) (ChatAPI, error) {
 	m := ChatAPI{
