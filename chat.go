@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os/exec"
 	"strings"
 	"time"
@@ -162,6 +163,45 @@ func chatAPIOut(k *Keybase, c ChatAPI) (ChatAPI, error) {
 		json.Unmarshal([]byte(*r.ErrorRaw), &errorRead)
 		r.ErrorRead = &errorRead
 		return r, errors.New(r.ErrorRead.Message)
+	}
+
+	return r, nil
+}
+
+// SendMessage sends a chat message
+func (k *Keybase) SendMessage(options SendMessageOptions) (SendResponse, error) {
+	var r SendResponse
+
+	arg := newSendMessageArg(options)
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return r, err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
+// SendMessageToChannel sends a chat message to a channel
+func (k *Keybase) SendMessageToChannel(channel chat1.ChatChannel, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+	}
+
+	r, err := k.SendMessage(opts)
+	if err != nil {
+		return r, err
 	}
 
 	return r, nil

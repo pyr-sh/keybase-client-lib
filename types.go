@@ -21,6 +21,52 @@ type RunOptions struct {
 	FilterChannels []chat1.ChatChannel // Only subscribe to messages from specified channels
 }
 
+// Error holds an error message returned by the API
+type Error struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type SendMessageBody struct {
+	Body string
+}
+
+// SendMessageOptions holds a set of options to be passed to SendMessage
+type SendMessageOptions struct {
+	Channel          chat1.ChatChannel `json:"channel,omitempty"`
+	ConversationID   chat1.ConvIDStr   `json:"conversation_id,omitempty"`
+	Message          SendMessageBody   `json:",omitempty"`
+	Filename         string            `json:"filename,omitempty"`
+	Title            string            `json:"title,omitempty"`
+	MessageID        chat1.MessageID   `json:"message_id,omitempty"`
+	ConfirmLumenSend bool              `json:"confirm_lumen_send"`
+	ReplyTo          *chat1.MessageID  `json:"reply_to,omitempty"`
+}
+
+type sendMessageParams struct {
+	Options SendMessageOptions
+}
+
+type sendMessageArg struct {
+	Method string
+	Params sendMessageParams
+}
+
+func newSendMessageArg(options SendMessageOptions) sendMessageArg {
+	return sendMessageArg{
+		Method: "send",
+		Params: sendMessageParams{
+			Options: options,
+		},
+	}
+}
+
+// SendResponse holds the data returned by the send method in the API
+type SendResponse struct {
+	Result chat1.SendRes `json:"result"`
+	Error  *Error        `json:"error,omitempty"`
+}
+
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
 type ChatAPI struct {
 	Type         string           `json:"type,omitempty"`
@@ -593,11 +639,6 @@ type tOptions struct {
 
 type tParams struct {
 	Options tOptions `json:"options"`
-}
-
-type Error struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
 }
 
 type tResult struct {
