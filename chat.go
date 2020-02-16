@@ -169,10 +169,12 @@ func chatAPIOut(k *Keybase, c ChatAPI) (ChatAPI, error) {
 }
 
 // SendMessage sends a chat message
-func (k *Keybase) SendMessage(options SendMessageOptions) (SendResponse, error) {
+func (k *Keybase) SendMessage(method string, options SendMessageOptions) (SendResponse, error) {
 	var r SendResponse
 
 	arg := newSendMessageArg(options)
+	arg.Method = method
+
 	jsonBytes, _ := json.Marshal(arg)
 
 	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
@@ -199,7 +201,7 @@ func (k *Keybase) SendMessageToChannel(channel chat1.ChatChannel, message string
 		},
 	}
 
-	r, err := k.SendMessage(opts)
+	r, err := k.SendMessage("send", opts)
 	if err != nil {
 		return r, err
 	}
@@ -218,7 +220,7 @@ func (k *Keybase) SendMessageToConvID(convID chat1.ConvIDStr, message string, a 
 		},
 	}
 
-	r, err := k.SendMessage(opts)
+	r, err := k.SendMessage("send", opts)
 	if err != nil {
 		return r, err
 	}
@@ -238,7 +240,7 @@ func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration tim
 		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
 
-	r, err := k.SendMessage(opts)
+	r, err := k.SendMessage("send", opts)
 	if err != nil {
 		return r, err
 	}
@@ -258,7 +260,7 @@ func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Du
 		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
 
-	r, err := k.SendMessage(opts)
+	r, err := k.SendMessage("send", opts)
 	if err != nil {
 		return r, err
 	}
@@ -278,7 +280,7 @@ func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo chat1.Messag
 		ReplyTo: &replyTo,
 	}
 
-	r, err := k.SendMessage(opts)
+	r, err := k.SendMessage("send", opts)
 	if err != nil {
 		return r, err
 	}
@@ -298,7 +300,7 @@ func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID,
 		ReplyTo: &replyTo,
 	}
 
-	r, err := k.SendMessage(opts)
+	r, err := k.SendMessage("send", opts)
 	if err != nil {
 		return r, err
 	}
