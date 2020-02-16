@@ -27,16 +27,16 @@ type Error struct {
 	Message string `json:"message"`
 }
 
-type duration struct {
+type explodingLifetime struct {
 	time.Duration
 }
 
-func (d *duration) UnmarshalJSON(b []byte) (err error) {
+func (d *explodingLifetime) UnmarshalJSON(b []byte) (err error) {
 	d.Duration, err = time.ParseDuration(strings.Trim(string(b), `"`))
 	return
 }
 
-func (d *duration) MarshalJSON() (b []byte, err error) {
+func (d *explodingLifetime) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
 }
 
@@ -54,7 +54,7 @@ type SendMessageOptions struct {
 	MessageID         chat1.MessageID   `json:"message_id,omitempty"`
 	ConfirmLumenSend  bool              `json:"confirm_lumen_send"`
 	ReplyTo           *chat1.MessageID  `json:"reply_to,omitempty"`
-	ExplodingLifetime duration          `json:"exploding_lifetime,omitempty"`
+	ExplodingLifetime explodingLifetime `json:"exploding_lifetime,omitempty"`
 }
 
 type sendMessageParams struct {
@@ -396,7 +396,7 @@ type options struct {
 	GameID             string             `json:"game_id,omitempty"`
 	Alias              string             `json:"alias,omitempty"`
 	BotAdvertisements  []BotAdvertisement `json:"advertisements,omitempty"`
-	ExplodingLifetime  duration           `json:"exploding_lifetime,omitempty"`
+	//ExplodingLifetime  duration           `json:"exploding_lifetime,omitempty"`
 
 	Name        string `json:"name,omitempty"`
 	Public      bool   `json:"public,omitempty"`

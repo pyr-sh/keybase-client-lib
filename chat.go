@@ -235,9 +235,8 @@ func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration tim
 		Message: SendMessageBody{
 			Body: fmt.Sprintf(message, a...),
 		},
+		ExplodingLifetime: explodingLifetime{duration},
 	}
-
-	opts.ExplodingLifetime.Duration = duration
 
 	r, err := k.SendMessage(opts)
 	if err != nil {
@@ -256,9 +255,8 @@ func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Du
 		Message: SendMessageBody{
 			Body: fmt.Sprintf(message, a...),
 		},
+		ExplodingLifetime: explodingLifetime{duration},
 	}
-
-	opts.ExplodingLifetime.Duration = duration
 
 	r, err := k.SendMessage(opts)
 	if err != nil {
@@ -268,43 +266,43 @@ func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Du
 	return r, nil
 }
 
-// Send sends a chat message
-func (c Chat) Send(message ...string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Message: &mesg{},
+// ReplyToChannel sends a chat message to a channel
+func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo *chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		ReplyTo: replyTo,
 	}
 
-	m.Method = "send"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = strings.Join(message, " ")
-
-	r, err := chatAPIOut(c.keybase, m)
+	r, err := k.SendMessage(opts)
 	if err != nil {
 		return r, err
 	}
+
 	return r, nil
 }
 
-// SendEphemeral sends an exploding chat message, with specified duration
-func (c Chat) SendEphemeral(duration time.Duration, message ...string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Message: &mesg{},
-	}
-	m.Params.Options.ExplodingLifetime.Duration = duration
-	m.Method = "send"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = strings.Join(message, " ")
+// ReplyToConvID sends a chat message to a conversation id
+func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo *chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
 
-	r, err := chatAPIOut(c.keybase, m)
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		ReplyTo: replyTo,
+	}
+
+	r, err := k.SendMessage(opts)
 	if err != nil {
 		return r, err
 	}
+
 	return r, nil
 }
 
