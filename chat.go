@@ -347,6 +347,46 @@ func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, me
 	return r, nil
 }
 
+// ReactByChannel reacts to a message in a channel
+func (k *Keybase) ReactByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
+	}
+
+	r, err := k.SendMessage("reaction", opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
+// ReactByConvID reacts to a message in a conversation id
+func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
+	}
+
+	r, err := k.SendMessage("reaction", opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
 // React sends a reaction to a message.
 func (c Chat) React(messageID int, reaction string) (ChatAPI, error) {
 	m := ChatAPI{
