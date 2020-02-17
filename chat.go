@@ -387,19 +387,37 @@ func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, m
 	return r, nil
 }
 
-// Delete deletes a chat message
-func (c Chat) Delete(messageID int) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Method = "delete"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.MessageID = messageID
+// DeleteByChannel reacts to a message in a channel
+func (k *Keybase) DeleteByChannel(channel chat1.ChatChannel, msgID chat1.MessageID) (SendResponse, error) {
+	var r SendResponse
 
-	r, err := chatAPIOut(c.keybase, m)
+	opts := SendMessageOptions{
+		Channel:   channel,
+		MessageID: msgID,
+	}
+
+	r, err := k.SendMessage("delete", opts)
 	if err != nil {
 		return r, err
 	}
+
+	return r, nil
+}
+
+// DeleteByConvID reacts to a message in a conversation id
+func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		MessageID:      msgID,
+	}
+
+	r, err := k.SendMessage("delete", opts)
+	if err != nil {
+		return r, err
+	}
+
 	return r, nil
 }
 
