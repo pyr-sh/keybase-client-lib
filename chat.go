@@ -387,26 +387,6 @@ func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, m
 	return r, nil
 }
 
-// React sends a reaction to a message.
-func (c Chat) React(messageID int, reaction string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Message: &mesg{},
-	}
-	m.Method = "reaction"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = reaction
-	m.Params.Options.MessageID = messageID
-
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
-}
-
 // Delete deletes a chat message
 func (c Chat) Delete(messageID int) (ChatAPI, error) {
 	m := ChatAPI{
