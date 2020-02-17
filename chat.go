@@ -189,8 +189,8 @@ func (k *Keybase) SendMessage(method string, options SendMessageOptions) (SendRe
 	return r, nil
 }
 
-// SendMessageToChannel sends a chat message to a channel
-func (k *Keybase) SendMessageToChannel(channel chat1.ChatChannel, message string, a ...interface{}) (SendResponse, error) {
+// SendMessageByChannel sends a chat message to a channel
+func (k *Keybase) SendMessageByChannel(channel chat1.ChatChannel, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -208,8 +208,8 @@ func (k *Keybase) SendMessageToChannel(channel chat1.ChatChannel, message string
 	return r, nil
 }
 
-// SendMessageToConvID sends a chat message to a conversation id
-func (k *Keybase) SendMessageToConvID(convID chat1.ConvIDStr, message string, a ...interface{}) (SendResponse, error) {
+// SendMessageByConvID sends a chat message to a conversation id
+func (k *Keybase) SendMessageByConvID(convID chat1.ConvIDStr, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -227,8 +227,8 @@ func (k *Keybase) SendMessageToConvID(convID chat1.ConvIDStr, message string, a 
 	return r, nil
 }
 
-// SendEphemeralToChannel sends an exploding chat message to a channel
-func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
+// SendEphemeralByChannel sends an exploding chat message to a channel
+func (k *Keybase) SendEphemeralByChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -247,8 +247,8 @@ func (k *Keybase) SendEphemeralToChannel(channel chat1.ChatChannel, duration tim
 	return r, nil
 }
 
-// SendEphemeralToConvID sends an exploding chat message to a conversation id
-func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
+// SendEphemeralByConvID sends an exploding chat message to a conversation id
+func (k *Keybase) SendEphemeralByConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -267,8 +267,8 @@ func (k *Keybase) SendEphemeralToConvID(convID chat1.ConvIDStr, duration time.Du
 	return r, nil
 }
 
-// ReplyToChannel sends a reply message to a channel
-func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+// ReplyByChannel sends a reply message to a channel
+func (k *Keybase) ReplyByChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -287,8 +287,8 @@ func (k *Keybase) ReplyToChannel(channel chat1.ChatChannel, replyTo chat1.Messag
 	return r, nil
 }
 
-// ReplyToConvID sends a reply message to a conversation id
-func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+// ReplyByConvID sends a reply message to a conversation id
+func (k *Keybase) ReplyByConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -307,8 +307,8 @@ func (k *Keybase) ReplyToConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID,
 	return r, nil
 }
 
-// EditToChannel sends an edit message to a channel
-func (k *Keybase) EditToChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+// EditByChannel sends an edit message to a channel
+func (k *Keybase) EditByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
@@ -327,8 +327,8 @@ func (k *Keybase) EditToChannel(channel chat1.ChatChannel, msgID chat1.MessageID
 	return r, nil
 }
 
-// EditToConvID sends an edit message to a conversation id
-func (k *Keybase) EditToConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
+// EditByConvID sends an edit message to a conversation id
+func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
 	var r SendResponse
 
 	opts := SendMessageOptions{
