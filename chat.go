@@ -421,6 +421,22 @@ func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) 
 	return r, nil
 }
 
+// GetConversations returns a list of all conversations. Optionally, you can filter by unread
+func (k *Keybase) GetConversations(unreadOnly bool) (SendResponse, error) {
+	var r SendResponse
+
+	opts := SendMessageOptions{
+		UnreadOnly: unreadOnly,
+	}
+
+	r, err := k.SendMessage("list", opts)
+	if err != nil {
+		return r, err
+	}
+
+	return r, nil
+}
+
 // ChatList returns a list of all conversations.
 // You can pass a Channel to use as a filter here, but you'll probably want to
 // leave the TopicName empty.

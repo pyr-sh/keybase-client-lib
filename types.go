@@ -55,6 +55,7 @@ type SendMessageOptions struct {
 	ConfirmLumenSend  bool               `json:"confirm_lumen_send"`
 	ReplyTo           *chat1.MessageID   `json:"reply_to,omitempty"`
 	ExplodingLifetime *ExplodingLifetime `json:"exploding_lifetime,omitempty"`
+	UnreadOnly        bool               `json:"unread_only,omitempty"`
 }
 
 type sendMessageParams struct {
