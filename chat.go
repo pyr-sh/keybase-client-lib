@@ -422,19 +422,29 @@ func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) 
 }
 
 // GetConversations returns a list of all conversations. Optionally, you can filter by unread
-func (k *Keybase) GetConversations(unreadOnly bool) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) GetConversations(unreadOnly bool) ([]chat1.ConvSummary, error) {
+	var r Inbox
 
 	opts := SendMessageOptions{
 		UnreadOnly: unreadOnly,
 	}
 
-	r, err := k.SendMessage("list", opts)
+	arg := newSendMessageArg(opts)
+	arg.Method = "list"
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return []chat1.ConvSummary{}, err
 	}
 
-	return r, nil
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return []chat1.ConvSummary{}, err
+	}
+
+	return r.Result.Convs, nil
 }
 
 // ChatList returns a list of all conversations.
