@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"samhofi.us/x/keybase/types/chat1"
+	"samhofi.us/x/keybase/types/stellar1"
 )
 
 // Returns a string representation of a message id suitable for use in a
@@ -86,14 +87,7 @@ func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string
 						break
 					}
 					if notification.Msg != nil {
-						subscriptionMessage := SubscriptionMessage{
-							Message: *notification.Msg,
-							Conversation: chat1.ConvSummary{
-								Id:      notification.Msg.ConvID,
-								Channel: notification.Msg.Channel,
-							},
-						}
-						subs.chat <- subscriptionMessage
+						subs.chat <- *notification.Msg
 					}
 				case "chat_conv":
 					var notification chat1.ConvNotification
@@ -102,10 +96,7 @@ func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string
 						break
 					}
 					if notification.Conv != nil {
-						subscriptionConv := SubscriptionConversation{
-							Conversation: *notification.Conv,
-						}
-						subs.conversation <- subscriptionConv
+						subs.conversation <- *notification.Conv
 					}
 				case "wallet":
 					var holder paymentHolder
@@ -113,8 +104,7 @@ func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string
 						subs.error <- err
 						break
 					}
-					subscriptionPayment := SubscriptionWalletEvent(holder)
-					subs.wallet <- subscriptionPayment
+					subs.wallet <- holder.Payment
 				default:
 					continue
 				}
@@ -159,9 +149,9 @@ func (k *Keybase) Run(handlers Handlers, options ...RunOptions) {
 		}
 	}
 
-	chatCh := make(chan SubscriptionMessage, channelCapacity)
-	convCh := make(chan SubscriptionConversation, channelCapacity)
-	walletCh := make(chan SubscriptionWalletEvent, channelCapacity)
+	chatCh := make(chan chat1.MsgSummary, channelCapacity)
+	convCh := make(chan chat1.ConvSummary, channelCapacity)
+	walletCh := make(chan stellar1.PaymentDetailsLocal, channelCapacity)
 	errorCh := make(chan error, channelCapacity)
 
 	subs := &SubscriptionChannels{

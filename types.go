@@ -26,34 +26,21 @@ type subscriptionType struct {
 	Type string `json:"type"`
 }
 
-type SubscriptionMessage struct {
-	Message      chat1.MsgSummary
-	Conversation chat1.ConvSummary
-}
-
-type SubscriptionConversation struct {
-	Conversation chat1.ConvSummary
-}
-
-type SubscriptionWalletEvent struct {
-	Payment stellar1.PaymentDetailsLocal
-}
-
 type paymentHolder struct {
 	Payment stellar1.PaymentDetailsLocal `json:"notification"`
 }
 
 type Handlers struct {
-	ChatHandler         *func(SubscriptionMessage)
-	ConversationHandler *func(SubscriptionConversation)
-	WalletHandler       *func(SubscriptionWalletEvent)
+	ChatHandler         *func(chat1.MsgSummary)
+	ConversationHandler *func(chat1.ConvSummary)
+	WalletHandler       *func(stellar1.PaymentDetailsLocal)
 	ErrorHandler        *func(error)
 }
 
 type SubscriptionChannels struct {
-	chat         chan SubscriptionMessage
-	conversation chan SubscriptionConversation
-	wallet       chan SubscriptionWalletEvent
+	chat         chan chat1.MsgSummary
+	conversation chan chat1.ConvSummary
+	wallet       chan stellar1.PaymentDetailsLocal
 	error        chan error
 }
 
