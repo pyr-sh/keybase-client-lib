@@ -172,6 +172,9 @@ func (k *Keybase) Run(handlers Handlers, options ...RunOptions) {
 		if options[0].Wallet {
 			runOptions = append(runOptions, "--wallet")
 		}
+		if options[0].Convs {
+			runOptions = append(runOptions, "--convs")
+		}
 		if options[0].Local {
 			runOptions = append(runOptions, "--local")
 		}
