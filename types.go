@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"samhofi.us/x/keybase/types/chat1"
+	"samhofi.us/x/keybase/types/stellar1"
 )
 
 // RunOptions holds a set of options to be passed to Run
@@ -19,6 +20,41 @@ type RunOptions struct {
 	Convs          bool                // Subscribe to new-conversation events
 	FilterChannel  chat1.ChatChannel   // Only subscribe to messages from specified channel
 	FilterChannels []chat1.ChatChannel // Only subscribe to messages from specified channels
+}
+
+type subscriptionType struct {
+	Type string `json:"type"`
+}
+
+type SubscriptionMessage struct {
+	Message      chat1.MsgSummary
+	Conversation chat1.ConvSummary
+}
+
+type SubscriptionConversation struct {
+	Conversation chat1.ConvSummary
+}
+
+type SubscriptionWalletEvent struct {
+	Payment stellar1.PaymentDetailsLocal
+}
+
+type paymentHolder struct {
+	Payment stellar1.PaymentDetailsLocal `json:"notification"`
+}
+
+type Handlers struct {
+	ChatHandler         *func(SubscriptionMessage)
+	ConversationHandler *func(SubscriptionConversation)
+	WalletHandler       *func(SubscriptionWalletEvent)
+	ErrorHandler        *func(error)
+}
+
+type SubscriptionChannels struct {
+	chat         chan SubscriptionMessage
+	conversation chan SubscriptionConversation
+	wallet       chan SubscriptionWalletEvent
+	error        chan error
 }
 
 // Error holds an error message returned by the API

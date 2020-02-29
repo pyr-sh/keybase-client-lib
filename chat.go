@@ -11,43 +11,7 @@ import (
 	"time"
 
 	"samhofi.us/x/keybase/types/chat1"
-	"samhofi.us/x/keybase/types/stellar1"
 )
-
-type SubscriptionType struct {
-	Type string `json:"type"`
-}
-
-type SubscriptionMessage struct {
-	Message      chat1.MsgSummary
-	Conversation chat1.ConvSummary
-}
-
-type SubscriptionConversation struct {
-	Conversation chat1.ConvSummary
-}
-
-type SubscriptionWalletEvent struct {
-	Payment stellar1.PaymentDetailsLocal
-}
-
-type PaymentHolder struct {
-	Payment stellar1.PaymentDetailsLocal `json:"notification"`
-}
-
-type Handlers struct {
-	ChatHandler         *func(SubscriptionMessage)
-	ConversationHandler *func(SubscriptionConversation)
-	WalletHandler       *func(SubscriptionWalletEvent)
-	ErrorHandler        *func(error)
-}
-
-type SubscriptionChannels struct {
-	chat         chan SubscriptionMessage
-	conversation chan SubscriptionConversation
-	wallet       chan SubscriptionWalletEvent
-	error        chan error
-}
 
 // Returns a string representation of a message id suitable for use in a
 // pagination struct
@@ -111,7 +75,7 @@ func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string
 		go func(scanner *bufio.Scanner, subs *SubscriptionChannels) {
 			for {
 				scanner.Scan()
-				var subType SubscriptionType
+				var subType subscriptionType
 				t := scanner.Text()
 				json.Unmarshal([]byte(t), &subType)
 				switch subType.Type {
@@ -144,7 +108,7 @@ func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string
 						subs.conversation <- subscriptionConv
 					}
 				case "wallet":
-					var holder PaymentHolder
+					var holder paymentHolder
 					if err := json.Unmarshal([]byte(t), &holder); err != nil {
 						subs.error <- err
 						break
