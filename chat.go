@@ -115,37 +115,38 @@ func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string
 }
 
 // Run runs `keybase chat api-listen`, and passes incoming messages to the message handler func
-func (k *Keybase) Run(handlers Handlers, options ...RunOptions) {
+func (k *Keybase) Run(handlers Handlers, options *RunOptions) {
 	var channelCapacity = 100
 
 	runOptions := make([]string, 0)
-	if len(options) > 0 {
-		if options[0].Capacity > 0 {
-			channelCapacity = options[0].Capacity
+	if handlers.WalletHandler != nil {
+		runOptions = append(runOptions, "--wallet")
+	}
+	if handlers.ConversationHandler != nil {
+		runOptions = append(runOptions, "--convs")
+	}
+
+	if options != nil {
+		if options.Capacity > 0 {
+			channelCapacity = options.Capacity
 		}
-		if options[0].Wallet {
-			runOptions = append(runOptions, "--wallet")
-		}
-		if options[0].Convs {
-			runOptions = append(runOptions, "--convs")
-		}
-		if options[0].Local {
+		if options.Local {
 			runOptions = append(runOptions, "--local")
 		}
-		if options[0].HideExploding {
+		if options.HideExploding {
 			runOptions = append(runOptions, "--hide-exploding")
 		}
-		if options[0].Dev {
+		if options.Dev {
 			runOptions = append(runOptions, "--dev")
 		}
-		if len(options[0].FilterChannels) > 0 {
+		if len(options.FilterChannels) > 0 {
 			runOptions = append(runOptions, "--filter-channels")
-			runOptions = append(runOptions, createFiltersString(options[0].FilterChannels))
+			runOptions = append(runOptions, createFiltersString(options.FilterChannels))
 
 		}
-		if options[0].FilterChannel.Name != "" {
+		if options.FilterChannel.Name != "" {
 			runOptions = append(runOptions, "--filter-channel")
-			runOptions = append(runOptions, createFilterString(options[0].FilterChannel))
+			runOptions = append(runOptions, createFilterString(options.FilterChannel))
 		}
 	}
 

@@ -16,8 +16,6 @@ type RunOptions struct {
 	Local          bool                // Subscribe to local messages
 	HideExploding  bool                // Ignore exploding messages
 	Dev            bool                // Subscribe to dev channel messages
-	Wallet         bool                // Subscribe to wallet events
-	Convs          bool                // Subscribe to new-conversation events
 	FilterChannel  chat1.ChatChannel   // Only subscribe to messages from specified channel
 	FilterChannels []chat1.ChatChannel // Only subscribe to messages from specified channels
 }
