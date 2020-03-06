@@ -2,136 +2,190 @@ package keybase
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
+
+	"samhofi.us/x/keybase/types/keybase1"
 )
 
-// kvAPIOut sends a JSON request to the kvstore API and returns its response.
-func kvAPIOut(k *Keybase, kv KVAPI) (KVAPI, error) {
-	jsonBytes, _ := json.Marshal(kv)
+// KVListNamespaces returns all namespaces for a team
+func (k *Keybase) KVListNamespaces(team *string) (keybase1.KVListNamespaceResult, error) {
+	type res struct {
+		Result keybase1.KVListNamespaceResult `json:"result"`
+		Error  *Error                         `json:"error"`
+	}
+	var r res
+
+	arg := newKVArg("list", KVOptions{
+		Team: team,
+	})
+
+	jsonBytes, _ := json.Marshal(arg)
 
 	cmdOut, err := k.Exec("kvstore", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return KVAPI{}, err
+		return r.Result, err
 	}
 
-	var r KVAPI
-	if err := json.Unmarshal(cmdOut, &r); err != nil {
-		return KVAPI{}, err
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
 	}
 
 	if r.Error != nil {
-		return KVAPI{}, errors.New(r.Error.Message)
+		return r.Result, fmt.Errorf("%s", r.Error.Message)
 	}
 
-	return r, nil
+	return r.Result, nil
 }
 
-// Namespaces returns all namespaces for a team
-func (kv KV) Namespaces() (KVAPI, error) {
-	m := KVAPI{
-		Params: &kvParams{},
+// KVListKeys returns all non-deleted keys for a namespace
+func (k *Keybase) KVListKeys(team *string, namespace string) (keybase1.KVListEntryResult, error) {
+	type res struct {
+		Result keybase1.KVListEntryResult `json:"result"`
+		Error  *Error                     `json:"error"`
 	}
-	m.Params.Options = kvOptions{
-		Team: kv.Team,
-	}
+	var r res
 
-	m.Method = "list"
+	arg := newKVArg("list", KVOptions{
+		Team:      team,
+		Namespace: &namespace,
+	})
 
-	r, err := kvAPIOut(kv.keybase, m)
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("kvstore", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
-	return r, nil
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%s", r.Error.Message)
+	}
+
+	return r.Result, nil
 }
 
-// Keys returns all non-deleted keys for a namespace
-func (kv KV) Keys(namespace string) (KVAPI, error) {
-	m := KVAPI{
-		Params: &kvParams{},
+// KVGet returns an entry
+func (k *Keybase) KVGet(team *string, namespace string, key string) (keybase1.KVGetResult, error) {
+	type res struct {
+		Result keybase1.KVGetResult `json:"result"`
+		Error  *Error               `json:"error"`
 	}
-	m.Params.Options = kvOptions{
-		Team:      kv.Team,
-		Namespace: namespace,
-	}
+	var r res
 
-	m.Method = "list"
+	arg := newKVArg("get", KVOptions{
+		Team:      team,
+		Namespace: &namespace,
+		EntryKey:  &key,
+	})
 
-	r, err := kvAPIOut(kv.keybase, m)
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("kvstore", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
-	return r, nil
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%s", r.Error.Message)
+	}
+
+	return r.Result, nil
 }
 
-// Get returns an entry
-func (kv KV) Get(namespace string, key string, revision ...uint) (KVAPI, error) {
-	m := KVAPI{
-		Params: &kvParams{},
+// KVPutWithRevision puts an entry, specifying the revision number
+func (k *Keybase) KVPutWithRevision(team *string, namespace string, key string, value string, revision int) (keybase1.KVPutResult, error) {
+	type res struct {
+		Result keybase1.KVPutResult `json:"result"`
+		Error  *Error               `json:"error"`
 	}
-	m.Params.Options = kvOptions{
-		Team:      kv.Team,
-		Namespace: namespace,
-		EntryKey:  key,
+	var r res
+
+	opts := KVOptions{
+		Team:       team,
+		Namespace:  &namespace,
+		EntryKey:   &key,
+		EntryValue: &value,
+	}
+	if revision != 0 {
+		opts.Revision = &revision
 	}
 
-	if len(revision) > 0 {
-		m.Params.Options.Revision = revision[0]
-	}
+	arg := newKVArg("put", opts)
 
-	m.Method = "get"
+	jsonBytes, _ := json.Marshal(arg)
 
-	r, err := kvAPIOut(kv.keybase, m)
+	cmdOut, err := k.Exec("kvstore", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
-	return r, nil
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%s", r.Error.Message)
+	}
+
+	return r.Result, nil
 }
 
-// Put adds an entry
-func (kv KV) Put(namespace string, key string, value string, revision ...uint) (KVAPI, error) {
-	m := KVAPI{
-		Params: &kvParams{},
-	}
-	m.Params.Options = kvOptions{
-		Team:       kv.Team,
-		Namespace:  namespace,
-		EntryKey:   key,
-		EntryValue: value,
-	}
-
-	if len(revision) > 0 {
-		m.Params.Options.Revision = revision[0]
-	}
-
-	m.Method = "put"
-
-	r, err := kvAPIOut(kv.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
+// KVPut puts an entry
+func (k *Keybase) KVPut(team *string, namespace string, key string, value string) (keybase1.KVPutResult, error) {
+	return k.KVPutWithRevision(team, namespace, key, value, 0)
 }
 
-// Delete removes an entry
-func (kv KV) Delete(namespace string, key string, revision ...uint) (KVAPI, error) {
-	m := KVAPI{
-		Params: &kvParams{},
+// KVDeleteWithRevision deletes an entry, specifying the revision number
+func (k *Keybase) KVDeleteWithRevision(team *string, namespace string, key string, revision int) (keybase1.KVDeleteEntryResult, error) {
+	type res struct {
+		Result keybase1.KVDeleteEntryResult `json:"result"`
+		Error  *Error                       `json:"error"`
 	}
-	m.Params.Options = kvOptions{
-		Team:      kv.Team,
-		Namespace: namespace,
-		EntryKey:  key,
+	var r res
+
+	opts := KVOptions{
+		Team:      team,
+		Namespace: &namespace,
+		EntryKey:  &key,
+	}
+	if revision != 0 {
+		opts.Revision = &revision
 	}
 
-	if len(revision) > 0 {
-		m.Params.Options.Revision = revision[0]
-	}
+	arg := newKVArg("del", opts)
 
-	m.Method = "del"
+	jsonBytes, _ := json.Marshal(arg)
 
-	r, err := kvAPIOut(kv.keybase, m)
+	cmdOut, err := k.Exec("kvstore", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
-	return r, nil
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%s", r.Error.Message)
+	}
+
+	return r.Result, nil
+}
+
+// KVDelete deletes an entry
+func (k *Keybase) KVDelete(team *string, namespace string, key string) (keybase1.KVDeleteEntryResult, error) {
+	return k.KVDeleteWithRevision(team, namespace, key, 0)
 }

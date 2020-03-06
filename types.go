@@ -114,6 +114,32 @@ type SendResponse struct {
 	Error  *Error        `json:"error,omitempty"`
 }
 
+type KVOptions struct {
+	Team       *string `json:"team"`
+	Namespace  *string `json:"namespace,omitempty"`
+	EntryKey   *string `json:"entryKey,omitempty"`
+	EntryValue *string `json:"entryValue,omitempty"`
+	Revision   *int    `json:"revision,omitempty"`
+}
+
+type kvParams struct {
+	Options KVOptions `json:"options"`
+}
+
+type kvArg struct {
+	Method string   `json:"method"`
+	Params kvParams `json:"params"`
+}
+
+func newKVArg(method string, options KVOptions) kvArg {
+	return kvArg{
+		Method: method,
+		Params: kvParams{
+			Options: options,
+		},
+	}
+}
+
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
 type ChatAPI struct {
 	Type         string           `json:"type,omitempty"`
@@ -714,41 +740,6 @@ type teamInfo struct {
 	Implicit                implicit `json:"implicit,omitempty"`
 }
 
-// KVAPI holds information sent and received to/from the kvstore api
-type KVAPI struct {
-	Method  string    `json:"method,omitempty"`
-	Params  *kvParams `json:"params,omitempty"`
-	Result  *kvResult `json:"result,omitempty"`
-	Error   *Error    `json:"error"`
-	keybase Keybase
-}
-
-type kvOptions struct {
-	Team       string `json:"team,omitempty"`
-	Namespace  string `json:"namespace,omitempty"`
-	EntryKey   string `json:"entryKey,omitempty"`
-	Revision   uint   `json:"revision,omitempty"`
-	EntryValue string `json:"entryValue,omitempty"`
-}
-
-type kvParams struct {
-	Options kvOptions `json:"options,omitempty"`
-}
-
-type entryKey struct {
-	EntryKey string `json:"entryKey"`
-	Revision uint   `json:"revision"`
-}
-
-type kvResult struct {
-	TeamName   string     `json:"teamName"`
-	Namespaces []string   `json:"namespaces"`
-	EntryKeys  []entryKey `json:"entryKeys"`
-	EntryKey   string     `json:"entryKey"`
-	EntryValue string     `json:"entryValue"`
-	Revision   uint       `json:"revision"`
-}
-
 // UserAPI holds information received from the user/lookup api
 type UserAPI struct {
 	Status uStatus `json:"status"`
@@ -951,20 +942,6 @@ type wallet interface {
 	TxDetail(txid string) (WalletAPI, error)
 }
 
-// KV holds basic information about a KVStore
-type KV struct {
-	keybase *Keybase
-	Team    string
-}
-
-type kvInterface interface {
-	Namespaces() (KVAPI, error)
-	Keys(namespace string) (KVAPI, error)
-	Get(namespace string, key string) (KVAPI, error)
-	Put(namespace string, key string, value string) (KVAPI, error)
-	Delete(namespace string, key string) (KVAPI, error)
-}
-
 type keybase interface {
 	AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error)
 	AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error)
@@ -973,7 +950,6 @@ type keybase interface {
 	CreateTeam(name string) (TeamAPI, error)
 	NewChat(channel chat1.ChatChannel) Chat
 	NewTeam(name string) Team
-	NewKV(team string) KV
 	NewWallet() Wallet
 	Run(handler func(ChatAPI), options ...RunOptions)
 	status() status
