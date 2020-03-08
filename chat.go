@@ -254,8 +254,6 @@ func (k *Keybase) SendMessage(method string, options SendMessageOptions) (chat1.
 
 // SendMessageByChannel sends a chat message to a channel
 func (k *Keybase) SendMessageByChannel(channel chat1.ChatChannel, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		Channel: channel,
 		Message: SendMessageBody{
@@ -263,18 +261,11 @@ func (k *Keybase) SendMessageByChannel(channel chat1.ChatChannel, message string
 		},
 	}
 
-	r, err := k.SendMessage("send", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
 // SendMessageByConvID sends a chat message to a conversation id
 func (k *Keybase) SendMessageByConvID(convID chat1.ConvIDStr, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		ConversationID: convID,
 		Message: SendMessageBody{
@@ -282,18 +273,11 @@ func (k *Keybase) SendMessageByConvID(convID chat1.ConvIDStr, message string, a 
 		},
 	}
 
-	r, err := k.SendMessage("send", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
 // SendEphemeralByChannel sends an exploding chat message to a channel
 func (k *Keybase) SendEphemeralByChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		Channel: channel,
 		Message: SendMessageBody{
@@ -302,18 +286,11 @@ func (k *Keybase) SendEphemeralByChannel(channel chat1.ChatChannel, duration tim
 		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
 
-	r, err := k.SendMessage("send", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
 // SendEphemeralByConvID sends an exploding chat message to a conversation id
 func (k *Keybase) SendEphemeralByConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		ConversationID: convID,
 		Message: SendMessageBody{
@@ -322,18 +299,11 @@ func (k *Keybase) SendEphemeralByConvID(convID chat1.ConvIDStr, duration time.Du
 		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
 
-	r, err := k.SendMessage("send", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
 // ReplyByChannel sends a reply message to a channel
 func (k *Keybase) ReplyByChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		Channel: channel,
 		Message: SendMessageBody{
@@ -342,18 +312,11 @@ func (k *Keybase) ReplyByChannel(channel chat1.ChatChannel, replyTo chat1.Messag
 		ReplyTo: &replyTo,
 	}
 
-	r, err := k.SendMessage("send", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
 // ReplyByConvID sends a reply message to a conversation id
 func (k *Keybase) ReplyByConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		ConversationID: convID,
 		Message: SendMessageBody{
@@ -362,18 +325,11 @@ func (k *Keybase) ReplyByConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID,
 		ReplyTo: &replyTo,
 	}
 
-	r, err := k.SendMessage("send", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
 // EditByChannel sends an edit message to a channel
 func (k *Keybase) EditByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		Channel: channel,
 		Message: SendMessageBody{
@@ -382,18 +338,11 @@ func (k *Keybase) EditByChannel(channel chat1.ChatChannel, msgID chat1.MessageID
 		MessageID: msgID,
 	}
 
-	r, err := k.SendMessage("edit", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("edit", opts)
 }
 
 // EditByConvID sends an edit message to a conversation id
 func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		ConversationID: convID,
 		Message: SendMessageBody{
@@ -402,18 +351,11 @@ func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, me
 		MessageID: msgID,
 	}
 
-	r, err := k.SendMessage("edit", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("edit", opts)
 }
 
 // ReactByChannel reacts to a message in a channel
 func (k *Keybase) ReactByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		Channel: channel,
 		Message: SendMessageBody{
@@ -422,18 +364,11 @@ func (k *Keybase) ReactByChannel(channel chat1.ChatChannel, msgID chat1.MessageI
 		MessageID: msgID,
 	}
 
-	r, err := k.SendMessage("reaction", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("reaction", opts)
 }
 
 // ReactByConvID reacts to a message in a conversation id
 func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		ConversationID: convID,
 		Message: SendMessageBody{
@@ -442,46 +377,27 @@ func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, m
 		MessageID: msgID,
 	}
 
-	r, err := k.SendMessage("reaction", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("reaction", opts)
 }
 
 // DeleteByChannel reacts to a message in a channel
 func (k *Keybase) DeleteByChannel(channel chat1.ChatChannel, msgID chat1.MessageID) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		Channel:   channel,
 		MessageID: msgID,
 	}
 
-	r, err := k.SendMessage("delete", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("delete", opts)
 }
 
 // DeleteByConvID reacts to a message in a conversation id
 func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) (chat1.SendRes, error) {
-	var r chat1.SendRes
-
 	opts := SendMessageOptions{
 		ConversationID: convID,
 		MessageID:      msgID,
 	}
 
-	r, err := k.SendMessage("delete", opts)
-	if err != nil {
-		return r, err
-	}
-
-	return r, nil
+	return k.SendMessage("delete", opts)
 }
 
 // GetConversations returns a list of all conversations.
