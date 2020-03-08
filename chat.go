@@ -222,8 +222,13 @@ func chatAPIOut(k *Keybase, c ChatAPI) (ChatAPI, error) {
 }
 
 // SendMessage sends a chat message
-func (k *Keybase) SendMessage(method string, options SendMessageOptions) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) SendMessage(method string, options SendMessageOptions) (chat1.SendRes, error) {
+	type res struct {
+		Result chat1.SendRes `json:"result"`
+		Error  *Error        `json:"error,omitempty"`
+	}
+
+	var r res
 
 	arg := newSendMessageArg(options)
 	arg.Method = method
@@ -232,20 +237,24 @@ func (k *Keybase) SendMessage(method string, options SendMessageOptions) (SendRe
 
 	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
 
 	err = json.Unmarshal(cmdOut, &r)
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
 
-	return r, nil
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return r.Result, nil
 }
 
 // SendMessageByChannel sends a chat message to a channel
-func (k *Keybase) SendMessageByChannel(channel chat1.ChatChannel, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) SendMessageByChannel(channel chat1.ChatChannel, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		Channel: channel,
@@ -263,8 +272,8 @@ func (k *Keybase) SendMessageByChannel(channel chat1.ChatChannel, message string
 }
 
 // SendMessageByConvID sends a chat message to a conversation id
-func (k *Keybase) SendMessageByConvID(convID chat1.ConvIDStr, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) SendMessageByConvID(convID chat1.ConvIDStr, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		ConversationID: convID,
@@ -282,8 +291,8 @@ func (k *Keybase) SendMessageByConvID(convID chat1.ConvIDStr, message string, a 
 }
 
 // SendEphemeralByChannel sends an exploding chat message to a channel
-func (k *Keybase) SendEphemeralByChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) SendEphemeralByChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		Channel: channel,
@@ -302,8 +311,8 @@ func (k *Keybase) SendEphemeralByChannel(channel chat1.ChatChannel, duration tim
 }
 
 // SendEphemeralByConvID sends an exploding chat message to a conversation id
-func (k *Keybase) SendEphemeralByConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) SendEphemeralByConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		ConversationID: convID,
@@ -322,8 +331,8 @@ func (k *Keybase) SendEphemeralByConvID(convID chat1.ConvIDStr, duration time.Du
 }
 
 // ReplyByChannel sends a reply message to a channel
-func (k *Keybase) ReplyByChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) ReplyByChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		Channel: channel,
@@ -342,8 +351,8 @@ func (k *Keybase) ReplyByChannel(channel chat1.ChatChannel, replyTo chat1.Messag
 }
 
 // ReplyByConvID sends a reply message to a conversation id
-func (k *Keybase) ReplyByConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) ReplyByConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		ConversationID: convID,
@@ -362,8 +371,8 @@ func (k *Keybase) ReplyByConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID,
 }
 
 // EditByChannel sends an edit message to a channel
-func (k *Keybase) EditByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) EditByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		Channel: channel,
@@ -382,8 +391,8 @@ func (k *Keybase) EditByChannel(channel chat1.ChatChannel, msgID chat1.MessageID
 }
 
 // EditByConvID sends an edit message to a conversation id
-func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		ConversationID: convID,
@@ -402,8 +411,8 @@ func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, me
 }
 
 // ReactByChannel reacts to a message in a channel
-func (k *Keybase) ReactByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) ReactByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		Channel: channel,
@@ -422,8 +431,8 @@ func (k *Keybase) ReactByChannel(channel chat1.ChatChannel, msgID chat1.MessageI
 }
 
 // ReactByConvID reacts to a message in a conversation id
-func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		ConversationID: convID,
@@ -442,8 +451,8 @@ func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, m
 }
 
 // DeleteByChannel reacts to a message in a channel
-func (k *Keybase) DeleteByChannel(channel chat1.ChatChannel, msgID chat1.MessageID) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) DeleteByChannel(channel chat1.ChatChannel, msgID chat1.MessageID) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		Channel:   channel,
@@ -459,8 +468,8 @@ func (k *Keybase) DeleteByChannel(channel chat1.ChatChannel, msgID chat1.Message
 }
 
 // DeleteByConvID reacts to a message in a conversation id
-func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) (SendResponse, error) {
-	var r SendResponse
+func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) (chat1.SendRes, error) {
+	var r chat1.SendRes
 
 	opts := SendMessageOptions{
 		ConversationID: convID,
@@ -475,9 +484,14 @@ func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) 
 	return r, nil
 }
 
-// GetConversations returns a list of all conversations. Optionally, you can filter by unread
+// GetConversations returns a list of all conversations.
 func (k *Keybase) GetConversations(unreadOnly bool) ([]chat1.ConvSummary, error) {
-	var r Inbox
+	type res struct {
+		Result []chat1.ConvSummary `json:"result"`
+		Error  *Error              `json:"error,omitempty"`
+	}
+
+	var r res
 
 	opts := SendMessageOptions{
 		UnreadOnly: unreadOnly,
@@ -490,36 +504,19 @@ func (k *Keybase) GetConversations(unreadOnly bool) ([]chat1.ConvSummary, error)
 
 	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return []chat1.ConvSummary{}, err
+		return r.Result, err
 	}
 
 	err = json.Unmarshal(cmdOut, &r)
 	if err != nil {
-		return []chat1.ConvSummary{}, err
+		return r.Result, err
 	}
 
-	return r.Result.Convs, nil
-}
-
-// ChatList returns a list of all conversations.
-// You can pass a Channel to use as a filter here, but you'll probably want to
-// leave the TopicName empty.
-func (k *Keybase) ChatList(opts ...chat1.ChatChannel) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
 	}
 
-	if len(opts) > 0 {
-		m.Params.Options.Name = opts[0].Name
-		m.Params.Options.Public = opts[0].Public
-		m.Params.Options.MembersType = opts[0].MembersType
-		m.Params.Options.TopicType = opts[0].TopicType
-		m.Params.Options.TopicName = opts[0].TopicName
-	}
-	m.Method = "list"
-
-	r, err := chatAPIOut(k, m)
-	return r, err
+	return r.Result, nil
 }
 
 // ReadMessage fetches the chat message with the specified message id from a conversation.

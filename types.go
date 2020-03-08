@@ -97,23 +97,6 @@ func newSendMessageArg(options SendMessageOptions) sendMessageArg {
 	}
 }
 
-// Result holds the result porstion of a `list` method sent to the API
-type Result struct {
-	Convs []chat1.ConvSummary `json:"conversations"`
-}
-
-// Inbox holds the results of a `list`method sent to the API
-type Inbox struct {
-	Result Result `json:"result"`
-	Error  *Error `json:"error,omitempty"`
-}
-
-// SendResponse holds the data returned by the send method in the API
-type SendResponse struct {
-	Result chat1.SendRes `json:"result"`
-	Error  *Error        `json:"error,omitempty"`
-}
-
 type KVOptions struct {
 	Team       *string `json:"team"`
 	Namespace  *string `json:"namespace,omitempty"`
