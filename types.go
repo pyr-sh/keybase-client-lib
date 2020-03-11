@@ -97,6 +97,35 @@ func newSendMessageArg(options SendMessageOptions) sendMessageArg {
 	}
 }
 
+// ReadMessageOptions holds a set of options to be passed to Read
+type ReadMessageOptions struct {
+	Channel        chat1.ChatChannel `json:"channel,omitempty"`
+	ConversationID chat1.ConvIDStr   `json:"conversation_id,omitempty"`
+	Pagination     *chat1.Pagination `json:"pagination,omitempty"`
+	Peek           bool              `json:"peek"`
+	UnreadOnly     bool              `json:"unread_only"`
+	FailOffline    bool              `json:"fail_offline"`
+}
+
+type readMessageParams struct {
+	Options ReadMessageOptions
+}
+
+type readMessageArg struct {
+	Method string
+	Params readMessageParams
+}
+
+func newReadMessageArg(options ReadMessageOptions) readMessageArg {
+	return readMessageArg{
+		Method: "read",
+		Params: readMessageParams{
+			Options: options,
+		},
+	}
+}
+
+// KVOptions holds a set of options to be passed to the KV methods
 type KVOptions struct {
 	Team       *string `json:"team"`
 	Namespace  *string `json:"namespace,omitempty"`

@@ -435,6 +435,51 @@ func (k *Keybase) GetConversations(unreadOnly bool) ([]chat1.ConvSummary, error)
 	return r.Result, nil
 }
 
+// Read fetches chat messages
+func (k *Keybase) Read(options ReadMessageOptions) (chat1.Thread, error) {
+	type res struct {
+		Result chat1.Thread `json:"result"`
+		Error  *Error       `json:"error"`
+	}
+	var r res
+
+	arg := newReadMessageArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return r.Result, err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return r.Result, nil
+}
+
+// ReadChannel fetches chat messages for a channel
+func (k *Keybase) ReadChannel(channel chat1.ChatChannel) (chat1.Thread, error) {
+	opts := ReadMessageOptions{
+		Channel: channel,
+	}
+	return k.Read(opts)
+}
+
+// ReadConversation fetches chat messages for a conversation
+func (k *Keybase) ReadConversation(conv chat1.ConvIDStr) (chat1.Thread, error) {
+	opts := ReadMessageOptions{
+		ConversationID: conv,
+	}
+	return k.Read(opts)
+}
+
 // ReadMessage fetches the chat message with the specified message id from a conversation.
 func (c Chat) ReadMessage(messageID int) (*ChatAPI, error) {
 	m := ChatAPI{
