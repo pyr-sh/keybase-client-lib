@@ -472,10 +472,66 @@ func (k *Keybase) ReadChannel(channel chat1.ChatChannel) (chat1.Thread, error) {
 	return k.Read(opts)
 }
 
+// ReadChannelNext fetches the next page of messages for a chat channel.
+func (k *Keybase) ReadChannelNext(channel chat1.ChatChannel, next []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Next: next,
+		Num:  num,
+	}
+
+	opts := ReadMessageOptions{
+		Channel:    channel,
+		Pagination: &page,
+	}
+	return k.Read(opts)
+}
+
+// ReadChannelPrevious fetches the previous page of messages for a chat channel
+func (k *Keybase) ReadChannelPrevious(channel chat1.ChatChannel, previous []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Previous: previous,
+		Num:      num,
+	}
+
+	opts := ReadMessageOptions{
+		Channel:    channel,
+		Pagination: &page,
+	}
+	return k.Read(opts)
+}
+
 // ReadConversation fetches chat messages for a conversation
 func (k *Keybase) ReadConversation(conv chat1.ConvIDStr) (chat1.Thread, error) {
 	opts := ReadMessageOptions{
 		ConversationID: conv,
+	}
+	return k.Read(opts)
+}
+
+// ReadConversationNext fetches the next page of messages for a conversation.
+func (k *Keybase) ReadConversationNext(conv chat1.ConvIDStr, next []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Next: next,
+		Num:  num,
+	}
+
+	opts := ReadMessageOptions{
+		ConversationID: conv,
+		Pagination:     &page,
+	}
+	return k.Read(opts)
+}
+
+// ReadConversationPrevious fetches the previous page of messages for a chat channel
+func (k *Keybase) ReadConversationPrevious(conv chat1.ConvIDStr, previous []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Previous: previous,
+		Num:      num,
+	}
+
+	opts := ReadMessageOptions{
+		ConversationID: conv,
+		Pagination:     &page,
 	}
 	return k.Read(opts)
 }
