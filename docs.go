@@ -1,5 +1,5 @@
 /*
-The keybase package implements an interface for interacting with the Keybase Chat, Team, and Wallet APIs
+Package keybase implements an interface for interacting with the Keybase Chat, Team, and Wallet APIs
 
 I've tried to follow Keybase's JSON API as closely as possible, so if you're stuck on anything, or wondering
 why things are organized in a certain way, it's most likely due to that. It may be helpful to look at the
