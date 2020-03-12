@@ -149,6 +149,34 @@ func newAdvertiseCommandsArg(options AdvertiseCommandsOptions) advertiseCommands
 	}
 }
 
+// DownloadOptions holds a set of options to be passed to Download
+type DownloadOptions struct {
+	Channel        chat1.ChatChannel
+	ConversationID chat1.ConvIDStr `json:"conversation_id"`
+	MessageID      chat1.MessageID `json:"message_id"`
+	Output         string
+	Preview        bool
+	NoStream       bool
+}
+
+type downloadParams struct {
+	Options DownloadOptions
+}
+
+type downloadArg struct {
+	Method string
+	Params downloadParams
+}
+
+func newDownloadArg(options DownloadOptions) downloadArg {
+	return downloadArg{
+		Method: "download",
+		Params: downloadParams{
+			Options: options,
+		},
+	}
+}
+
 // KVOptions holds a set of options to be passed to the KV methods
 type KVOptions struct {
 	Team       *string `json:"team"`

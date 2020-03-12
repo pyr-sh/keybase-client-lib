@@ -583,26 +583,52 @@ func (k *Keybase) UploadToConversation(conv chat1.ConvIDStr, title string, filen
 	return k.SendMessage("attach", opts)
 }
 
-// DownloadFromChannel downloads a file from a channel
-func (k *Keybase) DownloadFromChannel(channel chat1.ChatChannel, msgID chat1.MessageID, filename string) (chat1.SendRes, error) {
-	opts := SendMessageOptions{
-		Channel:   channel,
-		MessageID: msgID,
-		Filename:  filename,
+// Download downloads a file
+func (k *Keybase) Download(options DownloadOptions) error {
+	type res struct {
+		Error *Error `json:"error"`
+	}
+	var r res
+
+	arg := newDownloadArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return err
 	}
 
-	return k.SendMessage("download", opts)
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return err
+	}
+
+	if r.Error != nil {
+		return fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return nil
+}
+
+// DownloadFromChannel downloads a file from a channel
+func (k *Keybase) DownloadFromChannel(channel chat1.ChatChannel, msgID chat1.MessageID, output string) error {
+	opts := DownloadOptions{
+		Channel:   channel,
+		MessageID: msgID,
+		Output:    output,
+	}
+	return k.Download(opts)
 }
 
 // DownloadFromConversation downloads a file from a conversation
-func (k *Keybase) DownloadFromConversation(conv chat1.ConvIDStr, msgID chat1.MessageID, filename string) (chat1.SendRes, error) {
-	opts := SendMessageOptions{
+func (k *Keybase) DownloadFromConversation(conv chat1.ConvIDStr, msgID chat1.MessageID, output string) error {
+	opts := DownloadOptions{
 		ConversationID: conv,
 		MessageID:      msgID,
-		Filename:       filename,
+		Output:         output,
 	}
-
-	return k.SendMessage("download", opts)
+	return k.Download(opts)
 }
 
 // LoadFlip returns the results of a flip
