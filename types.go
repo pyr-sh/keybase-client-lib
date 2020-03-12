@@ -28,6 +28,7 @@ type paymentHolder struct {
 	Payment stellar1.PaymentDetailsLocal `json:"notification"`
 }
 
+// Handlers holds pointers to handlers that you want to implement inside the bot type
 type Handlers struct {
 	ChatHandler         *func(chat1.MsgSummary)
 	ConversationHandler *func(chat1.ConvSummary)
@@ -35,6 +36,7 @@ type Handlers struct {
 	ErrorHandler        *func(error)
 }
 
+// SubscriptionChannels are passed to GetNewMessages to return data through channels
 type SubscriptionChannels struct {
 	chat         chan chat1.MsgSummary
 	conversation chan chat1.ConvSummary
@@ -48,19 +50,23 @@ type Error struct {
 	Message string `json:"message"`
 }
 
+// ExplodingLifetime holds a time duration for ephemeral messages
 type ExplodingLifetime struct {
 	time.Duration
 }
 
+// UnmarshalJSON unpacks exploding lifetimes from JSON
 func (d *ExplodingLifetime) UnmarshalJSON(b []byte) (err error) {
 	d.Duration, err = time.ParseDuration(strings.Trim(string(b), `"`))
 	return
 }
 
+// MarshalJSON packs exploding lifetimes to JSON
 func (d *ExplodingLifetime) MarshalJSON() (b []byte, err error) {
 	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
 }
 
+// SendMessageBody holds the body string for all send and reply methods
 type SendMessageBody struct {
 	Body string
 }
