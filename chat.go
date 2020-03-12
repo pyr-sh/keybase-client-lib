@@ -63,7 +63,7 @@ func createFiltersString(channels []chat1.ChatChannel) string {
 }
 
 // Run `keybase chat api-listen` to get new messages coming into keybase and send them into the channel
-func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string) {
+func getNewMessages(k *Keybase, subs *subscriptionChannels, execOptions []string) {
 	execString := []string{"chat", "api-listen"}
 	if len(execOptions) > 0 {
 		execString = append(execString, execOptions...)
@@ -73,7 +73,7 @@ func getNewMessages(k *Keybase, subs *SubscriptionChannels, execOptions []string
 		stdOut, _ := execCmd.StdoutPipe()
 		execCmd.Start()
 		scanner := bufio.NewScanner(stdOut)
-		go func(scanner *bufio.Scanner, subs *SubscriptionChannels) {
+		go func(scanner *bufio.Scanner, subs *subscriptionChannels) {
 			for {
 				scanner.Scan()
 				var subType subscriptionType
@@ -155,7 +155,7 @@ func (k *Keybase) Run(handlers Handlers, options *RunOptions) {
 	walletCh := make(chan stellar1.PaymentDetailsLocal, channelCapacity)
 	errorCh := make(chan error, channelCapacity)
 
-	subs := &SubscriptionChannels{
+	subs := &subscriptionChannels{
 		chat:         chatCh,
 		conversation: convCh,
 		wallet:       walletCh,

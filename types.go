@@ -36,8 +36,8 @@ type Handlers struct {
 	ErrorHandler        *func(error)
 }
 
-// SubscriptionChannels are passed to GetNewMessages to return data through channels
-type SubscriptionChannels struct {
+// subscriptionChannels are passed to getNewMessages to return data through channels
+type subscriptionChannels struct {
 	chat         chan chat1.MsgSummary
 	conversation chan chat1.ConvSummary
 	wallet       chan stellar1.PaymentDetailsLocal
