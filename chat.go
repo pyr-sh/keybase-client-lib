@@ -583,21 +583,26 @@ func (k *Keybase) UploadToConversation(conv chat1.ConvIDStr, title string, filen
 	return k.SendMessage("attach", opts)
 }
 
-// Download downloads a file from a conversation
-func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// DownloadFromChannel downloads a file from a channel
+func (k *Keybase) DownloadFromChannel(channel chat1.ChatChannel, msgID chat1.MessageID, filename string) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel:   channel,
+		MessageID: msgID,
+		Filename:  filename,
 	}
-	m.Method = "download"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Output = filepath
-	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
+	return k.SendMessage("download", opts)
+}
+
+// DownloadFromConversation downloads a file from a conversation
+func (k *Keybase) DownloadFromConversation(conv chat1.ConvIDStr, msgID chat1.MessageID, filename string) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: conv,
+		MessageID:      msgID,
+		Filename:       filename,
 	}
-	return r, nil
+
+	return k.SendMessage("download", opts)
 }
 
 // LoadFlip returns the results of a flip
