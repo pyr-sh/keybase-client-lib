@@ -750,40 +750,56 @@ func (c Chat) Mark(messageID int) (ChatAPI, error) {
 	return r, nil
 }
 
+// AdvertiseCommands sends bot command advertisements
+func (k *Keybase) AdvertiseCommands(options AdvertiseCommandsOptions) error {
+	type res struct {
+		Error *Error `json:"error,omitempty"`
+	}
+
+	var r res
+
+	arg := newAdvertiseCommandsArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return err
+	}
+
+	if r.Error != nil {
+		return fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return nil
+}
+
 // ClearCommands clears bot advertisements
-func (k *Keybase) ClearCommands() (ChatAPI, error) {
-	m := ChatAPI{}
-	m.Method = "clearcommands"
+func (k *Keybase) ClearCommands() error {
+	type res struct {
+		Error *Error `json:"error,omitempty"`
+	}
 
-	r, err := chatAPIOut(k, m)
+	var r res
+
+	cmdOut, err := k.Exec("chat", "api", "-m", `{"method": "clearcommands"}`)
 	if err != nil {
-		return r, err
+		return err
 	}
-	return r, nil
-}
 
-// AdvertiseCommands sets up bot command advertisements
-// This method allows you to set up multiple different types of advertisements at once.
-// Use this method if you have commands whose visibility differs from each other.
-func (k *Keybase) AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Method = "advertisecommands"
-	m.Params.Options.BotAdvertisements = advertisements
-
-	r, err := chatAPIOut(k, m)
+	err = json.Unmarshal(cmdOut, &r)
 	if err != nil {
-		return r, err
+		return err
 	}
-	return r, nil
-}
 
-// AdvertiseCommand sets up bot command advertisements
-// This method allows you to set up one type of advertisement.
-// Use this method if you have commands whose visibility should all be the same.
-func (k *Keybase) AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error) {
-	return k.AdvertiseCommands([]BotAdvertisement{
-		advertisement,
-	})
+	if r.Error != nil {
+		return fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return nil
 }

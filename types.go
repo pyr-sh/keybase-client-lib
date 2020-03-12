@@ -125,6 +125,30 @@ func newReadMessageArg(options ReadMessageOptions) readMessageArg {
 	}
 }
 
+// AdvertiseCommandsOptions holds a set of options to be passed to AdvertiseCommands
+type AdvertiseCommandsOptions struct {
+	Alias          string
+	Advertisements []chat1.AdvertiseCommandAPIParam
+}
+
+type advertiseCommandsParams struct {
+	Options AdvertiseCommandsOptions
+}
+
+type advertiseCommandsArg struct {
+	Method string
+	Params advertiseCommandsParams
+}
+
+func newAdvertiseCommandsArg(options AdvertiseCommandsOptions) advertiseCommandsArg {
+	return advertiseCommandsArg{
+		Method: "advertisecommands",
+		Params: advertiseCommandsParams{
+			Options: options,
+		},
+	}
+}
+
 // KVOptions holds a set of options to be passed to the KV methods
 type KVOptions struct {
 	Team       *string `json:"team"`
@@ -955,8 +979,6 @@ type wallet interface {
 }
 
 type keybase interface {
-	AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error)
-	AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error)
 	ChatList(opts ...chat1.ChatChannel) (ChatAPI, error)
 	ClearCommands() (ChatAPI, error)
 	CreateTeam(name string) (TeamAPI, error)
