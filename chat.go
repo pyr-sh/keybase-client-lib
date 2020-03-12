@@ -559,22 +559,28 @@ func (c Chat) ReadMessage(messageID int) (*ChatAPI, error) {
 	return &r, nil
 }
 
-// Upload attaches a file to a conversation
-// The filepath must be an absolute path
-func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// UploadToChannel attaches a file to a channel
+// The filename must be an absolute path
+func (k *Keybase) UploadToChannel(channel chat1.ChatChannel, title string, filename string) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel:  channel,
+		Title:    title,
+		Filename: filename,
 	}
-	m.Method = "attach"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Filename = filepath
-	m.Params.Options.Title = title
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
+	return k.SendMessage("attach", opts)
+}
+
+// UploadToConversation attaches a file to a conversation
+// The filename must be an absolute path
+func (k *Keybase) UploadToConversation(conv chat1.ConvIDStr, title string, filename string) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: conv,
+		Title:          title,
+		Filename:       filename,
 	}
-	return r, nil
+
+	return k.SendMessage("attach", opts)
 }
 
 // Download downloads a file from a conversation
