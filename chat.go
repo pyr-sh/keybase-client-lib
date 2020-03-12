@@ -750,7 +750,9 @@ func (c Chat) Mark(messageID int) (ChatAPI, error) {
 	return r, nil
 }
 
-// AdvertiseCommands sends bot command advertisements
+// AdvertiseCommands sends bot command advertisements.
+// Valid values for the `Typ` field in chat1.AdvertiseCommandAPIParam are
+// "public", "teamconvs", and "teammembers"
 func (k *Keybase) AdvertiseCommands(options AdvertiseCommandsOptions) error {
 	type res struct {
 		Error *Error `json:"error,omitempty"`

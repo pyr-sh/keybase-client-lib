@@ -40,30 +40,6 @@ func NewKeybase(path ...string) *Keybase {
 	return k
 }
 
-// NewBotCommand returns a new BotCommand instance
-func NewBotCommand(name, description, usage string, extendedDescription ...BotCommandExtendedDescription) BotCommand {
-	result := BotCommand{
-		Name:        name,
-		Description: description,
-		Usage:       usage,
-	}
-
-	if len(extendedDescription) > 0 {
-		result.ExtendedDescription = &extendedDescription[0]
-	}
-
-	return result
-}
-
-// NewBotCommandExtendedDescription
-func NewBotCommandExtendedDescription(title, desktopBody, mobileBody string) BotCommandExtendedDescription {
-	return BotCommandExtendedDescription{
-		Title:       title,
-		DesktopBody: desktopBody,
-		MobileBody:  mobileBody,
-	}
-}
-
 // Exec executes the given Keybase command
 func (k *Keybase) Exec(command ...string) ([]byte, error) {
 	out, err := exec.Command(k.Path, command...).Output()

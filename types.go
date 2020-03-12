@@ -453,25 +453,6 @@ type notification struct {
 	Details details `json:"details"`
 }
 
-type BotCommand struct {
-	Name                string                         `json:"name"`
-	Description         string                         `json:"description"`
-	Usage               string                         `json:"usage"`
-	ExtendedDescription *BotCommandExtendedDescription `json:"extended_description,omitempty"`
-}
-
-type BotCommandExtendedDescription struct {
-	Title       string `json:"title"`
-	DesktopBody string `json:"desktop_body"`
-	MobileBody  string `json:"mobile_body"`
-}
-
-type BotAdvertisement struct {
-	Type        string       `json:"type"`                // "public", "teamconvs", "teammembers"
-	TeamName    string       `json:"team_name,omitempty"` // required if Type is not "public"
-	BotCommands []BotCommand `json:"commands"`
-}
-
 type mesg struct {
 	Body string `json:"body"`
 }
@@ -490,7 +471,6 @@ type options struct {
 	ReplyTo            int                `json:"reply_to,omitempty"`
 	GameID             string             `json:"game_id,omitempty"`
 	Alias              string             `json:"alias,omitempty"`
-	BotAdvertisements  []BotAdvertisement `json:"advertisements,omitempty"`
 	//ExplodingLifetime  duration           `json:"exploding_lifetime,omitempty"`
 
 	Name        string `json:"name,omitempty"`
