@@ -183,6 +183,30 @@ func newDownloadArg(options DownloadOptions) downloadArg {
 	}
 }
 
+// ListMembersOptions holds a set of options to be passed to ListMembers
+type ListMembersOptions struct {
+	Channel        chat1.ChatChannel
+	ConversationID chat1.ConvIDStr `json:"conversation_id"`
+}
+
+type listMembersParams struct {
+	Options ListMembersOptions
+}
+
+type listMembersArg struct {
+	Method string
+	Params listMembersParams
+}
+
+func newListMembersArg(options ListMembersOptions) listMembersArg {
+	return listMembersArg{
+		Method: "listmembers",
+		Params: listMembersParams{
+			Options: options,
+		},
+	}
+}
+
 // KVOptions holds a set of options to be passed to the KV methods
 type KVOptions struct {
 	Team       *string `json:"team"`

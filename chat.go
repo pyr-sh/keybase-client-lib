@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"samhofi.us/x/keybase/types/chat1"
+	"samhofi.us/x/keybase/types/keybase1"
 	"samhofi.us/x/keybase/types/stellar1"
 )
 
@@ -752,4 +753,50 @@ func (k *Keybase) ClearCommands() error {
 	}
 
 	return nil
+}
+
+// ListMembers returns member information for a channel or conversation
+func (k *Keybase) ListMembers(options ListMembersOptions) (keybase1.TeamDetails, error) {
+	type res struct {
+		Result keybase1.TeamDetails `json:"result"`
+		Error  *Error               `json:"error,omitempty"`
+	}
+
+	var r res
+
+	arg := newListMembersArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return r.Result, err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return r.Result, nil
+}
+
+// ListMembersOfChannel returns member information for a channel
+func (k *Keybase) ListMembersOfChannel(channel chat1.ChatChannel) (keybase1.TeamDetails, error) {
+	opts := ListMembersOptions{
+		Channel: channel,
+	}
+	return k.ListMembers(opts)
+}
+
+// ListMembersOfConversation returns member information for a conversation
+func (k *Keybase) ListMembersOfConversation(convID chat1.ConvIDStr) (keybase1.TeamDetails, error) {
+	opts := ListMembersOptions{
+		ConversationID: convID,
+	}
+	return k.ListMembers(opts)
 }
