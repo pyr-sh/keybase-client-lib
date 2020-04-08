@@ -231,8 +231,10 @@ func (o NewConversationRemoteRes) DeepCopy() NewConversationRemoteRes {
 }
 
 type GetMessagesRemoteRes struct {
-	Msgs      []MessageBoxed `codec:"msgs" json:"msgs"`
-	RateLimit *RateLimit     `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
+	Msgs        []MessageBoxed          `codec:"msgs" json:"msgs"`
+	MembersType ConversationMembersType `codec:"membersType" json:"membersType"`
+	Visibility  keybase1.TLFVisibility  `codec:"visibility" json:"visibility"`
+	RateLimit   *RateLimit              `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
 }
 
 func (o GetMessagesRemoteRes) DeepCopy() GetMessagesRemoteRes {
@@ -248,6 +250,8 @@ func (o GetMessagesRemoteRes) DeepCopy() GetMessagesRemoteRes {
 			}
 			return ret
 		})(o.Msgs),
+		MembersType: o.MembersType.DeepCopy(),
+		Visibility:  o.Visibility.DeepCopy(),
 		RateLimit: (func(x *RateLimit) *RateLimit {
 			if x == nil {
 				return nil
@@ -1246,4 +1250,156 @@ func (o BotInfoHash) DeepCopy() BotInfoHash {
 		}
 		return append([]byte{}, x...)
 	})(o)
+}
+
+type GetDefaultTeamChannelsRes struct {
+	Convs     []ConversationID `codec:"convs" json:"convs"`
+	RateLimit *RateLimit       `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
+}
+
+func (o GetDefaultTeamChannelsRes) DeepCopy() GetDefaultTeamChannelsRes {
+	return GetDefaultTeamChannelsRes{
+		Convs: (func(x []ConversationID) []ConversationID {
+			if x == nil {
+				return nil
+			}
+			ret := make([]ConversationID, len(x))
+			for i, v := range x {
+				vCopy := v.DeepCopy()
+				ret[i] = vCopy
+			}
+			return ret
+		})(o.Convs),
+		RateLimit: (func(x *RateLimit) *RateLimit {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x).DeepCopy()
+			return &tmp
+		})(o.RateLimit),
+	}
+}
+
+type SetDefaultTeamChannelsRes struct {
+	RateLimit *RateLimit `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
+}
+
+func (o SetDefaultTeamChannelsRes) DeepCopy() SetDefaultTeamChannelsRes {
+	return SetDefaultTeamChannelsRes{
+		RateLimit: (func(x *RateLimit) *RateLimit {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x).DeepCopy()
+			return &tmp
+		})(o.RateLimit),
+	}
+}
+
+type GetRecentJoinsRes struct {
+	NumJoins  int        `codec:"numJoins" json:"numJoins"`
+	RateLimit *RateLimit `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
+}
+
+func (o GetRecentJoinsRes) DeepCopy() GetRecentJoinsRes {
+	return GetRecentJoinsRes{
+		NumJoins: o.NumJoins,
+		RateLimit: (func(x *RateLimit) *RateLimit {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x).DeepCopy()
+			return &tmp
+		})(o.RateLimit),
+	}
+}
+
+type RefreshParticipantsRemoteRes struct {
+	HashMatch bool          `codec:"hashMatch" json:"hashMatch"`
+	Uids      []gregor1.UID `codec:"uids" json:"uids"`
+	Hash      string        `codec:"hash" json:"hash"`
+	RateLimit *RateLimit    `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
+}
+
+func (o RefreshParticipantsRemoteRes) DeepCopy() RefreshParticipantsRemoteRes {
+	return RefreshParticipantsRemoteRes{
+		HashMatch: o.HashMatch,
+		Uids: (func(x []gregor1.UID) []gregor1.UID {
+			if x == nil {
+				return nil
+			}
+			ret := make([]gregor1.UID, len(x))
+			for i, v := range x {
+				vCopy := v.DeepCopy()
+				ret[i] = vCopy
+			}
+			return ret
+		})(o.Uids),
+		Hash: o.Hash,
+		RateLimit: (func(x *RateLimit) *RateLimit {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x).DeepCopy()
+			return &tmp
+		})(o.RateLimit),
+	}
+}
+
+type GetLastActiveAtRes struct {
+	LastActiveAt gregor1.Time `codec:"lastActiveAt" json:"lastActiveAt"`
+	RateLimit    *RateLimit   `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
+}
+
+func (o GetLastActiveAtRes) DeepCopy() GetLastActiveAtRes {
+	return GetLastActiveAtRes{
+		LastActiveAt: o.LastActiveAt.DeepCopy(),
+		RateLimit: (func(x *RateLimit) *RateLimit {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x).DeepCopy()
+			return &tmp
+		})(o.RateLimit),
+	}
+}
+
+type ResetConversationMember struct {
+	ConvID ConversationID `codec:"convID" json:"convID"`
+	Uid    gregor1.UID    `codec:"uid" json:"uid"`
+}
+
+func (o ResetConversationMember) DeepCopy() ResetConversationMember {
+	return ResetConversationMember{
+		ConvID: o.ConvID.DeepCopy(),
+		Uid:    o.Uid.DeepCopy(),
+	}
+}
+
+type GetResetConversationsRes struct {
+	ResetConvs []ResetConversationMember `codec:"resetConvs" json:"resetConvs"`
+	RateLimit  *RateLimit                `codec:"rateLimit,omitempty" json:"rateLimit,omitempty"`
+}
+
+func (o GetResetConversationsRes) DeepCopy() GetResetConversationsRes {
+	return GetResetConversationsRes{
+		ResetConvs: (func(x []ResetConversationMember) []ResetConversationMember {
+			if x == nil {
+				return nil
+			}
+			ret := make([]ResetConversationMember, len(x))
+			for i, v := range x {
+				vCopy := v.DeepCopy()
+				ret[i] = vCopy
+			}
+			return ret
+		})(o.ResetConvs),
+		RateLimit: (func(x *RateLimit) *RateLimit {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x).DeepCopy()
+			return &tmp
+		})(o.RateLimit),
+	}
 }

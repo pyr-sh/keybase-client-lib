@@ -536,6 +536,7 @@ type InboxUIItem struct {
 	IsDefaultConv     bool                          `codec:"isDefaultConv" json:"isDefaultConv"`
 	Name              string                        `codec:"name" json:"name"`
 	Snippet           string                        `codec:"snippet" json:"snippet"`
+	SnippetDecorated  string                        `codec:"snippetDecorated" json:"snippetDecorated"`
 	SnippetDecoration SnippetDecoration             `codec:"snippetDecoration" json:"snippetDecoration"`
 	Channel           string                        `codec:"channel" json:"channel"`
 	Headline          string                        `codec:"headline" json:"headline"`
@@ -578,6 +579,7 @@ func (o InboxUIItem) DeepCopy() InboxUIItem {
 		IsDefaultConv:     o.IsDefaultConv,
 		Name:              o.Name,
 		Snippet:           o.Snippet,
+		SnippetDecorated:  o.SnippetDecorated,
 		SnippetDecoration: o.SnippetDecoration.DeepCopy(),
 		Channel:           o.Channel,
 		Headline:          o.Headline,
@@ -888,6 +890,50 @@ func (o UIMessageUnfurlInfo) DeepCopy() UIMessageUnfurlInfo {
 	}
 }
 
+type UIReactionDesc struct {
+	Decorated string              `codec:"decorated" json:"decorated"`
+	Users     map[string]Reaction `codec:"users" json:"users"`
+}
+
+func (o UIReactionDesc) DeepCopy() UIReactionDesc {
+	return UIReactionDesc{
+		Decorated: o.Decorated,
+		Users: (func(x map[string]Reaction) map[string]Reaction {
+			if x == nil {
+				return nil
+			}
+			ret := make(map[string]Reaction, len(x))
+			for k, v := range x {
+				kCopy := k
+				vCopy := v.DeepCopy()
+				ret[kCopy] = vCopy
+			}
+			return ret
+		})(o.Users),
+	}
+}
+
+type UIReactionMap struct {
+	Reactions map[string]UIReactionDesc `codec:"reactions" json:"reactions"`
+}
+
+func (o UIReactionMap) DeepCopy() UIReactionMap {
+	return UIReactionMap{
+		Reactions: (func(x map[string]UIReactionDesc) map[string]UIReactionDesc {
+			if x == nil {
+				return nil
+			}
+			ret := make(map[string]UIReactionDesc, len(x))
+			for k, v := range x {
+				kCopy := k
+				vCopy := v.DeepCopy()
+				ret[kCopy] = vCopy
+			}
+			return ret
+		})(o.Reactions),
+	}
+}
+
 type UIMessageValid struct {
 	MessageID             MessageID              `codec:"messageID" json:"messageID"`
 	Ctime                 gregor1.Time           `codec:"ctime" json:"ctime"`
@@ -897,7 +943,7 @@ type UIMessageValid struct {
 	BodySummary           string                 `codec:"bodySummary" json:"bodySummary"`
 	SenderUsername        string                 `codec:"senderUsername" json:"senderUsername"`
 	SenderDeviceName      string                 `codec:"senderDeviceName" json:"senderDeviceName"`
-	SenderDeviceType      string                 `codec:"senderDeviceType" json:"senderDeviceType"`
+	SenderDeviceType      keybase1.DeviceTypeV2  `codec:"senderDeviceType" json:"senderDeviceType"`
 	SenderUID             gregor1.UID            `codec:"senderUID" json:"senderUID"`
 	SenderDeviceID        gregor1.DeviceID       `codec:"senderDeviceID" json:"senderDeviceID"`
 	Superseded            bool                   `codec:"superseded" json:"superseded"`
@@ -910,7 +956,7 @@ type UIMessageValid struct {
 	IsEphemeralExpired    bool                   `codec:"isEphemeralExpired" json:"isEphemeralExpired"`
 	ExplodedBy            *string                `codec:"explodedBy,omitempty" json:"explodedBy,omitempty"`
 	Etime                 gregor1.Time           `codec:"etime" json:"etime"`
-	Reactions             ReactionMap            `codec:"reactions" json:"reactions"`
+	Reactions             UIReactionMap          `codec:"reactions" json:"reactions"`
 	HasPairwiseMacs       bool                   `codec:"hasPairwiseMacs" json:"hasPairwiseMacs"`
 	PaymentInfos          []UIPaymentInfo        `codec:"paymentInfos" json:"paymentInfos"`
 	RequestInfo           *UIRequestInfo         `codec:"requestInfo,omitempty" json:"requestInfo,omitempty"`
@@ -946,7 +992,7 @@ func (o UIMessageValid) DeepCopy() UIMessageValid {
 		BodySummary:      o.BodySummary,
 		SenderUsername:   o.SenderUsername,
 		SenderDeviceName: o.SenderDeviceName,
-		SenderDeviceType: o.SenderDeviceType,
+		SenderDeviceType: o.SenderDeviceType.DeepCopy(),
 		SenderUID:        o.SenderUID.DeepCopy(),
 		SenderDeviceID:   o.SenderDeviceID.DeepCopy(),
 		Superseded:       o.Superseded,
@@ -1067,6 +1113,7 @@ type UIMessageOutbox struct {
 	IsEphemeral       bool            `codec:"isEphemeral" json:"isEphemeral"`
 	FlipGameID        *FlipGameIDStr  `codec:"flipGameID,omitempty" json:"flipGameID,omitempty"`
 	ReplyTo           *UIMessage      `codec:"replyTo,omitempty" json:"replyTo,omitempty"`
+	Supersedes        MessageID       `codec:"supersedes" json:"supersedes"`
 	Filename          string          `codec:"filename" json:"filename"`
 	Title             string          `codec:"title" json:"title"`
 	Preview           *MakePreviewRes `codec:"preview,omitempty" json:"preview,omitempty"`
@@ -1102,8 +1149,9 @@ func (o UIMessageOutbox) DeepCopy() UIMessageOutbox {
 			tmp := (*x).DeepCopy()
 			return &tmp
 		})(o.ReplyTo),
-		Filename: o.Filename,
-		Title:    o.Title,
+		Supersedes: o.Supersedes.DeepCopy(),
+		Filename:   o.Filename,
+		Title:      o.Title,
 		Preview: (func(x *MakePreviewRes) *MakePreviewRes {
 			if x == nil {
 				return nil
@@ -1417,6 +1465,7 @@ const (
 	UITextDecorationTyp_LINK               UITextDecorationTyp = 4
 	UITextDecorationTyp_MAILTO             UITextDecorationTyp = 5
 	UITextDecorationTyp_KBFSPATH           UITextDecorationTyp = 6
+	UITextDecorationTyp_EMOJI              UITextDecorationTyp = 7
 )
 
 func (o UITextDecorationTyp) DeepCopy() UITextDecorationTyp { return o }
@@ -1429,6 +1478,7 @@ var UITextDecorationTypMap = map[string]UITextDecorationTyp{
 	"LINK":               4,
 	"MAILTO":             5,
 	"KBFSPATH":           6,
+	"EMOJI":              7,
 }
 
 var UITextDecorationTypRevMap = map[UITextDecorationTyp]string{
@@ -1439,6 +1489,7 @@ var UITextDecorationTypRevMap = map[UITextDecorationTyp]string{
 	4: "LINK",
 	5: "MAILTO",
 	6: "KBFSPATH",
+	7: "EMOJI",
 }
 
 func (e UITextDecorationTyp) String() string {
@@ -1565,6 +1616,7 @@ type UITextDecoration struct {
 	Link__               *UILinkDecoration     `codec:"link,omitempty" json:"link,omitempty"`
 	Mailto__             *UILinkDecoration     `codec:"mailto,omitempty" json:"mailto,omitempty"`
 	Kbfspath__           *KBFSPath             `codec:"kbfspath,omitempty" json:"kbfspath,omitempty"`
+	Emoji__              *Emoji                `codec:"emoji,omitempty" json:"emoji,omitempty"`
 }
 
 func (o *UITextDecoration) Typ() (ret UITextDecorationTyp, err error) {
@@ -1602,6 +1654,11 @@ func (o *UITextDecoration) Typ() (ret UITextDecorationTyp, err error) {
 	case UITextDecorationTyp_KBFSPATH:
 		if o.Kbfspath__ == nil {
 			err = errors.New("unexpected nil value for Kbfspath__")
+			return ret, err
+		}
+	case UITextDecorationTyp_EMOJI:
+		if o.Emoji__ == nil {
+			err = errors.New("unexpected nil value for Emoji__")
 			return ret, err
 		}
 	}
@@ -1678,6 +1735,16 @@ func (o UITextDecoration) Kbfspath() (res KBFSPath) {
 	return *o.Kbfspath__
 }
 
+func (o UITextDecoration) Emoji() (res Emoji) {
+	if o.Typ__ != UITextDecorationTyp_EMOJI {
+		panic("wrong case accessed")
+	}
+	if o.Emoji__ == nil {
+		return
+	}
+	return *o.Emoji__
+}
+
 func NewUITextDecorationWithPayment(v TextPayment) UITextDecoration {
 	return UITextDecoration{
 		Typ__:     UITextDecorationTyp_PAYMENT,
@@ -1724,6 +1791,13 @@ func NewUITextDecorationWithKbfspath(v KBFSPath) UITextDecoration {
 	return UITextDecoration{
 		Typ__:      UITextDecorationTyp_KBFSPATH,
 		Kbfspath__: &v,
+	}
+}
+
+func NewUITextDecorationWithEmoji(v Emoji) UITextDecoration {
+	return UITextDecoration{
+		Typ__:   UITextDecorationTyp_EMOJI,
+		Emoji__: &v,
 	}
 }
 
@@ -1779,6 +1853,13 @@ func (o UITextDecoration) DeepCopy() UITextDecoration {
 			tmp := (*x).DeepCopy()
 			return &tmp
 		})(o.Kbfspath__),
+		Emoji__: (func(x *Emoji) *Emoji {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x).DeepCopy()
+			return &tmp
+		})(o.Emoji__),
 	}
 }
 
@@ -1917,7 +1998,8 @@ func (o UIChatSearchConvHits) DeepCopy() UIChatSearchConvHits {
 }
 
 type UIChatSearchTeamHits struct {
-	Hits []keybase1.TeamSearchItem `codec:"hits" json:"hits"`
+	Hits             []keybase1.TeamSearchItem `codec:"hits" json:"hits"`
+	SuggestedMatches bool                      `codec:"suggestedMatches" json:"suggestedMatches"`
 }
 
 func (o UIChatSearchTeamHits) DeepCopy() UIChatSearchTeamHits {
@@ -1933,6 +2015,29 @@ func (o UIChatSearchTeamHits) DeepCopy() UIChatSearchTeamHits {
 			}
 			return ret
 		})(o.Hits),
+		SuggestedMatches: o.SuggestedMatches,
+	}
+}
+
+type UIChatSearchBotHits struct {
+	Hits             []keybase1.FeaturedBot `codec:"hits" json:"hits"`
+	SuggestedMatches bool                   `codec:"suggestedMatches" json:"suggestedMatches"`
+}
+
+func (o UIChatSearchBotHits) DeepCopy() UIChatSearchBotHits {
+	return UIChatSearchBotHits{
+		Hits: (func(x []keybase1.FeaturedBot) []keybase1.FeaturedBot {
+			if x == nil {
+				return nil
+			}
+			ret := make([]keybase1.FeaturedBot, len(x))
+			for i, v := range x {
+				vCopy := v.DeepCopy()
+				ret[i] = vCopy
+			}
+			return ret
+		})(o.Hits),
+		SuggestedMatches: o.SuggestedMatches,
 	}
 }
 
