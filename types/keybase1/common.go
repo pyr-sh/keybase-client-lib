@@ -26,6 +26,12 @@ func (o DurationSec) DeepCopy() DurationSec {
 	return o
 }
 
+type DurationMsec float64
+
+func (o DurationMsec) DeepCopy() DurationMsec {
+	return o
+}
+
 type StringKVPair struct {
 	Key   string `codec:"key" json:"key"`
 	Value string `codec:"value" json:"value"`
@@ -432,7 +438,7 @@ type PublicKey struct {
 	ParentID          string        `codec:"parentID" json:"parentID"`
 	DeviceID          DeviceID      `codec:"deviceID" json:"deviceID"`
 	DeviceDescription string        `codec:"deviceDescription" json:"deviceDescription"`
-	DeviceType        string        `codec:"deviceType" json:"deviceType"`
+	DeviceType        DeviceTypeV2  `codec:"deviceType" json:"deviceType"`
 	CTime             Time          `codec:"cTime" json:"cTime"`
 	ETime             Time          `codec:"eTime" json:"eTime"`
 	IsRevoked         bool          `codec:"isRevoked" json:"isRevoked"`
@@ -458,7 +464,7 @@ func (o PublicKey) DeepCopy() PublicKey {
 		ParentID:          o.ParentID,
 		DeviceID:          o.DeviceID.DeepCopy(),
 		DeviceDescription: o.DeviceDescription,
-		DeviceType:        o.DeviceType,
+		DeviceType:        o.DeviceType.DeepCopy(),
 		CTime:             o.CTime.DeepCopy(),
 		ETime:             o.ETime.DeepCopy(),
 		IsRevoked:         o.IsRevoked,
@@ -504,21 +510,21 @@ func (o User) DeepCopy() User {
 }
 
 type Device struct {
-	Type               string   `codec:"type" json:"type"`
-	Name               string   `codec:"name" json:"name"`
-	DeviceID           DeviceID `codec:"deviceID" json:"deviceID"`
-	DeviceNumberOfType int      `codec:"deviceNumberOfType" json:"deviceNumberOfType"`
-	CTime              Time     `codec:"cTime" json:"cTime"`
-	MTime              Time     `codec:"mTime" json:"mTime"`
-	LastUsedTime       Time     `codec:"lastUsedTime" json:"lastUsedTime"`
-	EncryptKey         KID      `codec:"encryptKey" json:"encryptKey"`
-	VerifyKey          KID      `codec:"verifyKey" json:"verifyKey"`
-	Status             int      `codec:"status" json:"status"`
+	Type               DeviceTypeV2 `codec:"type" json:"type"`
+	Name               string       `codec:"name" json:"name"`
+	DeviceID           DeviceID     `codec:"deviceID" json:"deviceID"`
+	DeviceNumberOfType int          `codec:"deviceNumberOfType" json:"deviceNumberOfType"`
+	CTime              Time         `codec:"cTime" json:"cTime"`
+	MTime              Time         `codec:"mTime" json:"mTime"`
+	LastUsedTime       Time         `codec:"lastUsedTime" json:"lastUsedTime"`
+	EncryptKey         KID          `codec:"encryptKey" json:"encryptKey"`
+	VerifyKey          KID          `codec:"verifyKey" json:"verifyKey"`
+	Status             int          `codec:"status" json:"status"`
 }
 
 func (o Device) DeepCopy() Device {
 	return Device{
-		Type:               o.Type,
+		Type:               o.Type.DeepCopy(),
 		Name:               o.Name,
 		DeviceID:           o.DeviceID.DeepCopy(),
 		DeviceNumberOfType: o.DeviceNumberOfType,
@@ -555,6 +561,12 @@ func (e DeviceType) String() string {
 		return v
 	}
 	return fmt.Sprintf("%v", int(e))
+}
+
+type DeviceTypeV2 string
+
+func (o DeviceTypeV2) DeepCopy() DeviceTypeV2 {
+	return o
 }
 
 type Stream struct {
@@ -1061,6 +1073,24 @@ func (e OfflineAvailability) String() string {
 	return fmt.Sprintf("%v", int(e))
 }
 
+type UserReacji struct {
+	Name       string  `codec:"name" json:"name"`
+	CustomAddr *string `codec:"customAddr,omitempty" json:"customAddr,omitempty"`
+}
+
+func (o UserReacji) DeepCopy() UserReacji {
+	return UserReacji{
+		Name: o.Name,
+		CustomAddr: (func(x *string) *string {
+			if x == nil {
+				return nil
+			}
+			tmp := (*x)
+			return &tmp
+		})(o.CustomAddr),
+	}
+}
+
 type ReacjiSkinTone int
 
 func (o ReacjiSkinTone) DeepCopy() ReacjiSkinTone {
@@ -1068,23 +1098,68 @@ func (o ReacjiSkinTone) DeepCopy() ReacjiSkinTone {
 }
 
 type UserReacjis struct {
-	TopReacjis []string       `codec:"topReacjis" json:"topReacjis"`
+	TopReacjis []UserReacji   `codec:"topReacjis" json:"topReacjis"`
 	SkinTone   ReacjiSkinTone `codec:"skinTone" json:"skinTone"`
 }
 
 func (o UserReacjis) DeepCopy() UserReacjis {
 	return UserReacjis{
-		TopReacjis: (func(x []string) []string {
+		TopReacjis: (func(x []UserReacji) []UserReacji {
 			if x == nil {
 				return nil
 			}
-			ret := make([]string, len(x))
+			ret := make([]UserReacji, len(x))
 			for i, v := range x {
-				vCopy := v
+				vCopy := v.DeepCopy()
 				ret[i] = vCopy
 			}
 			return ret
 		})(o.TopReacjis),
 		SkinTone: o.SkinTone.DeepCopy(),
+	}
+}
+
+type WotStatusType int
+
+const (
+	WotStatusType_NONE     WotStatusType = 0
+	WotStatusType_PROPOSED WotStatusType = 1
+	WotStatusType_ACCEPTED WotStatusType = 2
+	WotStatusType_REJECTED WotStatusType = 3
+	WotStatusType_REVOKED  WotStatusType = 4
+)
+
+func (o WotStatusType) DeepCopy() WotStatusType { return o }
+
+var WotStatusTypeMap = map[string]WotStatusType{
+	"NONE":     0,
+	"PROPOSED": 1,
+	"ACCEPTED": 2,
+	"REJECTED": 3,
+	"REVOKED":  4,
+}
+
+var WotStatusTypeRevMap = map[WotStatusType]string{
+	0: "NONE",
+	1: "PROPOSED",
+	2: "ACCEPTED",
+	3: "REJECTED",
+	4: "REVOKED",
+}
+
+func (e WotStatusType) String() string {
+	if v, ok := WotStatusTypeRevMap[e]; ok {
+		return v
+	}
+	return fmt.Sprintf("%v", int(e))
+}
+
+type GenericError struct {
+	Message string `codec:"message" json:"message"`
+}
+
+func (o GenericError) DeepCopy() GenericError {
+	return GenericError{
+		Message: o.Message,
 	}
 }

@@ -310,6 +310,8 @@ const (
 	TopicType_CHAT         TopicType = 1
 	TopicType_DEV          TopicType = 2
 	TopicType_KBFSFILEEDIT TopicType = 3
+	TopicType_EMOJI        TopicType = 4
+	TopicType_EMOJICROSS   TopicType = 5
 )
 
 func (o TopicType) DeepCopy() TopicType { return o }
@@ -319,6 +321,8 @@ var TopicTypeMap = map[string]TopicType{
 	"CHAT":         1,
 	"DEV":          2,
 	"KBFSFILEEDIT": 3,
+	"EMOJI":        4,
+	"EMOJICROSS":   5,
 }
 
 var TopicTypeRevMap = map[TopicType]string{
@@ -326,6 +330,8 @@ var TopicTypeRevMap = map[TopicType]string{
 	1: "CHAT",
 	2: "DEV",
 	3: "KBFSFILEEDIT",
+	4: "EMOJI",
+	5: "EMOJICROSS",
 }
 
 type TeamType int
@@ -626,6 +632,32 @@ func (o RateLimit) DeepCopy() RateLimit {
 	}
 }
 
+type InboxParticipantsMode int
+
+const (
+	InboxParticipantsMode_ALL        InboxParticipantsMode = 0
+	InboxParticipantsMode_SKIP_TEAMS InboxParticipantsMode = 1
+)
+
+func (o InboxParticipantsMode) DeepCopy() InboxParticipantsMode { return o }
+
+var InboxParticipantsModeMap = map[string]InboxParticipantsMode{
+	"ALL":        0,
+	"SKIP_TEAMS": 1,
+}
+
+var InboxParticipantsModeRevMap = map[InboxParticipantsMode]string{
+	0: "ALL",
+	1: "SKIP_TEAMS",
+}
+
+func (e InboxParticipantsMode) String() string {
+	if v, ok := InboxParticipantsModeRevMap[e]; ok {
+		return v
+	}
+	return fmt.Sprintf("%v", int(e))
+}
+
 type GetInboxQuery struct {
 	ConvID            *ConversationID            `codec:"convID,omitempty" json:"convID,omitempty"`
 	TopicType         *TopicType                 `codec:"topicType,omitempty" json:"topicType,omitempty"`
@@ -644,6 +676,7 @@ type GetInboxQuery struct {
 	ReadOnly          bool                       `codec:"readOnly" json:"readOnly"`
 	ComputeActiveList bool                       `codec:"computeActiveList" json:"computeActiveList"`
 	SummarizeMaxMsgs  bool                       `codec:"summarizeMaxMsgs" json:"summarizeMaxMsgs"`
+	ParticipantsMode  InboxParticipantsMode      `codec:"participantsMode" json:"participantsMode"`
 	SkipBgLoads       bool                       `codec:"skipBgLoads" json:"skipBgLoads"`
 	AllowUnseenQuery  bool                       `codec:"allowUnseenQuery" json:"allowUnseenQuery"`
 }
@@ -765,6 +798,7 @@ func (o GetInboxQuery) DeepCopy() GetInboxQuery {
 		ReadOnly:          o.ReadOnly,
 		ComputeActiveList: o.ComputeActiveList,
 		SummarizeMaxMsgs:  o.SummarizeMaxMsgs,
+		ParticipantsMode:  o.ParticipantsMode.DeepCopy(),
 		SkipBgLoads:       o.SkipBgLoads,
 		AllowUnseenQuery:  o.AllowUnseenQuery,
 	}
@@ -958,6 +992,7 @@ type ConversationReaderInfo struct {
 	MaxMsgid          MessageID                    `codec:"maxMsgid" json:"maxMsgid"`
 	Status            ConversationMemberStatus     `codec:"status" json:"status"`
 	UntrustedTeamRole keybase1.TeamRole            `codec:"untrustedTeamRole" json:"untrustedTeamRole"`
+	LastSendTime      gregor1.Time                 `codec:"l" json:"l"`
 	Journeycard       *ConversationJourneycardInfo `codec:"jc,omitempty" json:"jc,omitempty"`
 }
 
@@ -968,6 +1003,7 @@ func (o ConversationReaderInfo) DeepCopy() ConversationReaderInfo {
 		MaxMsgid:          o.MaxMsgid.DeepCopy(),
 		Status:            o.Status.DeepCopy(),
 		UntrustedTeamRole: o.UntrustedTeamRole.DeepCopy(),
+		LastSendTime:      o.LastSendTime.DeepCopy(),
 		Journeycard: (func(x *ConversationJourneycardInfo) *ConversationJourneycardInfo {
 			if x == nil {
 				return nil
@@ -1958,6 +1994,7 @@ const (
 	GetThreadReason_KBFSFILEACTIVITY   GetThreadReason = 8
 	GetThreadReason_COINFLIP           GetThreadReason = 9
 	GetThreadReason_BOTCOMMANDS        GetThreadReason = 10
+	GetThreadReason_EMOJISOURCE        GetThreadReason = 11
 )
 
 func (o GetThreadReason) DeepCopy() GetThreadReason { return o }
@@ -1974,6 +2011,7 @@ var GetThreadReasonMap = map[string]GetThreadReason{
 	"KBFSFILEACTIVITY":   8,
 	"COINFLIP":           9,
 	"BOTCOMMANDS":        10,
+	"EMOJISOURCE":        11,
 }
 
 var GetThreadReasonRevMap = map[GetThreadReason]string{
@@ -1988,6 +2026,7 @@ var GetThreadReasonRevMap = map[GetThreadReason]string{
 	8:  "KBFSFILEACTIVITY",
 	9:  "COINFLIP",
 	10: "BOTCOMMANDS",
+	11: "EMOJISOURCE",
 }
 
 func (e GetThreadReason) String() string {
@@ -2044,6 +2083,8 @@ type SearchOpts struct {
 	ConvID            *ConversationID `codec:"convID,omitempty" json:"convID,omitempty"`
 	MaxNameConvs      int             `codec:"maxNameConvs" json:"maxNameConvs"`
 	MaxTeams          int             `codec:"maxTeams" json:"maxTeams"`
+	MaxBots           int             `codec:"maxBots" json:"maxBots"`
+	SkipBotCache      bool            `codec:"skipBotCache" json:"skipBotCache"`
 }
 
 func (o SearchOpts) DeepCopy() SearchOpts {
@@ -2077,6 +2118,8 @@ func (o SearchOpts) DeepCopy() SearchOpts {
 		})(o.ConvID),
 		MaxNameConvs: o.MaxNameConvs,
 		MaxTeams:     o.MaxTeams,
+		MaxBots:      o.MaxBots,
+		SkipBotCache: o.SkipBotCache,
 	}
 }
 
@@ -2388,6 +2431,7 @@ type Asset struct {
 	Size      int64         `codec:"size" json:"size"`
 	MimeType  string        `codec:"mimeType" json:"mimeType"`
 	EncHash   Hash          `codec:"encHash" json:"encHash"`
+	PtHash    Hash          `codec:"ptHash" json:"ptHash"`
 	Key       []byte        `codec:"key" json:"key"`
 	VerifyKey []byte        `codec:"verifyKey" json:"verifyKey"`
 	Title     string        `codec:"title" json:"title"`
@@ -2406,6 +2450,7 @@ func (o Asset) DeepCopy() Asset {
 		Size:     o.Size,
 		MimeType: o.MimeType,
 		EncHash:  o.EncHash.DeepCopy(),
+		PtHash:   o.PtHash.DeepCopy(),
 		Key: (func(x []byte) []byte {
 			if x == nil {
 				return nil
@@ -2471,4 +2516,33 @@ func (o TeamMember) DeepCopy() TeamMember {
 		Role:   o.Role.DeepCopy(),
 		Status: o.Status.DeepCopy(),
 	}
+}
+
+type LastActiveStatus int
+
+const (
+	LastActiveStatus_NONE            LastActiveStatus = 0
+	LastActiveStatus_ACTIVE          LastActiveStatus = 1
+	LastActiveStatus_RECENTLY_ACTIVE LastActiveStatus = 2
+)
+
+func (o LastActiveStatus) DeepCopy() LastActiveStatus { return o }
+
+var LastActiveStatusMap = map[string]LastActiveStatus{
+	"NONE":            0,
+	"ACTIVE":          1,
+	"RECENTLY_ACTIVE": 2,
+}
+
+var LastActiveStatusRevMap = map[LastActiveStatus]string{
+	0: "NONE",
+	1: "ACTIVE",
+	2: "RECENTLY_ACTIVE",
+}
+
+func (e LastActiveStatus) String() string {
+	if v, ok := LastActiveStatusRevMap[e]; ok {
+		return v
+	}
+	return fmt.Sprintf("%v", int(e))
 }
