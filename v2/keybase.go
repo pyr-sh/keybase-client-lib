@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+
+	"samhofi.us/x/keybase/types/chat1"
 )
 
 // Possible MemberTypes
@@ -38,30 +40,6 @@ func NewKeybase(path ...string) *Keybase {
 	return k
 }
 
-// NewBotCommand returns a new BotCommand instance
-func NewBotCommand(name, description, usage string, extendedDescription ...BotCommandExtendedDescription) BotCommand {
-	result := BotCommand{
-		Name:        name,
-		Description: description,
-		Usage:       usage,
-	}
-
-	if len(extendedDescription) > 0 {
-		result.ExtendedDescription = &extendedDescription[0]
-	}
-
-	return result
-}
-
-// NewBotCommandExtendedDescription
-func NewBotCommandExtendedDescription(title, desktopBody, mobileBody string) BotCommandExtendedDescription {
-	return BotCommandExtendedDescription{
-		Title:       title,
-		DesktopBody: desktopBody,
-		MobileBody:  mobileBody,
-	}
-}
-
 // Exec executes the given Keybase command
 func (k *Keybase) Exec(command ...string) ([]byte, error) {
 	out, err := exec.Command(k.Path, command...).Output()
@@ -72,7 +50,7 @@ func (k *Keybase) Exec(command ...string) ([]byte, error) {
 }
 
 // NewChat returns a new Chat instance
-func (k *Keybase) NewChat(channel Channel) Chat {
+func (k *Keybase) NewChat(channel chat1.ChatChannel) Chat {
 	return Chat{
 		keybase: k,
 		Channel: channel,
@@ -84,14 +62,6 @@ func (k *Keybase) NewTeam(name string) Team {
 	return Team{
 		keybase: k,
 		Name:    name,
-	}
-}
-
-// NewKV returns a new KV instance
-func (k *Keybase) NewKV(team string) KV {
-	return KV{
-		keybase: k,
-		Team:    team,
 	}
 }
 

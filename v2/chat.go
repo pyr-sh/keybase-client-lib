@@ -2,47 +2,19 @@ package keybase
 
 import (
 	"bufio"
-	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os/exec"
-	"strings"
 	"time"
+
+	"samhofi.us/x/keybase/types/chat1"
+	"samhofi.us/x/keybase/types/keybase1"
+	"samhofi.us/x/keybase/types/stellar1"
 )
 
-// Returns a string representation of a message id suitable for use in a
-// pagination struct
-func getID(id uint) string {
-	var b []byte
-	switch {
-	case id < 128:
-		// 7-bit int
-		b = make([]byte, 1)
-		b = []byte{byte(id)}
-
-	case id <= 255:
-		// uint8
-		b = make([]byte, 2)
-		b = []byte{204, byte(id)}
-
-	case id > 255 && id <= 65535:
-		// uint16
-		b = make([]byte, 2)
-		binary.BigEndian.PutUint16(b, uint16(id))
-		b = append([]byte{205}, b...)
-
-	case id > 65535 && id <= 4294967295:
-		// uint32
-		b = make([]byte, 4)
-		binary.BigEndian.PutUint32(b, uint32(id))
-		b = append([]byte{206}, b...)
-	}
-	return base64.StdEncoding.EncodeToString(b)
-}
-
 // Creates a string of a json-encoded channel to pass to keybase chat api-listen --filter-channel
-func createFilterString(channel Channel) string {
+func createFilterString(channel chat1.ChatChannel) string {
 	if channel.Name == "" {
 		return ""
 	}
@@ -51,7 +23,7 @@ func createFilterString(channel Channel) string {
 }
 
 // Creates a string of json-encoded channels to pass to keybase chat api-listen --filter-channels
-func createFiltersString(channels []Channel) string {
+func createFiltersString(channels []chat1.ChatChannel) string {
 	if len(channels) == 0 {
 		return ""
 	}
@@ -60,7 +32,7 @@ func createFiltersString(channels []Channel) string {
 }
 
 // Run `keybase chat api-listen` to get new messages coming into keybase and send them into the channel
-func getNewMessages(k *Keybase, c chan<- ChatAPI, execOptions []string) {
+func getNewMessages(k *Keybase, subs *subscriptionChannels, execOptions []string) {
 	execString := []string{"chat", "api-listen"}
 	if len(execOptions) > 0 {
 		execString = append(execString, execOptions...)
@@ -70,75 +42,128 @@ func getNewMessages(k *Keybase, c chan<- ChatAPI, execOptions []string) {
 		stdOut, _ := execCmd.StdoutPipe()
 		execCmd.Start()
 		scanner := bufio.NewScanner(stdOut)
-		go func(scanner *bufio.Scanner, c chan<- ChatAPI) {
-			for scanner.Scan() {
-				var jsonData ChatAPI
-				json.Unmarshal([]byte(scanner.Text()), &jsonData)
-				if jsonData.ErrorRaw != nil {
-					var errorListen = string(*jsonData.ErrorRaw)
-					jsonData.ErrorListen = &errorListen
+		go func(scanner *bufio.Scanner, subs *subscriptionChannels) {
+			for {
+				scanner.Scan()
+				var subType subscriptionType
+				t := scanner.Text()
+				json.Unmarshal([]byte(t), &subType)
+				switch subType.Type {
+				case "chat":
+					var notification chat1.MsgNotification
+					if err := json.Unmarshal([]byte(t), &notification); err != nil {
+						subs.error <- err
+						break
+					}
+					if notification.Msg != nil {
+						subs.chat <- *notification.Msg
+					}
+				case "chat_conv":
+					var notification chat1.ConvNotification
+					if err := json.Unmarshal([]byte(t), &notification); err != nil {
+						subs.error <- err
+						break
+					}
+					if notification.Conv != nil {
+						subs.conversation <- *notification.Conv
+					}
+				case "wallet":
+					var holder paymentHolder
+					if err := json.Unmarshal([]byte(t), &holder); err != nil {
+						subs.error <- err
+						break
+					}
+					subs.wallet <- holder.Payment
+				default:
+					continue
 				}
-				c <- jsonData
 			}
-		}(scanner, c)
+		}(scanner, subs)
 		execCmd.Wait()
 	}
 }
 
 // Run runs `keybase chat api-listen`, and passes incoming messages to the message handler func
-func (k *Keybase) Run(handler func(ChatAPI), options ...RunOptions) {
-	var heartbeatFreq int64
+func (k *Keybase) Run(handlers Handlers, options *RunOptions) {
 	var channelCapacity = 100
 
 	runOptions := make([]string, 0)
-	if len(options) > 0 {
-		if options[0].Capacity > 0 {
-			channelCapacity = options[0].Capacity
+	if handlers.WalletHandler != nil {
+		runOptions = append(runOptions, "--wallet")
+	}
+	if handlers.ConversationHandler != nil {
+		runOptions = append(runOptions, "--convs")
+	}
+
+	if options != nil {
+		if options.Capacity > 0 {
+			channelCapacity = options.Capacity
 		}
-		if options[0].Heartbeat > 0 {
-			heartbeatFreq = options[0].Heartbeat
-		}
-		if options[0].Local {
+		if options.Local {
 			runOptions = append(runOptions, "--local")
 		}
-		if options[0].HideExploding {
+		if options.HideExploding {
 			runOptions = append(runOptions, "--hide-exploding")
 		}
-		if options[0].Dev {
+		if options.Dev {
 			runOptions = append(runOptions, "--dev")
 		}
-		if len(options[0].FilterChannels) > 0 {
+		if len(options.FilterChannels) > 0 {
 			runOptions = append(runOptions, "--filter-channels")
-			runOptions = append(runOptions, createFiltersString(options[0].FilterChannels))
+			runOptions = append(runOptions, createFiltersString(options.FilterChannels))
 
 		}
-		if options[0].FilterChannel.Name != "" {
+		if options.FilterChannel.Name != "" {
 			runOptions = append(runOptions, "--filter-channel")
-			runOptions = append(runOptions, createFilterString(options[0].FilterChannel))
+			runOptions = append(runOptions, createFilterString(options.FilterChannel))
 		}
 	}
-	c := make(chan ChatAPI, channelCapacity)
-	defer close(c)
-	if heartbeatFreq > 0 {
-		go heartbeat(c, time.Duration(heartbeatFreq)*time.Minute)
-	}
-	go getNewMessages(k, c, runOptions)
-	for {
-		go handler(<-c)
-	}
-}
 
-// heartbeat sends a message through the channel with a message type of `heartbeat`
-func heartbeat(c chan<- ChatAPI, freq time.Duration) {
-	m := ChatAPI{
-		Type: "heartbeat",
+	chatCh := make(chan chat1.MsgSummary, channelCapacity)
+	convCh := make(chan chat1.ConvSummary, channelCapacity)
+	walletCh := make(chan stellar1.PaymentDetailsLocal, channelCapacity)
+	errorCh := make(chan error, channelCapacity)
+
+	subs := &subscriptionChannels{
+		chat:         chatCh,
+		conversation: convCh,
+		wallet:       walletCh,
+		error:        errorCh,
 	}
-	count := 0
+
+	defer close(subs.chat)
+	defer close(subs.conversation)
+	defer close(subs.wallet)
+	defer close(subs.error)
+
+	go getNewMessages(k, subs, runOptions)
 	for {
-		time.Sleep(freq)
-		m.Msg.ID = count
-		c <- m
-		count++
+		select {
+		case chatMsg := <-subs.chat:
+			if handlers.ChatHandler == nil {
+				continue
+			}
+			chatHandler := *handlers.ChatHandler
+			go chatHandler(chatMsg)
+		case walletMsg := <-subs.wallet:
+			if handlers.WalletHandler == nil {
+				continue
+			}
+			walletHandler := *handlers.WalletHandler
+			go walletHandler(walletMsg)
+		case newConv := <-subs.conversation:
+			if handlers.ConversationHandler == nil {
+				continue
+			}
+			convHandler := *handlers.ConversationHandler
+			go convHandler(newConv)
+		case errMsg := <-subs.error:
+			if handlers.ErrorHandler == nil {
+				continue
+			}
+			errHandler := *handlers.ErrorHandler
+			go errHandler(errMsg)
+		}
 	}
 }
 
@@ -165,289 +190,391 @@ func chatAPIOut(k *Keybase, c ChatAPI) (ChatAPI, error) {
 	return r, nil
 }
 
-// Send sends a chat message
-func (c Chat) Send(message ...string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Message: &mesg{},
+// SendMessage sends a chat message
+func (k *Keybase) SendMessage(method string, options SendMessageOptions) (chat1.SendRes, error) {
+	type res struct {
+		Result chat1.SendRes `json:"result"`
+		Error  *Error        `json:"error,omitempty"`
 	}
 
-	m.Method = "send"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = strings.Join(message, " ")
+	var r res
 
-	r, err := chatAPIOut(c.keybase, m)
+	arg := newSendMessageArg(options)
+	arg.Method = method
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
-	return r, nil
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return r.Result, nil
 }
 
-// SendEphemeral sends an exploding chat message, with specified duration
-func (c Chat) SendEphemeral(duration time.Duration, message ...string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// SendMessageByChannel sends a chat message to a channel
+func (k *Keybase) SendMessageByChannel(channel chat1.ChatChannel, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
 	}
-	m.Params.Options = options{
-		Message: &mesg{},
-	}
-	m.Params.Options.ExplodingLifetime.Duration = duration
-	m.Method = "send"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = strings.Join(message, " ")
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
-// Reply sends a reply to a chat message
-func (c Chat) Reply(replyTo int, message ...string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Message: &mesg{},
+// SendMessageByConvID sends a chat message to a conversation id
+func (k *Keybase) SendMessageByConvID(convID chat1.ConvIDStr, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
 	}
 
-	m.Method = "send"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.ReplyTo = replyTo
-	m.Params.Options.Message.Body = strings.Join(message, " ")
-
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
-// Edit edits a previously sent chat message
-func (c Chat) Edit(messageID int, message ...string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// SendEphemeralByChannel sends an exploding chat message to a channel
+func (k *Keybase) SendEphemeralByChannel(channel chat1.ChatChannel, duration time.Duration, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
-	m.Params.Options = options{
-		Message: &mesg{},
-	}
-	m.Method = "edit"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = strings.Join(message, " ")
-	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
-// React sends a reaction to a message.
-func (c Chat) React(messageID int, reaction string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// SendEphemeralByConvID sends an exploding chat message to a conversation id
+func (k *Keybase) SendEphemeralByConvID(convID chat1.ConvIDStr, duration time.Duration, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		ExplodingLifetime: &ExplodingLifetime{duration},
 	}
-	m.Params.Options = options{
-		Message: &mesg{},
-	}
-	m.Method = "reaction"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Message.Body = reaction
-	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
-// Delete deletes a chat message
-func (c Chat) Delete(messageID int) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// ReplyByChannel sends a reply message to a channel
+func (k *Keybase) ReplyByChannel(channel chat1.ChatChannel, replyTo chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		ReplyTo: &replyTo,
 	}
-	m.Method = "delete"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
+	return k.SendMessage("send", opts)
 }
 
-// ChatList returns a list of all conversations.
-// You can pass a Channel to use as a filter here, but you'll probably want to
-// leave the TopicName empty.
-func (k *Keybase) ChatList(opts ...Channel) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// ReplyByConvID sends a reply message to a conversation id
+func (k *Keybase) ReplyByConvID(convID chat1.ConvIDStr, replyTo chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		ReplyTo: &replyTo,
 	}
 
-	if len(opts) > 0 {
-		m.Params.Options.Name = opts[0].Name
-		m.Params.Options.Public = opts[0].Public
-		m.Params.Options.MembersType = opts[0].MembersType
-		m.Params.Options.TopicType = opts[0].TopicType
-		m.Params.Options.TopicName = opts[0].TopicName
-	}
-	m.Method = "list"
-
-	r, err := chatAPIOut(k, m)
-	return r, err
+	return k.SendMessage("send", opts)
 }
 
-// ReadMessage fetches the chat message with the specified message id from a conversation.
-func (c Chat) ReadMessage(messageID int) (*ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Pagination: &pagination{},
+// EditByChannel sends an edit message to a channel
+func (k *Keybase) EditByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
 	}
 
-	m.Method = "read"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Pagination.Num = 1
-
-	m.Params.Options.Pagination.Previous = getID(uint(messageID - 1))
-
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return &r, err
-	}
-	r.keybase = *c.keybase
-	return &r, nil
+	return k.SendMessage("edit", opts)
 }
 
-// Read fetches chat messages from a conversation. By default, 10 messages will
-// be fetched at a time. However, if count is passed, then that is the number of
-// messages that will be fetched.
-func (c Chat) Read(count ...int) (*ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Pagination: &pagination{},
-	}
-
-	m.Method = "read"
-	m.Params.Options.Channel = &c.Channel
-	if len(count) == 0 {
-		m.Params.Options.Pagination.Num = 10
-	} else {
-		m.Params.Options.Pagination.Num = count[0]
+// EditByConvID sends an edit message to a conversation id
+func (k *Keybase) EditByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
 	}
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return &r, err
-	}
-	r.keybase = *c.keybase
-	return &r, nil
+	return k.SendMessage("edit", opts)
 }
 
-// Next fetches the next page of chat messages that were fetched with Read. By
-// default, Next will fetch the same amount of messages that were originally
-// fetched with Read. However, if count is passed, then that is the number of
-// messages that will be fetched.
-func (c *ChatAPI) Next(count ...int) (*ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Pagination: &pagination{},
+// ReactByChannel reacts to a message in a channel
+func (k *Keybase) ReactByChannel(channel chat1.ChatChannel, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel: channel,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
 	}
 
-	m.Method = "read"
-	m.Params.Options.Channel = &c.Result.Messages[0].Msg.Channel
-	if len(count) == 0 {
-		m.Params.Options.Pagination.Num = c.Result.Pagination.Num
-	} else {
-		m.Params.Options.Pagination.Num = count[0]
-	}
-	m.Params.Options.Pagination.Next = c.Result.Pagination.Next
-
-	result, err := chatAPIOut(&c.keybase, m)
-	if err != nil {
-		return &result, err
-	}
-	k := c.keybase
-	*c = result
-	c.keybase = k
-	return c, nil
+	return k.SendMessage("reaction", opts)
 }
 
-// Previous fetches the previous page of chat messages that were fetched with Read.
-// By default, Previous will fetch the same amount of messages that were
-// originally fetched with Read. However, if count is passed, then that is the
-// number of messages that will be fetched.
-func (c *ChatAPI) Previous(count ...int) (*ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
-	}
-	m.Params.Options = options{
-		Pagination: &pagination{},
+// ReactByConvID reacts to a message in a conversation id
+func (k *Keybase) ReactByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID, message string, a ...interface{}) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		Message: SendMessageBody{
+			Body: fmt.Sprintf(message, a...),
+		},
+		MessageID: msgID,
 	}
 
-	m.Method = "read"
-	m.Params.Options.Channel = &c.Result.Messages[0].Msg.Channel
-	if len(count) == 0 {
-		m.Params.Options.Pagination.Num = c.Result.Pagination.Num
-	} else {
-		m.Params.Options.Pagination.Num = count[0]
-	}
-	m.Params.Options.Pagination.Previous = c.Result.Pagination.Previous
-
-	result, err := chatAPIOut(&c.keybase, m)
-	if err != nil {
-		return &result, err
-	}
-	k := c.keybase
-	*c = result
-	c.keybase = k
-	return c, nil
+	return k.SendMessage("reaction", opts)
 }
 
-// Upload attaches a file to a conversation
-// The filepath must be an absolute path
-func (c Chat) Upload(title string, filepath string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// DeleteByChannel reacts to a message in a channel
+func (k *Keybase) DeleteByChannel(channel chat1.ChatChannel, msgID chat1.MessageID) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel:   channel,
+		MessageID: msgID,
 	}
-	m.Method = "attach"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Filename = filepath
-	m.Params.Options.Title = title
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
-	}
-	return r, nil
+	return k.SendMessage("delete", opts)
 }
 
-// Download downloads a file from a conversation
-func (c Chat) Download(messageID int, filepath string) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// DeleteByConvID reacts to a message in a conversation id
+func (k *Keybase) DeleteByConvID(convID chat1.ConvIDStr, msgID chat1.MessageID) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: convID,
+		MessageID:      msgID,
 	}
-	m.Method = "download"
-	m.Params.Options.Channel = &c.Channel
-	m.Params.Options.Output = filepath
-	m.Params.Options.MessageID = messageID
 
-	r, err := chatAPIOut(c.keybase, m)
-	if err != nil {
-		return r, err
+	return k.SendMessage("delete", opts)
+}
+
+// GetConversations returns a list of all conversations.
+func (k *Keybase) GetConversations(unreadOnly bool) ([]chat1.ConvSummary, error) {
+	type res struct {
+		Result []chat1.ConvSummary `json:"result"`
+		Error  *Error              `json:"error,omitempty"`
 	}
-	return r, nil
+
+	var r res
+
+	opts := SendMessageOptions{
+		UnreadOnly: unreadOnly,
+	}
+
+	arg := newSendMessageArg(opts)
+	arg.Method = "list"
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return r.Result, err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return r.Result, nil
+}
+
+// Read fetches chat messages
+func (k *Keybase) Read(options ReadMessageOptions) (chat1.Thread, error) {
+	type res struct {
+		Result chat1.Thread `json:"result"`
+		Error  *Error       `json:"error"`
+	}
+	var r res
+
+	arg := newReadMessageArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return r.Result, err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return r.Result, nil
+}
+
+// ReadChannel fetches chat messages for a channel
+func (k *Keybase) ReadChannel(channel chat1.ChatChannel) (chat1.Thread, error) {
+	opts := ReadMessageOptions{
+		Channel: channel,
+	}
+	return k.Read(opts)
+}
+
+// ReadChannelNext fetches the next page of messages for a chat channel.
+func (k *Keybase) ReadChannelNext(channel chat1.ChatChannel, next []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Next: next,
+		Num:  num,
+	}
+
+	opts := ReadMessageOptions{
+		Channel:    channel,
+		Pagination: &page,
+	}
+	return k.Read(opts)
+}
+
+// ReadChannelPrevious fetches the previous page of messages for a chat channel
+func (k *Keybase) ReadChannelPrevious(channel chat1.ChatChannel, previous []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Previous: previous,
+		Num:      num,
+	}
+
+	opts := ReadMessageOptions{
+		Channel:    channel,
+		Pagination: &page,
+	}
+	return k.Read(opts)
+}
+
+// ReadConversation fetches chat messages for a conversation
+func (k *Keybase) ReadConversation(conv chat1.ConvIDStr) (chat1.Thread, error) {
+	opts := ReadMessageOptions{
+		ConversationID: conv,
+	}
+	return k.Read(opts)
+}
+
+// ReadConversationNext fetches the next page of messages for a conversation.
+func (k *Keybase) ReadConversationNext(conv chat1.ConvIDStr, next []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Next: next,
+		Num:  num,
+	}
+
+	opts := ReadMessageOptions{
+		ConversationID: conv,
+		Pagination:     &page,
+	}
+	return k.Read(opts)
+}
+
+// ReadConversationPrevious fetches the previous page of messages for a chat channel
+func (k *Keybase) ReadConversationPrevious(conv chat1.ConvIDStr, previous []byte, num int) (chat1.Thread, error) {
+	page := chat1.Pagination{
+		Previous: previous,
+		Num:      num,
+	}
+
+	opts := ReadMessageOptions{
+		ConversationID: conv,
+		Pagination:     &page,
+	}
+	return k.Read(opts)
+}
+
+// UploadToChannel attaches a file to a channel
+// The filename must be an absolute path
+func (k *Keybase) UploadToChannel(channel chat1.ChatChannel, title string, filename string) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		Channel:  channel,
+		Title:    title,
+		Filename: filename,
+	}
+
+	return k.SendMessage("attach", opts)
+}
+
+// UploadToConversation attaches a file to a conversation
+// The filename must be an absolute path
+func (k *Keybase) UploadToConversation(conv chat1.ConvIDStr, title string, filename string) (chat1.SendRes, error) {
+	opts := SendMessageOptions{
+		ConversationID: conv,
+		Title:          title,
+		Filename:       filename,
+	}
+
+	return k.SendMessage("attach", opts)
+}
+
+// Download downloads a file
+func (k *Keybase) Download(options DownloadOptions) error {
+	type res struct {
+		Error *Error `json:"error"`
+	}
+	var r res
+
+	arg := newDownloadArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return err
+	}
+
+	if r.Error != nil {
+		return fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return nil
+}
+
+// DownloadFromChannel downloads a file from a channel
+func (k *Keybase) DownloadFromChannel(channel chat1.ChatChannel, msgID chat1.MessageID, output string) error {
+	opts := DownloadOptions{
+		Channel:   channel,
+		MessageID: msgID,
+		Output:    output,
+	}
+	return k.Download(opts)
+}
+
+// DownloadFromConversation downloads a file from a conversation
+func (k *Keybase) DownloadFromConversation(conv chat1.ConvIDStr, msgID chat1.MessageID, output string) error {
+	opts := DownloadOptions{
+		ConversationID: conv,
+		MessageID:      msgID,
+		Output:         output,
+	}
+	return k.Download(opts)
 }
 
 // LoadFlip returns the results of a flip
@@ -517,40 +644,104 @@ func (c Chat) Mark(messageID int) (ChatAPI, error) {
 	return r, nil
 }
 
+// AdvertiseCommands sends bot command advertisements.
+// Valid values for the `Typ` field in chat1.AdvertiseCommandAPIParam are
+// "public", "teamconvs", and "teammembers"
+func (k *Keybase) AdvertiseCommands(options AdvertiseCommandsOptions) error {
+	type res struct {
+		Error *Error `json:"error,omitempty"`
+	}
+
+	var r res
+
+	arg := newAdvertiseCommandsArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return err
+	}
+
+	if r.Error != nil {
+		return fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return nil
+}
+
 // ClearCommands clears bot advertisements
-func (k *Keybase) ClearCommands() (ChatAPI, error) {
-	m := ChatAPI{}
-	m.Method = "clearcommands"
-
-	r, err := chatAPIOut(k, m)
-	if err != nil {
-		return r, err
+func (k *Keybase) ClearCommands() error {
+	type res struct {
+		Error *Error `json:"error,omitempty"`
 	}
-	return r, nil
+
+	var r res
+
+	cmdOut, err := k.Exec("chat", "api", "-m", `{"method": "clearcommands"}`)
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return err
+	}
+
+	if r.Error != nil {
+		return fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return nil
 }
 
-// AdvertiseCommands sets up bot command advertisements
-// This method allows you to set up multiple different types of advertisements at once.
-// Use this method if you have commands whose visibility differs from each other.
-func (k *Keybase) AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error) {
-	m := ChatAPI{
-		Params: &params{},
+// ListMembers returns member information for a channel or conversation
+func (k *Keybase) ListMembers(options ListMembersOptions) (keybase1.TeamDetails, error) {
+	type res struct {
+		Result keybase1.TeamDetails `json:"result"`
+		Error  *Error               `json:"error,omitempty"`
 	}
-	m.Method = "advertisecommands"
-	m.Params.Options.BotAdvertisements = advertisements
 
-	r, err := chatAPIOut(k, m)
+	var r res
+
+	arg := newListMembersArg(options)
+
+	jsonBytes, _ := json.Marshal(arg)
+
+	cmdOut, err := k.Exec("chat", "api", "-m", string(jsonBytes))
 	if err != nil {
-		return r, err
+		return r.Result, err
 	}
-	return r, nil
+
+	err = json.Unmarshal(cmdOut, &r)
+	if err != nil {
+		return r.Result, err
+	}
+
+	if r.Error != nil {
+		return r.Result, fmt.Errorf("%v", r.Error.Message)
+	}
+
+	return r.Result, nil
 }
 
-// AdvertiseCommand sets up bot command advertisements
-// This method allows you to set up one type of advertisement.
-// Use this method if you have commands whose visibility should all be the same.
-func (k *Keybase) AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error) {
-	return k.AdvertiseCommands([]BotAdvertisement{
-		advertisement,
-	})
+// ListMembersOfChannel returns member information for a channel
+func (k *Keybase) ListMembersOfChannel(channel chat1.ChatChannel) (keybase1.TeamDetails, error) {
+	opts := ListMembersOptions{
+		Channel: channel,
+	}
+	return k.ListMembers(opts)
+}
+
+// ListMembersOfConversation returns member information for a conversation
+func (k *Keybase) ListMembersOfConversation(convID chat1.ConvIDStr) (keybase1.TeamDetails, error) {
+	opts := ListMembersOptions{
+		ConversationID: convID,
+	}
+	return k.ListMembers(opts)
 }

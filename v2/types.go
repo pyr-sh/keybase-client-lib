@@ -5,18 +5,233 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"samhofi.us/x/keybase/types/chat1"
+	"samhofi.us/x/keybase/types/stellar1"
 )
 
 // RunOptions holds a set of options to be passed to Run
 type RunOptions struct {
-	Capacity       int       // Channel capacity for the buffered channel that holds messages. Defaults to 100 if not set
-	Heartbeat      int64     // Send a heartbeat through the channel every X minutes (0 = off)
-	Local          bool      // Subscribe to local messages
-	HideExploding  bool      // Ignore exploding messages
-	Dev            bool      // Subscribe to dev channel messages
-	Wallet         bool      // Subscribe to wallet events
-	FilterChannel  Channel   // Only subscribe to messages from specified channel
-	FilterChannels []Channel // Only subscribe to messages from specified channels
+	Capacity       int                 // Channel capacity for the buffered channel that holds messages. Defaults to 100 if not set
+	Local          bool                // Subscribe to local messages
+	HideExploding  bool                // Ignore exploding messages
+	Dev            bool                // Subscribe to dev channel messages
+	FilterChannel  chat1.ChatChannel   // Only subscribe to messages from specified channel
+	FilterChannels []chat1.ChatChannel // Only subscribe to messages from specified channels
+}
+
+type subscriptionType struct {
+	Type string `json:"type"`
+}
+
+type paymentHolder struct {
+	Payment stellar1.PaymentDetailsLocal `json:"notification"`
+}
+
+// Handlers holds pointers to handlers that you want to implement inside the bot type
+type Handlers struct {
+	ChatHandler         *func(chat1.MsgSummary)
+	ConversationHandler *func(chat1.ConvSummary)
+	WalletHandler       *func(stellar1.PaymentDetailsLocal)
+	ErrorHandler        *func(error)
+}
+
+// subscriptionChannels are passed to getNewMessages to return data through channels
+type subscriptionChannels struct {
+	chat         chan chat1.MsgSummary
+	conversation chan chat1.ConvSummary
+	wallet       chan stellar1.PaymentDetailsLocal
+	error        chan error
+}
+
+// Error holds an error message returned by the API
+type Error struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+// ExplodingLifetime holds a time duration for ephemeral messages
+type ExplodingLifetime struct {
+	time.Duration
+}
+
+// UnmarshalJSON unpacks exploding lifetimes from JSON
+func (d *ExplodingLifetime) UnmarshalJSON(b []byte) (err error) {
+	d.Duration, err = time.ParseDuration(strings.Trim(string(b), `"`))
+	return
+}
+
+// MarshalJSON packs exploding lifetimes to JSON
+func (d *ExplodingLifetime) MarshalJSON() (b []byte, err error) {
+	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
+}
+
+// SendMessageBody holds the body string for all send and reply methods
+type SendMessageBody struct {
+	Body string
+}
+
+// SendMessageOptions holds a set of options to be passed to SendMessage
+type SendMessageOptions struct {
+	Channel           chat1.ChatChannel  `json:"channel,omitempty"`
+	ConversationID    chat1.ConvIDStr    `json:"conversation_id,omitempty"`
+	Message           SendMessageBody    `json:",omitempty"`
+	Filename          string             `json:"filename,omitempty"`
+	Title             string             `json:"title,omitempty"`
+	MessageID         chat1.MessageID    `json:"message_id,omitempty"`
+	ConfirmLumenSend  bool               `json:"confirm_lumen_send"`
+	ReplyTo           *chat1.MessageID   `json:"reply_to,omitempty"`
+	ExplodingLifetime *ExplodingLifetime `json:"exploding_lifetime,omitempty"`
+	UnreadOnly        bool               `json:"unread_only,omitempty"`
+}
+
+type sendMessageParams struct {
+	Options SendMessageOptions
+}
+
+type sendMessageArg struct {
+	Method string
+	Params sendMessageParams
+}
+
+func newSendMessageArg(options SendMessageOptions) sendMessageArg {
+	return sendMessageArg{
+		Method: "send",
+		Params: sendMessageParams{
+			Options: options,
+		},
+	}
+}
+
+// ReadMessageOptions holds a set of options to be passed to Read
+type ReadMessageOptions struct {
+	Channel        chat1.ChatChannel `json:"channel,omitempty"`
+	ConversationID chat1.ConvIDStr   `json:"conversation_id,omitempty"`
+	Pagination     *chat1.Pagination `json:"pagination,omitempty"`
+	Peek           bool              `json:"peek"`
+	UnreadOnly     bool              `json:"unread_only"`
+	FailOffline    bool              `json:"fail_offline"`
+}
+
+type readMessageParams struct {
+	Options ReadMessageOptions
+}
+
+type readMessageArg struct {
+	Method string
+	Params readMessageParams
+}
+
+func newReadMessageArg(options ReadMessageOptions) readMessageArg {
+	return readMessageArg{
+		Method: "read",
+		Params: readMessageParams{
+			Options: options,
+		},
+	}
+}
+
+// AdvertiseCommandsOptions holds a set of options to be passed to AdvertiseCommands
+type AdvertiseCommandsOptions struct {
+	Alias          string
+	Advertisements []chat1.AdvertiseCommandAPIParam
+}
+
+type advertiseCommandsParams struct {
+	Options AdvertiseCommandsOptions
+}
+
+type advertiseCommandsArg struct {
+	Method string
+	Params advertiseCommandsParams
+}
+
+func newAdvertiseCommandsArg(options AdvertiseCommandsOptions) advertiseCommandsArg {
+	return advertiseCommandsArg{
+		Method: "advertisecommands",
+		Params: advertiseCommandsParams{
+			Options: options,
+		},
+	}
+}
+
+// DownloadOptions holds a set of options to be passed to Download
+type DownloadOptions struct {
+	Channel        chat1.ChatChannel
+	ConversationID chat1.ConvIDStr `json:"conversation_id"`
+	MessageID      chat1.MessageID `json:"message_id"`
+	Output         string
+	Preview        bool
+	NoStream       bool
+}
+
+type downloadParams struct {
+	Options DownloadOptions
+}
+
+type downloadArg struct {
+	Method string
+	Params downloadParams
+}
+
+func newDownloadArg(options DownloadOptions) downloadArg {
+	return downloadArg{
+		Method: "download",
+		Params: downloadParams{
+			Options: options,
+		},
+	}
+}
+
+// ListMembersOptions holds a set of options to be passed to ListMembers
+type ListMembersOptions struct {
+	Channel        chat1.ChatChannel
+	ConversationID chat1.ConvIDStr `json:"conversation_id"`
+}
+
+type listMembersParams struct {
+	Options ListMembersOptions
+}
+
+type listMembersArg struct {
+	Method string
+	Params listMembersParams
+}
+
+func newListMembersArg(options ListMembersOptions) listMembersArg {
+	return listMembersArg{
+		Method: "listmembers",
+		Params: listMembersParams{
+			Options: options,
+		},
+	}
+}
+
+// KVOptions holds a set of options to be passed to the KV methods
+type KVOptions struct {
+	Team       *string `json:"team"`
+	Namespace  *string `json:"namespace,omitempty"`
+	EntryKey   *string `json:"entryKey,omitempty"`
+	EntryValue *string `json:"entryValue,omitempty"`
+	Revision   *int    `json:"revision,omitempty"`
+}
+
+type kvParams struct {
+	Options KVOptions `json:"options"`
+}
+
+type kvArg struct {
+	Method string   `json:"method"`
+	Params kvParams `json:"params"`
+}
+
+func newKVArg(method string, options KVOptions) kvArg {
+	return kvArg{
+		Method: method,
+		Params: kvParams{
+			Options: options,
+		},
+	}
 }
 
 // ChatAPI holds information about a message received by the `keybase chat api-listen` command
@@ -229,19 +444,19 @@ type content struct {
 }
 
 type msg struct {
-	ID                 int      `json:"id"`
-	ConversationID     string   `json:"conversation_id"`
-	Channel            Channel  `json:"channel"`
-	Sender             sender   `json:"sender"`
-	SentAt             int      `json:"sent_at"`
-	SentAtMs           int64    `json:"sent_at_ms"`
-	Content            content  `json:"content"`
-	Unread             bool     `json:"unread"`
-	AtMentionUsernames []string `json:"at_mention_usernames"`
-	IsEphemeral        bool     `json:"is_ephemeral"`
-	Etime              int64    `json:"etime"`
-	HasPairwiseMacs    bool     `json:"has_pairwise_macs"`
-	ChannelMention     string   `json:"channel_mention"`
+	ID                 int               `json:"id"`
+	ConversationID     string            `json:"conversation_id"`
+	Channel            chat1.ChatChannel `json:"channel"`
+	Sender             sender            `json:"sender"`
+	SentAt             int               `json:"sent_at"`
+	SentAtMs           int64             `json:"sent_at_ms"`
+	Content            content           `json:"content"`
+	Unread             bool              `json:"unread"`
+	AtMentionUsernames []string          `json:"at_mention_usernames"`
+	IsEphemeral        bool              `json:"is_ephemeral"`
+	Etime              int64             `json:"etime"`
+	HasPairwiseMacs    bool              `json:"has_pairwise_macs"`
+	ChannelMention     string            `json:"channel_mention"`
 }
 
 type summary struct {
@@ -296,53 +511,12 @@ type notification struct {
 	Details details `json:"details"`
 }
 
-// Channel holds information about a conversation
-type Channel struct {
-	Name        string `json:"name,omitempty"`
-	Public      bool   `json:"public,omitempty"`
-	MembersType string `json:"members_type,omitempty"`
-	TopicType   string `json:"topic_type,omitempty"`
-	TopicName   string `json:"topic_name,omitempty"`
-}
-
-type BotCommand struct {
-	Name                string                         `json:"name"`
-	Description         string                         `json:"description"`
-	Usage               string                         `json:"usage"`
-	ExtendedDescription *BotCommandExtendedDescription `json:"extended_description,omitempty"`
-}
-
-type BotCommandExtendedDescription struct {
-	Title       string `json:"title"`
-	DesktopBody string `json:"desktop_body"`
-	MobileBody  string `json:"mobile_body"`
-}
-
-type BotAdvertisement struct {
-	Type        string       `json:"type"`                // "public", "teamconvs", "teammembers"
-	TeamName    string       `json:"team_name,omitempty"` // required if Type is not "public"
-	BotCommands []BotCommand `json:"commands"`
-}
-
 type mesg struct {
 	Body string `json:"body"`
 }
 
-type duration struct {
-	time.Duration
-}
-
-func (d *duration) UnmarshalJSON(b []byte) (err error) {
-	d.Duration, err = time.ParseDuration(strings.Trim(string(b), `"`))
-	return
-}
-
-func (d *duration) MarshalJSON() (b []byte, err error) {
-	return []byte(fmt.Sprintf(`"%s"`, d.String())), nil
-}
-
 type options struct {
-	Channel            *Channel           `json:"channel,omitempty"`
+	Channel            *chat1.ChatChannel `json:"channel,omitempty"`
 	MessageID          int                `json:"message_id,omitempty"`
 	Message            *mesg              `json:"message,omitempty"`
 	Pagination         *pagination        `json:"pagination,omitempty"`
@@ -355,8 +529,7 @@ type options struct {
 	ReplyTo            int                `json:"reply_to,omitempty"`
 	GameID             string             `json:"game_id,omitempty"`
 	Alias              string             `json:"alias,omitempty"`
-	BotAdvertisements  []BotAdvertisement `json:"advertisements,omitempty"`
-	ExplodingLifetime  duration           `json:"exploding_lifetime,omitempty"`
+	//ExplodingLifetime  duration           `json:"exploding_lifetime,omitempty"`
 
 	Name        string `json:"name,omitempty"`
 	Public      bool   `json:"public,omitempty"`
@@ -437,12 +610,12 @@ type rateLimits struct {
 }
 
 type conversation struct {
-	ID           string  `json:"id"`
-	Channel      Channel `json:"channel"`
-	Unread       bool    `json:"unread"`
-	ActiveAt     int     `json:"active_at"`
-	ActiveAtMs   int64   `json:"active_at_ms"`
-	MemberStatus string  `json:"member_status"`
+	ID           string            `json:"id"`
+	Channel      chat1.ChatChannel `json:"channel"`
+	Unread       bool              `json:"unread"`
+	ActiveAt     int               `json:"active_at"`
+	ActiveAtMs   int64             `json:"active_at_ms"`
+	MemberStatus string            `json:"member_status"`
 }
 
 type SendPayment struct {
@@ -602,11 +775,6 @@ type tParams struct {
 	Options tOptions `json:"options"`
 }
 
-type Error struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
-}
-
 type tResult struct {
 	ChatSent               bool                   `json:"chatSent"`
 	CreatorAdded           bool                   `json:"creatorAdded"`
@@ -644,41 +812,6 @@ type teamInfo struct {
 	IsMemberShowcased       bool     `json:"is_member_showcased"`
 	Status                  int      `json:"status"`
 	Implicit                implicit `json:"implicit,omitempty"`
-}
-
-// KVAPI holds information sent and received to/from the kvstore api
-type KVAPI struct {
-	Method  string    `json:"method,omitempty"`
-	Params  *kvParams `json:"params,omitempty"`
-	Result  *kvResult `json:"result,omitempty"`
-	Error   *Error    `json:"error"`
-	keybase Keybase
-}
-
-type kvOptions struct {
-	Team       string `json:"team,omitempty"`
-	Namespace  string `json:"namespace,omitempty"`
-	EntryKey   string `json:"entryKey,omitempty"`
-	Revision   uint   `json:"revision,omitempty"`
-	EntryValue string `json:"entryValue,omitempty"`
-}
-
-type kvParams struct {
-	Options kvOptions `json:"options,omitempty"`
-}
-
-type entryKey struct {
-	EntryKey string `json:"entryKey"`
-	Revision uint   `json:"revision"`
-}
-
-type kvResult struct {
-	TeamName   string     `json:"teamName"`
-	Namespaces []string   `json:"namespaces"`
-	EntryKeys  []entryKey `json:"entryKeys"`
-	EntryKey   string     `json:"entryKey"`
-	EntryValue string     `json:"entryValue"`
-	Revision   uint       `json:"revision"`
 }
 
 // UserAPI holds information received from the user/lookup api
@@ -831,7 +964,7 @@ type Keybase struct {
 // Chat holds basic information about a specific conversation
 type Chat struct {
 	keybase *Keybase
-	Channel Channel
+	Channel chat1.ChatChannel
 }
 
 type chat interface {
@@ -883,29 +1016,12 @@ type wallet interface {
 	TxDetail(txid string) (WalletAPI, error)
 }
 
-// KV holds basic information about a KVStore
-type KV struct {
-	keybase *Keybase
-	Team    string
-}
-
-type kvInterface interface {
-	Namespaces() (KVAPI, error)
-	Keys(namespace string) (KVAPI, error)
-	Get(namespace string, key string) (KVAPI, error)
-	Put(namespace string, key string, value string) (KVAPI, error)
-	Delete(namespace string, key string) (KVAPI, error)
-}
-
 type keybase interface {
-	AdvertiseCommand(advertisement BotAdvertisement) (ChatAPI, error)
-	AdvertiseCommands(advertisements []BotAdvertisement) (ChatAPI, error)
-	ChatList(opts ...Channel) (ChatAPI, error)
+	ChatList(opts ...chat1.ChatChannel) (ChatAPI, error)
 	ClearCommands() (ChatAPI, error)
 	CreateTeam(name string) (TeamAPI, error)
-	NewChat(channel Channel) Chat
+	NewChat(channel chat1.ChatChannel) Chat
 	NewTeam(name string) Team
-	NewKV(team string) KV
 	NewWallet() Wallet
 	Run(handler func(ChatAPI), options ...RunOptions)
 	status() status
