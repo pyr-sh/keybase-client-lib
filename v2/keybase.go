@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"samhofi.us/x/keybase/types/chat1"
+	"samhofi.us/x/keybase/v2/types/chat1"
 )
 
 // Possible MemberTypes

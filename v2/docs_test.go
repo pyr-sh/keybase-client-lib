@@ -1,6 +1,6 @@
 package keybase
 
-import "samhofi.us/x/keybase/types/chat1"
+import "samhofi.us/x/keybase/v2/types/chat1"
 
 func ExampleKeybase_AdvertiseCommands() {
 	var k = NewKeybase()

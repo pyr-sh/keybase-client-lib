@@ -4,7 +4,7 @@
 package chat1
 
 import (
-	keybase1 "samhofi.us/x/keybase/types/keybase1"
+	keybase1 "samhofi.us/x/keybase/v2/types/keybase1"
 	"errors"
 	"fmt"
 )
