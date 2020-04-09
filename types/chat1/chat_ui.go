@@ -4,9 +4,9 @@
 package chat1
 
 import (
-	gregor1 "samhofi.us/x/keybase/types/gregor1"
-	keybase1 "samhofi.us/x/keybase/types/keybase1"
-	stellar1 "samhofi.us/x/keybase/types/stellar1"
+	gregor1 "samhofi.us/x/keybase/v2/types/gregor1"
+	keybase1 "samhofi.us/x/keybase/v2/types/keybase1"
+	stellar1 "samhofi.us/x/keybase/v2/types/stellar1"
 	"errors"
 	"fmt"
 )

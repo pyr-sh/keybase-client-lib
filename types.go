@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"samhofi.us/x/keybase/types/chat1"
-	"samhofi.us/x/keybase/types/stellar1"
+	"samhofi.us/x/keybase/v2/types/chat1"
+	"samhofi.us/x/keybase/v2/types/stellar1"
 )
 
 // RunOptions holds a set of options to be passed to Run

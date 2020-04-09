@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"samhofi.us/x/keybase/types/keybase1"
+	"samhofi.us/x/keybase/v2/types/keybase1"
 )
 
 // KVListNamespaces returns all namespaces for a team

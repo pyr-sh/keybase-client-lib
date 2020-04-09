@@ -4,7 +4,7 @@
 package keybase1
 
 import (
-	gregor1 "samhofi.us/x/keybase/types/gregor1"
+	gregor1 "samhofi.us/x/keybase/v2/types/gregor1"
 )
 
 type ChatConversationID []byte

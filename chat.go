@@ -8,9 +8,9 @@ import (
 	"os/exec"
 	"time"
 
-	"samhofi.us/x/keybase/types/chat1"
-	"samhofi.us/x/keybase/types/keybase1"
-	"samhofi.us/x/keybase/types/stellar1"
+	"samhofi.us/x/keybase/v2/types/chat1"
+	"samhofi.us/x/keybase/v2/types/keybase1"
+	"samhofi.us/x/keybase/v2/types/stellar1"
 )
 
 // Creates a string of a json-encoded channel to pass to keybase chat api-listen --filter-channel
